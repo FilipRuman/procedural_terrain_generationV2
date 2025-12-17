@@ -42,7 +42,6 @@ public partial class GroundGen : MeshInstance3D
 
     private void GenerateIndexes(SurfaceTool st)
     {
-
         for (int x = 0; x < triangle_count_per_dimension - 1; x++)
         {
             for (int z = 0; z < triangle_count_per_dimension - 1; z++)
@@ -72,14 +71,13 @@ public partial class GroundGen : MeshInstance3D
             for (uint z = 0; z < triangle_count_per_dimension; z++)
             {
 
-                var uv = new Vector2(x / (float) triangle_count_per_dimension, z / (float) triangle_count_per_dimension);
+                var uv = new Vector2(x / (float)triangle_count_per_dimension, z / (float)triangle_count_per_dimension);
                 st.SetUV(uv);
 
                 Vector2 real_pos = RealPosition(x, z);
-                
-                float height = Mathf.Lerp( biomes[0].noise.GetHeight(real_pos),biomes[1].noise.GetHeight(real_pos),uv.Y);
+                float height = Mathf.Lerp(biomes[0].noise.GetHeight(real_pos), biomes[1].noise.GetHeight(real_pos), uv.Y);
 
-                st.AddVertex(new(real_pos.X, height , real_pos.Y));
+                st.AddVertex(new(real_pos.X, height, real_pos.Y));
             }
         }
 

@@ -64,16 +64,17 @@ void fragment(){
 	vec4 color_1 = texture(map_1,fixed_uv);
 	vec4 color_2 = texture(map_2,fixed_uv);
 
-	vec3 color = vec3(0,0,0);
-	color = handle_biome_color(color, 0, color_1.r, world_pos, world_normal, adjusted_normal);
-	color = handle_biome_color(color, 1, color_1.g, world_pos, world_normal, adjusted_normal);
-	color = handle_biome_color(color, 2, color_1.b, world_pos, world_normal, adjusted_normal);
-	color = handle_biome_color(color, 3, color_1.a, world_pos, world_normal, adjusted_normal);
-	color = handle_biome_color(color, 4, color_2.r, world_pos, world_normal, adjusted_normal);
-	color = handle_biome_color(color, 5, color_2.g, world_pos, world_normal, adjusted_normal);
-	color = handle_biome_color(color, 6, color_2.b, world_pos, world_normal, adjusted_normal);
-	color = handle_biome_color(color, 7, color_2.a, world_pos, world_normal, adjusted_normal);
-	ALBEDO = color;
+
+	vec3 output_color = vec3(0,0,0);
+	output_color = handle_biome_color(output_color, 0, color_1.r, world_pos, world_normal, adjusted_normal);
+	output_color = handle_biome_color(output_color, 1, color_1.g, world_pos, world_normal, adjusted_normal);
+	output_color = handle_biome_color(output_color, 2, color_1.b, world_pos, world_normal, adjusted_normal);
+	output_color = handle_biome_color(output_color, 3, color_1.a, world_pos, world_normal, adjusted_normal);
+	output_color = handle_biome_color(output_color, 4, color_2.r, world_pos, world_normal, adjusted_normal);
+	output_color = handle_biome_color(output_color, 5, color_2.g, world_pos, world_normal, adjusted_normal);
+	output_color = handle_biome_color(output_color, 6, color_2.b, world_pos, world_normal, adjusted_normal);
+	output_color = handle_biome_color(output_color, 7, color_2.a, world_pos, world_normal, adjusted_normal);
+	ALBEDO =output_color;
 
 	ALBEDO *= global_brightness;
 

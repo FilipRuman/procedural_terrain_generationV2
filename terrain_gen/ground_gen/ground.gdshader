@@ -1,5 +1,6 @@
 shader_type spatial;
 const int BIOMES_COUNT = 8;
+const int chunk_data_maps_count = 100;
 
 uniform float global_brightness;
 uniform float global_saturation;
@@ -14,8 +15,11 @@ uniform vec3 texture_noise_strenght;
 
 uniform sampler2D roughness_gradient;
 uniform sampler2D noise;
-uniform sampler2D map_1;
-uniform sampler2D map_2;
+
+uniform int test_index;
+instance uniform int chunk_data_map_index;
+uniform sampler2D[chunk_data_maps_count] map_1:repeat_disable;
+uniform sampler2D[chunk_data_maps_count] map_2:repeat_disable;
 
 uniform vec3[BIOMES_COUNT] texture_tint;
 uniform float[BIOMES_COUNT] texture_saturation;
@@ -56,13 +60,13 @@ void fragment(){
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 world_normal = normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	vec3 adjusted_normal = pow(abs(world_normal), vec3(8.0));
-	world_pos += texture(texture_repetition_noise,UV).r * texture_noise_strenght;
+	world_pos += texture(texture_repetition_noise,world_pos.xz).r * texture_noise_strenght;
 
-	float uv_noise = texture(uv_noise_texture,UV).r;
+	float uv_noise = texture(uv_noise_texture,world_pos.xz).r;
 	
 	vec2 fixed_uv = UV+uv_noise* uv_noise_strength;
-	vec4 color_1 = texture(map_1,fixed_uv);
-	vec4 color_2 = texture(map_2,fixed_uv);
+	vec4 color_1 = texture(map_1[chunk_data_map_index],fixed_uv);
+	vec4 color_2 = texture(map_2[chunk_data_map_index],fixed_uv);
 
 
 	vec3 output_color = vec3(0,0,0);
@@ -78,8 +82,11 @@ void fragment(){
 
 	ALBEDO *= global_brightness;
 
-	ALBEDO *= mix(0.9, 1.1, texture(noise,UV).r);
+	ALBEDO *= mix(0.9, 1.1, texture(noise,world_pos.xz).r);
 	ALBEDO -= vec3(1) * global_saturation; 
-	ROUGHNESS =texture(roughness_gradient,texture(noise,UV).rg).r ;
+	ROUGHNESS =texture(roughness_gradient,texture(noise,world_pos.xz).rg).r ;
 	METALLIC = 0.0;
+	if(test_index == chunk_data_map_index){
+		ALBEDO = vec3(1);
+	}
 }

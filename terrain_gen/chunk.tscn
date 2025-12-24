@@ -1,0 +1,21 @@
+[gd_scene load_steps=6 format=3 uid="uid://mujlms5gx604"]
+
+[ext_resource type="Script" uid="uid://re04wmktwwri" path="res://terrain_gen/Chunk.cs" id="1_y1pun"]
+[ext_resource type="Material" uid="uid://dpud1m5ciourq" path="res://terrain_gen/goundMaterial.tres" id="2_j4kne"]
+[ext_resource type="Script" uid="uid://d42wvv1ein13" path="res://terrain_gen/ground_gen/GroundMeshGen.cs" id="7_gogqm"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_y1pun"]
+
+[sub_resource type="Gradient" id="Gradient_50xq3"]
+
+[node name="chunk" type="Node3D" node_paths=PackedStringArray("mesh_gen")]
+script = ExtResource("1_y1pun")
+mesh_gen = NodePath("ground")
+
+[node name="ground" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_y1pun")
+skeleton = NodePath("../..")
+surface_material_override/0 = ExtResource("2_j4kne")
+script = ExtResource("7_gogqm")
+influence_gradient = SubResource("Gradient_50xq3")
+resolution = 1

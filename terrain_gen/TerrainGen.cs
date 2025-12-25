@@ -85,7 +85,7 @@ public partial class TerrainGen : Node3D
             {
                 i++;
                 Vector2 chunk_absolute_pos = /* chunk_relative_pos + position */ new(x * chunk_size, y * chunk_size);
-                var biome_data = biome_generator.GenerateMaps((int)chunk_absolute_pos.X, (int)chunk_absolute_pos.Y, chunk_size, biomes);
+                var biome_data = biome_generator.GenerateMaps(new(chunk_absolute_pos.X, chunk_absolute_pos.Y), chunk_size, biomes);
                 // var biome_data = biome_generator.GenerateMaps((int)i, (int)0, chunk_size, biomes);
 
 

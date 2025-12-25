@@ -17,12 +17,12 @@ public partial class BiomeGenerator : Node
 
     class GridCell
     {
-        public Vector2 pos;
+        public Vector2 world_pos;
         public Biome biome;
 
-        public GridCell(Vector2 pos, Biome biome)
+        public GridCell(Vector2 world_pos, Biome biome)
         {
-            this.pos = pos;
+            this.world_pos = world_pos;
             this.biome = biome;
         }
     }
@@ -41,6 +41,7 @@ public partial class BiomeGenerator : Node
         {
             get
             {
+                // + 1 is needed because grid has a buffer of one cell on all of the sides. 
                 return cells[x + 1 + (y + 1) * grid_stride];
             }
         }
@@ -75,7 +76,7 @@ public partial class BiomeGenerator : Node
             return distance.CompareTo(other.distance);
         }
     }
-    private Grid GenerateGrid(int grid_cells_per_axis, int x_base, int y_base, int grid_stride)
+    private Grid GenerateGrid(int grid_cells_per_axis, Vector2 base_world_possition, int grid_stride)
     {
         var cells = new GridCell[(grid_stride) * (grid_stride)];
 
@@ -84,22 +85,22 @@ public partial class BiomeGenerator : Node
         {
             for (int y = 0; y < grid_stride; y++)
             {
-                int world_x = x_base + (x - 1) * grid_size;
-                int world_y = y_base + (y - 1) * grid_size;
-                // -1 for the border 
+                // - 1 because of the buffer
+                float world_x = base_world_possition.X + (x - 1) * grid_size;
+                float world_y = base_world_possition.Y + (y - 1) * grid_size;
                 ulong s =
     (ulong)seed ^
-    (ulong)world_x * 73856093UL ^
-    (ulong)world_y * 19349663UL;
+    (ulong)Mathf.FloorToInt(world_x) * 73856093UL ^
+    (ulong)Mathf.FloorToInt(world_y) * 19349663UL;
 
                 GD.Seed(s);
 
                 float x_offset = GD.Randf() * grid_size * 0.5f;
                 float y_offset = GD.Randf() * grid_size * 0.5f;
                 int grid_index = x + y * (grid_stride);
-                // Vector2 final_pos = new(world_x + x_offset, world_y + y_offset);
+                Vector2 final_pos = new(world_x + x_offset, world_y + y_offset);
 
-                Vector2 final_pos = new(world_x, world_y);
+                // Vector2 final_pos = new(world_x, world_y);
 
                 Biome biome = biomes[GD.Randi() % (biomes.Length)];
                 cells[grid_index] = new(final_pos, biome);
@@ -136,13 +137,11 @@ public partial class BiomeGenerator : Node
 
     private CellDataCombo HandleCell(Vector2 world_pos, GridCell cell)
     {
-        float distance = cell.pos.DistanceTo(world_pos);
+        float distance = cell.world_pos.DistanceTo(world_pos);
         return new(cell, distance, influence: 0/*will be calculated later*/);
     }
     private void GetCellsToCheck(Vector2I grid_pos, Vector2 world_pos, Grid grid, List<CellDataCombo> output)
     {
-
-
         // really fast because the output list has already allocated the memory
         output.Add(HandleCell(world_pos, grid[grid_pos.X - 1, grid_pos.Y + 1]));
         output.Add(HandleCell(world_pos, grid[grid_pos.X, grid_pos.Y + 1]));
@@ -153,14 +152,13 @@ public partial class BiomeGenerator : Node
         output.Add(HandleCell(world_pos, grid[grid_pos.X - 1, grid_pos.Y - 1]));
         output.Add(HandleCell(world_pos, grid[grid_pos.X, grid_pos.Y - 1]));
         output.Add(HandleCell(world_pos, grid[grid_pos.X + 1, grid_pos.Y - 1]));
-
     }
 
 
 
     private void CalculateInfluencesForCeils(
         List<CellDataCombo> neighbors,
-        CellDataCombo main, Vector2 pos,
+        CellDataCombo main, Vector2 world_possiton,
         float[] bakedGradient)
     {
         main.influence = 1.0f;
@@ -168,7 +166,7 @@ public partial class BiomeGenerator : Node
         // In a reverse order so that we can remove neighbors that doesn't mach our requirements
         for (int i = neighbors.Count - 1; i >= 0; i--)
         {
-            handle_neighbour_cell(neighbors, main, pos, bakedGradient, i);
+            handle_neighbour_cell(neighbors, main, world_possiton, bakedGradient, i);
         }
         // normalize
         float sum = main.influence;
@@ -183,7 +181,7 @@ public partial class BiomeGenerator : Node
         }
     }
 
-    private void handle_neighbour_cell(List<CellDataCombo> neighbors, CellDataCombo main, Vector2 pos, float[] bakedGradient, int cell_index_in_list)
+    private void handle_neighbour_cell(List<CellDataCombo> neighbors, CellDataCombo main, Vector2 world_pos, float[] bakedGradient, int cell_index_in_list)
     {
         var neighbor = neighbors[cell_index_in_list];
         if (neighbor.cell.biome.type_index == main.cell.biome.type_index)
@@ -193,8 +191,8 @@ public partial class BiomeGenerator : Node
         }
 
         float distance =
-            (pos.DistanceSquaredTo(neighbor.cell.pos) - pos.DistanceSquaredTo(main.cell.pos)) /
-            (2.0f * main.cell.pos.DistanceTo(neighbor.cell.pos));
+            (world_pos.DistanceSquaredTo(neighbor.cell.world_pos) - world_pos.DistanceSquaredTo(main.cell.world_pos)) /
+            (2.0f * main.cell.world_pos.DistanceTo(neighbor.cell.world_pos));
 
         float abs_distance = Mathf.Abs(distance);
 
@@ -279,7 +277,7 @@ public partial class BiomeGenerator : Node
         }
     }
 
-    public OutputData GenerateMaps(int x_base, int y_base, int width_height, Biome[] biomes)
+    public OutputData GenerateMaps(Vector2 base_world_possition, int width_height, Biome[] biomes)
     {
 
         this.biomes = biomes;
@@ -287,7 +285,7 @@ public partial class BiomeGenerator : Node
         int grid_cells_per_axis = Mathf.CeilToInt(width_height / (float)grid_size);
 
         int grid_stride = grid_cells_per_axis + 2;
-        Grid grid = GenerateGrid(grid_cells_per_axis, x_base, y_base, grid_stride);
+        Grid grid = GenerateGrid(grid_cells_per_axis, base_world_possition, grid_stride);
 
         int points_per_axis = grid_cells_per_axis * biome_map_resolution;
 
@@ -299,46 +297,35 @@ public partial class BiomeGenerator : Node
 
         // alloc heap once
         List<CellDataCombo> cells = new(9);
-        GD.Print($"poits_per_axis: {points_per_axis}");
         for (int x = 0; x < points_per_axis; x++)
         {
             for (int y = 0; y < points_per_axis; y++)
             {
-
                 cells.Clear();
 
-                Vector2 world_pos = new Vector2(x + x_base, y + y_base) * point_size;
+                Vector2 world_pos = new Vector2(x, y) * point_size + base_world_possition;
                 Vector2I grid_pos = new(x / biome_map_resolution, y / biome_map_resolution);
                 GetCellsToCheck(grid_pos, world_pos, grid, cells);
                 cells.Sort();
 
                 var main_cell = cells[0]; cells.RemoveAt(0);
 
+                CalculateInfluencesForCeils(cells, main_cell, world_pos, backed_gradient);
+
+                cells.Add(main_cell);
+
                 int base_index = (x + y * points_per_axis) * 4;
-                if (main_cell.distance < 5)
-                {
-                    map_1_data[base_index + 1] = FloatToByte(1);
-
-                }
-                //TEST END
-
-                // GetCellsToCheck(x, y, grid, cells);
-                // cells.Sort();
-
-                // var main_cell = cells[0]; cells.RemoveAt(0);
-
-                // CalculateInfluencesForCeils(cells, main_cell, new(x, y), backed_gradient);
-                //
-                // cells.Add(main_cell);
-                // int base_index = (x + y * points_per_axis) * 4;
-                //
-                // foreach (CellDataCombo cell in cells)
+                // For Tests if (main_cell.influence > .97)
                 // {
-                //     // using big ass switch statement would be faster, especially when using more than 2 textures but this is cleaner, so choose your poison.
-                //     var map = cell.cell.biome.type_index / 4 == 0 ? map_1_data : map_2_data;
-                //     int index = cell.cell.biome.type_index % 4;
-                //     map[base_index + index] = FloatToByte(cell.influence);
+                //     map_1_data[base_index + 1] = FloatToByte(1);
                 // }
+                foreach (CellDataCombo cell in cells)
+                {
+                    // using big ass switch statement would be faster, especially when using more than 2 textures but this is cleaner, so choose your poison.
+                    var map = cell.cell.biome.type_index / 4 == 0 ? map_1_data : map_2_data;
+                    int index = cell.cell.biome.type_index % 4;
+                    map[base_index + index] = FloatToByte(cell.influence);
+                }
             }
         }
 

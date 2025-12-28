@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=17 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://ie6lidlhojfd" path="res://terrain_gen/biomes/BiomeGenerator.cs" id="1_4arys"]
 [ext_resource type="Script" uid="uid://b6rfv7qd6bbo2" path="res://terrain_gen/ground_gen/NoiseComponent.cs" id="3_jka67"]
@@ -6,11 +6,6 @@
 [ext_resource type="Script" uid="uid://cy771avr8nygp" path="res://terrain_gen/TerrainGen.cs" id="4_jka67"]
 [ext_resource type="Script" uid="uid://bqpjjupyok60s" path="res://terrain_gen/biomes/Biome.cs" id="4_r3fl7"]
 [ext_resource type="Material" uid="uid://dpud1m5ciourq" path="res://terrain_gen/goundMaterial.tres" id="6_i5arm"]
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_a0tk4"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_r3fl7"]
-albedo_color = Color(0.60098106, 0, 0.12408098, 1)
 
 [sub_resource type="Gradient" id="Gradient_6iypd"]
 interpolation_mode = 2
@@ -62,11 +57,6 @@ metadata/_custom_type_script = "uid://bqpjjupyok60s"
 
 [node name="Node3D" type="Node3D"]
 
-[node name="player" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.0158494, 0, 0)
-mesh = SubResource("CapsuleMesh_a0tk4")
-surface_material_override/0 = SubResource("StandardMaterial3D_r3fl7")
-
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.69700396, 0.3482852, 0.62680405, 0.55750585, -0.28653324, 0.7791574, 0.45096907, 0.8925226, 0.005543679, 0, 0, 1.0228882)
 light_energy = 4.595
@@ -82,7 +72,7 @@ directional_shadow_pancake_size = 20.7
 
 [node name="biome gen" type="Node3D" parent="."]
 script = ExtResource("1_4arys")
-seed = 7205
+seed = 7219
 grid_size = 20
 biome_map_resolution = 20
 max_overlap_distance = 5.0
@@ -92,13 +82,12 @@ biomes = [SubResource("Resource_tereu"), SubResource("Resource_wlxy5"), SubResou
 [node name="chunk" parent="." instance=ExtResource("3_r3fl7")]
 
 [node name="terrain_gen" type="Node3D" parent="." node_paths=PackedStringArray("biome_generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 164.95822, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 200, 0)
 script = ExtResource("4_jka67")
 chunk_prefab = ExtResource("3_r3fl7")
 biome_generator = NodePath("../biome gen")
 chunk_size = 40
 biomes = [SubResource("Resource_tereu"), SubResource("Resource_wlxy5"), SubResource("Resource_3v7ru")]
-position = Vector2(200, 200)
 view_distance = 5
 ground_shader_material = ExtResource("6_i5arm")
 

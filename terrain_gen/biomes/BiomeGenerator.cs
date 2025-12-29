@@ -12,6 +12,8 @@ public partial class BiomeGenerator : Node
     [Export] float max_overlap_distance;
     [Export] Gradient overlap_gradient;
     [Export] bool run;
+    [Export] float master_terrain_distance_modifier;
+    [Export] float biome_spawn_point_exclusion_distance;
 
     [Export] Biome[] biomes;
 
@@ -95,12 +97,11 @@ public partial class BiomeGenerator : Node
 
                 GD.Seed(s);
 
-                float x_offset = GD.Randf() * grid_size * 0.5f;
-                float y_offset = GD.Randf() * grid_size * 0.5f;
+                float x_offset = GD.Randf() * (grid_size * 0.5f - biome_spawn_point_exclusion_distance);
+                float y_offset = GD.Randf() * (grid_size * 0.5f - biome_spawn_point_exclusion_distance);
                 int grid_index = x + y * (grid_stride);
                 Vector2 final_pos = new(world_x + x_offset, world_y + y_offset);
 
-                // Vector2 final_pos = new(world_x, world_y);
 
                 Biome biome = biomes[GD.Randi() % (biomes.Length)];
                 cells[grid_index] = new(final_pos, biome);
@@ -112,28 +113,6 @@ public partial class BiomeGenerator : Node
         return grid;
     }
 
-    // private CellDataCombo HandleCell(int x, int y, GridCell cell)
-    // {
-    //
-    //     float distance = cell.pos.DistanceTo(new(x, y));
-    //     return new(cell, distance, influence: 0/*will be calculated later*/);
-    // }
-    // private void GetCellsToCheck(int x, int y, Grid grid, List<CellDataCombo> output)
-    // {
-    //     int x_grid = x / grid_size;
-    //     int y_grid = y / grid_size;
-    //
-    //     // really fast because the output list has already allocated the memory
-    //     output.Add(HandleCell(x, y, grid[x_grid - 1, y_grid + 1]));
-    //     output.Add(HandleCell(x, y, grid[x_grid, y_grid + 1]));
-    //     output.Add(HandleCell(x, y, grid[x_grid + 1, y_grid + 1]));
-    //     output.Add(HandleCell(x, y, grid[x_grid - 1, y_grid]));
-    //     output.Add(HandleCell(x, y, grid[x_grid, y_grid]));
-    //     output.Add(HandleCell(x, y, grid[x_grid + 1, y_grid]));
-    //     output.Add(HandleCell(x, y, grid[x_grid - 1, y_grid - 1]));
-    //     output.Add(HandleCell(x, y, grid[x_grid, y_grid - 1]));
-    //     output.Add(HandleCell(x, y, grid[x_grid + 1, y_grid - 1]));
-    // }
 
     private CellDataCombo HandleCell(Vector2 world_pos, GridCell cell)
     {
@@ -166,10 +145,11 @@ public partial class BiomeGenerator : Node
         // In a reverse order so that we can remove neighbors that doesn't mach our requirements
         for (int i = neighbors.Count - 1; i >= 0; i--)
         {
-            handle_neighbour_cell(neighbors, main, world_possiton, bakedGradient, i);
+            handle_neighbour_cell_influence(neighbors, main, world_possiton, bakedGradient, i);
         }
         // normalize
         float sum = main.influence;
+
         foreach (var n in neighbors)
             sum += n.influence;
 
@@ -181,8 +161,9 @@ public partial class BiomeGenerator : Node
         }
     }
 
-    private void handle_neighbour_cell(List<CellDataCombo> neighbors, CellDataCombo main, Vector2 world_pos, float[] bakedGradient, int cell_index_in_list)
+    private void handle_neighbour_cell_influence(List<CellDataCombo> neighbors, CellDataCombo main, Vector2 world_pos, float[] bakedGradient, int cell_index_in_list)
     {
+
         var neighbor = neighbors[cell_index_in_list];
         if (neighbor.cell.biome.type_index == main.cell.biome.type_index)
         {
@@ -203,9 +184,9 @@ public partial class BiomeGenerator : Node
         }
         float overlap_percentage = abs_distance / max_overlap_distance; // 0 at boundary
 
-        float influence = bakedGradient[FloatToByte(overlap_percentage)];
+        float influence = 1 -/* bakedGradient[FloatToByte( */overlap_percentage/* )] */;
 
-        // Pairwise split
+        // This is needed so that we know at what side of the border we are
         if (distance > 0)
         {
             neighbor.influence = influence;
@@ -215,7 +196,6 @@ public partial class BiomeGenerator : Node
             neighbor.influence = 0;
             main.influence += influence;
         }
-        // neighbor.influence = Mathf.Clamp(neighbor.influence, 0.0f, 1.0f);
         return;
     }
 
@@ -277,7 +257,7 @@ public partial class BiomeGenerator : Node
         }
     }
 
-    public OutputData GenerateMaps(Vector2 base_world_possition, int width_height, Biome[] biomes)
+    public OutputData GenerateMaps(Vector2 base_world_position, int width_height, Biome[] biomes)
     {
 
         this.biomes = biomes;
@@ -285,7 +265,7 @@ public partial class BiomeGenerator : Node
         int grid_cells_per_axis = Mathf.CeilToInt(width_height / (float)grid_size);
 
         int grid_stride = grid_cells_per_axis + 2;
-        Grid grid = GenerateGrid(grid_cells_per_axis, base_world_possition, grid_stride);
+        Grid grid = GenerateGrid(grid_cells_per_axis, base_world_position, grid_stride);
 
         int points_per_axis = grid_cells_per_axis * biome_map_resolution;
 
@@ -303,7 +283,7 @@ public partial class BiomeGenerator : Node
             {
                 cells.Clear();
 
-                Vector2 world_pos = new Vector2(x, y) * point_size + base_world_possition;
+                Vector2 world_pos = new Vector2(x, y) * point_size + base_world_position;
                 Vector2I grid_pos = new(x / biome_map_resolution, y / biome_map_resolution);
                 GetCellsToCheck(grid_pos, world_pos, grid, cells);
                 cells.Sort();
@@ -315,9 +295,21 @@ public partial class BiomeGenerator : Node
                 cells.Add(main_cell);
 
                 int base_index = (x + y * points_per_axis) * 4;
-                // For Tests if (main_cell.influence > .97)
+
+                // for tests:
+                float sum = 0;
+                foreach (CellDataCombo cell in cells)
+                {
+                    sum += FloatToByte(cell.influence);
+                }
+
+
+                // var map = map_1_data;
+                // int index = main_cell.cell.biome.type_index % 4/* cell.cell.biome.type_index % 4 */;
+                // map[base_index + index] = FloatToByte(main_cell.influence);
+                // if (sum < FloatToByte(.98f))
                 // {
-                //     map_1_data[base_index + 1] = FloatToByte(1);
+                //     GD.Print("normaliation doesn't work!");
                 // }
                 foreach (CellDataCombo cell in cells)
                 {

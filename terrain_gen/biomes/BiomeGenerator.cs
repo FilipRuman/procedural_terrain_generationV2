@@ -148,55 +148,63 @@ public partial class BiomeGenerator : Node
             handle_neighbour_cell_influence(neighbors, main, world_possiton, bakedGradient, i);
         }
         // normalize
+        main.influence = Mathf.Max(main.influence, 0f);
         float sum = main.influence;
+
 
         foreach (var n in neighbors)
             sum += n.influence;
 
-        if (sum > 0)
-        {
-            main.influence /= sum;
-            foreach (var n in neighbors)
-                n.influence /= sum;
-        }
+        main.influence /= sum;
+        foreach (var n in neighbors)
+            n.influence /= sum;
+
     }
 
     private void handle_neighbour_cell_influence(List<CellDataCombo> neighbors, CellDataCombo main, Vector2 world_pos, float[] bakedGradient, int cell_index_in_list)
     {
 
+
         var neighbor = neighbors[cell_index_in_list];
+
         if (neighbor.cell.biome.type_index == main.cell.biome.type_index)
         {
+            if (main.influence != 1)
+            {
+                // IDK. if this is good or not I:
+                // float influ = CalculateInfluence(main, bakedGradient, neighbor);
+                // main.influence = Mathf.Clamp(main.influence + influ, 0, 1);
+            }
             neighbors.RemoveAt(cell_index_in_list);
             return;
         }
+
+        if (neighbor.cell.biome.type_index > main.cell.biome.type_index) { return; }
+
+        float influence = CalculateInfluence(main, bakedGradient, neighbor);
+
+        float influence_change = main.influence - Mathf.Clamp(main.influence - influence, 0, 1);
+
+        neighbor.influence = influence_change;
+        main.influence -= influence_change;
+        return;
+    }
+
+    private float CalculateInfluence(CellDataCombo main, float[] bakedGradient, CellDataCombo neighbor)
+    {
 
         float distance =
-            (world_pos.DistanceSquaredTo(neighbor.cell.world_pos) - world_pos.DistanceSquaredTo(main.cell.world_pos)) /
-            (2.0f * main.cell.world_pos.DistanceTo(neighbor.cell.world_pos));
+            (neighbor.distance - main.distance) + master_terrain_distance_modifier;
+        distance = MathF.Max(distance, 0);
 
-        float abs_distance = Mathf.Abs(distance);
 
-        if (abs_distance >= max_overlap_distance)
-        {
-            neighbors.RemoveAt(cell_index_in_list);
-            return;
-        }
-        float overlap_percentage = abs_distance / max_overlap_distance; // 0 at boundary
+        if (distance >= max_overlap_distance)
+            return 0;
 
-        float influence = 1 -/* bakedGradient[FloatToByte( */overlap_percentage/* )] */;
+        float overlap_percentage = distance / max_overlap_distance; // 0 at boundary
 
-        // This is needed so that we know at what side of the border we are
-        if (distance > 0)
-        {
-            neighbor.influence = influence;
-        }
-        else
-        {
-            neighbor.influence = 0;
-            main.influence += influence;
-        }
-        return;
+        return bakedGradient[FloatToByte(overlap_percentage)];
+
     }
 
     public class OutputData
@@ -259,6 +267,7 @@ public partial class BiomeGenerator : Node
 
     public OutputData GenerateMaps(Vector2 base_world_position, int width_height, Biome[] biomes)
     {
+        // Generate 1 point on the neighbour chunk, so that the map has smooth transitions 
 
         this.biomes = biomes;
 
@@ -307,16 +316,13 @@ public partial class BiomeGenerator : Node
                 // var map = map_1_data;
                 // int index = main_cell.cell.biome.type_index % 4/* cell.cell.biome.type_index % 4 */;
                 // map[base_index + index] = FloatToByte(main_cell.influence);
-                // if (sum < FloatToByte(.98f))
-                // {
-                //     GD.Print("normaliation doesn't work!");
-                // }
+
                 foreach (CellDataCombo cell in cells)
                 {
                     // using big ass switch statement would be faster, especially when using more than 2 textures but this is cleaner, so choose your poison.
                     var map = cell.cell.biome.type_index / 4 == 0 ? map_1_data : map_2_data;
                     int index = cell.cell.biome.type_index % 4;
-                    map[base_index + index] = FloatToByte(cell.influence);
+                    map[base_index + index] += FloatToByte(cell.influence);
                 }
             }
         }

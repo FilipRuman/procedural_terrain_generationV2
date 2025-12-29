@@ -12,7 +12,6 @@ public partial class BiomeGenerator : Node
     [Export] float max_overlap_distance;
     [Export] Gradient overlap_gradient;
     [Export] bool run;
-    [Export] float master_terrain_distance_modifier;
     [Export] float biome_spawn_point_exclusion_distance;
 
     [Export] Biome[] biomes;
@@ -193,15 +192,15 @@ public partial class BiomeGenerator : Node
     private float CalculateInfluence(CellDataCombo main, float[] bakedGradient, CellDataCombo neighbor)
     {
 
-        float distance =
-            (neighbor.distance - main.distance) + master_terrain_distance_modifier;
-        distance = MathF.Max(distance, 0);
+        float delta =
+            neighbor.distance - main.distance;
+        delta = MathF.Max(delta, 0);
 
 
-        if (distance >= max_overlap_distance)
+        if (delta >= max_overlap_distance)
             return 0;
 
-        float overlap_percentage = distance / max_overlap_distance; // 0 at boundary
+        float overlap_percentage = delta / max_overlap_distance; // 0 at boundary
 
         return bakedGradient[FloatToByte(overlap_percentage)];
 
@@ -305,25 +304,16 @@ public partial class BiomeGenerator : Node
 
                 int base_index = (x + y * points_per_axis) * 4;
 
-                // for tests:
-                float sum = 0;
-                foreach (CellDataCombo cell in cells)
-                {
-                    sum += FloatToByte(cell.influence);
-                }
-
-
-                // var map = map_1_data;
-                // int index = main_cell.cell.biome.type_index % 4/* cell.cell.biome.type_index % 4 */;
-                // map[base_index + index] = FloatToByte(main_cell.influence);
 
                 foreach (CellDataCombo cell in cells)
                 {
                     // using big ass switch statement would be faster, especially when using more than 2 textures but this is cleaner, so choose your poison.
                     var map = cell.cell.biome.type_index / 4 == 0 ? map_1_data : map_2_data;
                     int index = cell.cell.biome.type_index % 4;
-                    map[base_index + index] += FloatToByte(cell.influence);
+                    // So that the Byte doesn't overflow
+                    map[base_index + index] = FloatToByte(Math.Clamp(ByteToFloat(map[base_index + index]) + cell.influence, 0, 1));
                 }
+
             }
         }
 

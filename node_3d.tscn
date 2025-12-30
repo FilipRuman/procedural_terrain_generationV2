@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=15 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://ie6lidlhojfd" path="res://terrain_gen/biomes/BiomeGenerator.cs" id="1_4arys"]
 [ext_resource type="Script" uid="uid://b6rfv7qd6bbo2" path="res://terrain_gen/ground_gen/NoiseComponent.cs" id="3_jka67"]
@@ -10,8 +10,8 @@
 [sub_resource type="Gradient" id="Gradient_6iypd"]
 interpolation_mode = 2
 interpolation_color_space = 2
-offsets = PackedFloat32Array(0, 0.1532738, 0.35119048, 0.4642857)
-colors = PackedColorArray(1, 1, 1, 1, 0.60875547, 0.6087555, 0.6087551, 1, 0.5890956, 0.58909565, 0.58909535, 1, 0.00012029045, 0.00012029051, 0.000120290424, 1)
+offsets = PackedFloat32Array(0, 0.9798658)
+colors = PackedColorArray(0.90134203, 0.90134215, 0.901342, 1, 0, 0, 0, 1)
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_i5arm"]
 
@@ -41,17 +41,8 @@ terrain_mesh_noise = SubResource("Resource_4arys")
 type_index = 2
 metadata/_custom_type_script = "uid://bqpjjupyok60s"
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_6iypd"]
-
-[sub_resource type="Resource" id="Resource_cdqbm"]
-script = ExtResource("3_jka67")
-noise = SubResource("FastNoiseLite_6iypd")
-amplitude = 2.0
-metadata/_custom_type_script = "uid://b6rfv7qd6bbo2"
-
-[sub_resource type="Resource" id="Resource_3v7ru"]
+[sub_resource type="Resource" id="Resource_i5arm"]
 script = ExtResource("4_r3fl7")
-terrain_mesh_noise = SubResource("Resource_cdqbm")
 type_index = 3
 metadata/_custom_type_script = "uid://bqpjjupyok60s"
 
@@ -74,10 +65,13 @@ directional_shadow_pancake_size = 20.7
 script = ExtResource("1_4arys")
 seed = 7219
 grid_size = 20
-biome_map_resolution = 20
-max_overlap_distance = 5.0
+biome_map_resolution = 40
+margin_points = 20
+max_overlap_distance = 6.0
 overlap_gradient = SubResource("Gradient_6iypd")
-biomes = [SubResource("Resource_tereu"), SubResource("Resource_wlxy5"), SubResource("Resource_3v7ru")]
+run = true
+biomes = [SubResource("Resource_tereu"), SubResource("Resource_wlxy5"), SubResource("Resource_i5arm")]
+margin_percentage = 0.15833333
 
 [node name="chunk" parent="." instance=ExtResource("3_r3fl7")]
 
@@ -87,7 +81,7 @@ script = ExtResource("4_jka67")
 chunk_prefab = ExtResource("3_r3fl7")
 biome_generator = NodePath("../biome gen")
 chunk_size = 40
-biomes = [SubResource("Resource_tereu"), SubResource("Resource_wlxy5"), SubResource("Resource_3v7ru")]
+biomes = [SubResource("Resource_tereu"), SubResource("Resource_wlxy5"), SubResource("Resource_i5arm")]
 view_distance = 5
 ground_shader_material = ExtResource("6_i5arm")
 

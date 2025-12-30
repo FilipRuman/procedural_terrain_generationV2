@@ -71,9 +71,9 @@ public partial class GroundMeshGen : MeshInstance3D
         var output = 0f;
         foreach (var biome_influence_data in biome_influences)
         {
-            var biome = biomes[biome_influence_data.biome_type_index - 1];
+            // var biome = biomes[biome_influence_data.biome_type_index - 1];
             // TODO: Bake gradient
-            output += influence_gradient.Sample(biome_influence_data.influence).R * biome.terrain_mesh_noise.Sample(real_pos);
+            output += influence_gradient.Sample(biome_influence_data.influence).R /* * biome.terrain_mesh_noise.Sample(real_pos) */;
         }
         return output;
     }

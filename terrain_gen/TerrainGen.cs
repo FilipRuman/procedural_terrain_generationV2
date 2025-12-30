@@ -52,7 +52,6 @@ public partial class TerrainGen : Node3D
         // {
         //     if (x * x + y * y >= radius * radius)
         //         continue;
-
         // output.Add(new(x * chunk_size, 0));
         // }
         // }
@@ -104,6 +103,8 @@ public partial class TerrainGen : Node3D
         }
         // }
 
+
+        ground_shader_material.SetShaderParameter("uv_margin", biome_generator.CalculateUvMargin(chunk_size));
         ground_shader_material.SetShaderParameter("map_1", map_1);
         ground_shader_material.SetShaderParameter("map_2", map_2);
     }

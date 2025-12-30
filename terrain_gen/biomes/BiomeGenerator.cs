@@ -8,7 +8,7 @@ public partial class BiomeGenerator : Node
     [Export] int seed;
     [Export] int grid_size;
     [Export] int biome_map_resolution;
-
+    [Export] int margin_points;
     [Export] float max_overlap_distance;
     [Export] Gradient overlap_gradient;
     [Export] bool run;
@@ -31,19 +31,20 @@ public partial class BiomeGenerator : Node
     {
         GridCell[] cells;
         int grid_stride;
+        int grid_margin;
 
-        public Grid(GridCell[] cells, int grid_cells_per_axis)
+        public Grid(GridCell[] cells, int grid_cells_per_axis, int grid_margin)
         {
             this.cells = cells;
             this.grid_stride = grid_cells_per_axis;
+            this.grid_margin = grid_margin;
         }
 
         public GridCell this[int x, int y]
         {
             get
             {
-                // + 1 is needed because grid has a buffer of one cell on all of the sides. 
-                return cells[x + 1 + (y + 1) * grid_stride];
+                return cells[x + grid_margin + (y + grid_margin) * grid_stride];
             }
         }
     }
@@ -77,18 +78,18 @@ public partial class BiomeGenerator : Node
             return distance.CompareTo(other.distance);
         }
     }
-    private Grid GenerateGrid(int grid_cells_per_axis, Vector2 base_world_possition, int grid_stride)
+    private Grid GenerateGrid(int grid_cells_per_axis, Vector2 base_world_position, int grid_stride, int grid_margin)
     {
-        var cells = new GridCell[(grid_stride) * (grid_stride)];
+        var cells = new GridCell[grid_stride * grid_stride];
 
         // + 2 to generate position outside of this chunk of terrain, on the: left, right, up, down. This is needed to ensure consistency between chunks.
         for (int x = 0; x < grid_stride; x++)
         {
             for (int y = 0; y < grid_stride; y++)
             {
-                // - 1 because of the buffer
-                float world_x = base_world_possition.X + (x - 1) * grid_size;
-                float world_y = base_world_possition.Y + (y - 1) * grid_size;
+                // - 2 because of the buffer
+                float world_x = base_world_position.X + (x - grid_margin) * grid_size;
+                float world_y = base_world_position.Y + (y - grid_margin) * grid_size;
                 ulong s =
     (ulong)seed ^
     (ulong)Mathf.FloorToInt(world_x) * 73856093UL ^
@@ -107,7 +108,7 @@ public partial class BiomeGenerator : Node
             }
         }
 
-        Grid grid = new(cells, grid_stride);
+        Grid grid = new(cells, grid_stride, grid_margin);
 
         return grid;
     }
@@ -136,15 +137,16 @@ public partial class BiomeGenerator : Node
 
     private void CalculateInfluencesForCeils(
         List<CellDataCombo> neighbors,
-        CellDataCombo main, Vector2 world_possiton,
+        CellDataCombo main, Vector2 world_position,
         float[] bakedGradient)
     {
         main.influence = 1.0f;
 
+
         // In a reverse order so that we can remove neighbors that doesn't mach our requirements
         for (int i = neighbors.Count - 1; i >= 0; i--)
         {
-            handle_neighbour_cell_influence(neighbors, main, world_possiton, bakedGradient, i);
+            set_neighbor_cell_influence(neighbors, main, world_position, bakedGradient, i);
         }
         // normalize
         main.influence = Mathf.Max(main.influence, 0f);
@@ -160,9 +162,8 @@ public partial class BiomeGenerator : Node
 
     }
 
-    private void handle_neighbour_cell_influence(List<CellDataCombo> neighbors, CellDataCombo main, Vector2 world_pos, float[] bakedGradient, int cell_index_in_list)
+    private void set_neighbor_cell_influence(List<CellDataCombo> neighbors, CellDataCombo main, Vector2 world_pos, float[] bakedGradient, int cell_index_in_list)
     {
-
 
         var neighbor = neighbors[cell_index_in_list];
 
@@ -212,6 +213,7 @@ public partial class BiomeGenerator : Node
         readonly byte[] map_1_data;
         readonly byte[] map_2_data;
 
+
         public OutputData(int map_resolution, byte[] map_1_data, byte[] map_2_data)
         {
             this.map_resolution = map_resolution;
@@ -228,6 +230,7 @@ public partial class BiomeGenerator : Node
         }
         public List<BiomeInfluenceOutput> SampleBiomeDataForMesh(Vector2 UV)
         {
+            // Redo this - 
             int i = Mathf.FloorToInt(map_resolution * UV.X + map_resolution * map_resolution * UV.Y);
 
             var output = new List<BiomeInfluenceOutput>(3);
@@ -263,21 +266,39 @@ public partial class BiomeGenerator : Node
             output.Add(new(biome_index, ByteToFloat(_byte)));
         }
     }
+    public float CalculateUvMargin(int width_height)
+    {
+        int grid_cells_per_axis = Mathf.CeilToInt(width_height / (float)grid_size);
+        int points_per_axis = grid_cells_per_axis * biome_map_resolution + margin_points * 2;
 
+        float point_size = width_height / (float)(grid_cells_per_axis * biome_map_resolution);
+
+        // Chosen empirically, this works the best with my use case, but Idk. why I:
+        const int filter_padding = -1;
+        int effective_margin_points = margin_points + filter_padding;
+        return effective_margin_points / (float)points_per_axis;
+
+    }
     public OutputData GenerateMaps(Vector2 base_world_position, int width_height, Biome[] biomes)
     {
-        // Generate 1 point on the neighbour chunk, so that the map has smooth transitions 
-
         this.biomes = biomes;
 
         int grid_cells_per_axis = Mathf.CeilToInt(width_height / (float)grid_size);
+        int points_per_axis = grid_cells_per_axis * biome_map_resolution + margin_points * 2;
 
-        int grid_stride = grid_cells_per_axis + 2;
-        Grid grid = GenerateGrid(grid_cells_per_axis, base_world_position, grid_stride);
+        float point_size = width_height / (float)(grid_cells_per_axis * biome_map_resolution);
 
-        int points_per_axis = grid_cells_per_axis * biome_map_resolution;
+        // Chosen empirically, this works the best with my use case, but Idk. why I:
+        const int filter_padding = -1;
+        int effective_margin_points = margin_points + filter_padding;
+        float uv_margin = effective_margin_points / (float)points_per_axis;
 
-        float point_size = width_height / (float)points_per_axis;
+        int grid_margin = 1 + Mathf.CeilToInt(margin_points * point_size / grid_size);
+        // * 2 because the margin is on each side
+        int grid_stride = grid_cells_per_axis + grid_margin * 2;
+        Grid grid = GenerateGrid(grid_cells_per_axis, base_world_position, grid_stride, grid_margin);
+
+        //+2 for checking cells on the neighbor tiles to ensure smooth transition between them
         var map_1_data = new byte[points_per_axis * points_per_axis * 4];
         var map_2_data = new byte[points_per_axis * points_per_axis * 4];
 
@@ -285,9 +306,9 @@ public partial class BiomeGenerator : Node
 
         // alloc heap once
         List<CellDataCombo> cells = new(9);
-        for (int x = 0; x < points_per_axis; x++)
+        for (int x = -margin_points; x < points_per_axis - margin_points; x++)
         {
-            for (int y = 0; y < points_per_axis; y++)
+            for (int y = -margin_points; y < points_per_axis - margin_points; y++)
             {
                 cells.Clear();
 
@@ -302,7 +323,7 @@ public partial class BiomeGenerator : Node
 
                 cells.Add(main_cell);
 
-                int base_index = (x + y * points_per_axis) * 4;
+                int base_index = (x + margin_points + (y + margin_points) * points_per_axis) * 4;
 
 
                 foreach (CellDataCombo cell in cells)

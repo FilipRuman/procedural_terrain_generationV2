@@ -14,7 +14,6 @@ public partial class GroundMeshGen : MeshInstance3D
         triangle_count_per_dimension = size /* * resolution */;
         triangle_size = 1/* size / resolution */;
 
-        GD.Print("run");
         var arrayMesh = GenerateTerrainMesh(biomes, biome_data);
         Mesh = arrayMesh;
 
@@ -33,9 +32,6 @@ public partial class GroundMeshGen : MeshInstance3D
 
         st.GenerateNormals();
         st.GenerateTangents();
-
-        // TODO: Generate normals by hand to avoid seams.https://www.youtube.com/watch?v=NpeYTcS7n-M&t=432s
-        // Also make uvs generated based on the possition of the tile in the real space not on the tile it sefl to avoid seams 
 
 
         return st.Commit();

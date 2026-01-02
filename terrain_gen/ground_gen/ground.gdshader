@@ -44,7 +44,7 @@ NormalAlbedoRoughness triple_stochastic_sample(sampler2D normal_texture,sampler2
 	(textureGrad(roughness_texture,uv_y,ddx,ddy)*bw_vx[3].y) +
 	(textureGrad(roughness_texture,uv_z,ddx,ddy)*bw_vx[3].z);
 
-	return NormalAlbedoAo(normal.xyz,albedo.xyz,roughness.xyz);
+	return NormalAlbedoRoughness(normal.xyz,albedo.xyz,roughness.xyz);
 
 }
 
@@ -68,10 +68,6 @@ uniform sampler2D uv_noise_texture_2;
 uniform float uv_noise_frequency_2;
 uniform vec2 uv_noise_strength_2;
 
-
-uniform sampler2D roughness_gradient;
-uniform sampler2D other_noise;
-
 instance uniform int chunk_data_map_index;
 uniform sampler2D[chunk_data_maps_count] map_1:repeat_disable;
 uniform sampler2D[chunk_data_maps_count] map_2:repeat_disable;
@@ -79,41 +75,43 @@ uniform sampler2D[chunk_data_maps_count] map_2:repeat_disable;
 uniform vec3[BIOMES_COUNT] texture_tint;
 uniform float[BIOMES_COUNT] texture_saturation;
 uniform float[BIOMES_COUNT] texture_scale;
-uniform sampler2D[BIOMES_COUNT] biome_textures;
+uniform sampler2D[BIOMES_COUNT] biome_albedo_textures;
 uniform sampler2D[BIOMES_COUNT] biome_normal_textures;
 uniform sampler2D[BIOMES_COUNT] biome_roughness_textures;
 
+uniform sampler2D other_noise;
+uniform float metallic;
+uniform float spectacular;
+uniform float other_noise_scale;
+
 uniform float uv_margin;
 
-
-
-
-NormalAlbedoAo triple_stochastic_triplanar (vec3 position, vec3 worldNormal,vec3 adjusted_normal, float biome_scale,
- sampler2D biome_normal_map,sampler2D biome_texture,sampler2D biome_roughness){
+NormalAlbedoRoughness triple_stochastic_triplanar (vec3 position, vec3 worldNormal, vec3 adjusted_normal, float biome_scale,
+ sampler2D biome_normal_map, sampler2D biome_texture, sampler2D biome_roughness){
 	vec3 weights = adjusted_normal / (adjusted_normal.x + adjusted_normal.y + adjusted_normal.z) * 3.0;
 
 	vec2 uv_x = position.zy;
 	vec2 uv_y = position.xz;
 	vec2 uv_z = position.xy;
 
-	NormalAlbedoRoughness output = NormalAlbedoRoughness(vec3(0),vec3(0),vec3(0));
+	NormalAlbedoRoughness output = NormalAlbedoRoughness(vec3(0), vec3(0), vec3(0));
 	NormalAlbedoRoughness partial;
 	if (weights.x > 0.01){
-		partial = triple_stochastic_sample(rock_normal_map,rock_texture,rock_roughness, uv_x * rock_scale);
+		partial = triple_stochastic_sample(rock_normal_map, rock_texture, rock_roughness, uv_x * rock_scale);
 		output.normal += partial.normal * weights.x;
 		output.albedo += partial.albedo * rock_saturation * weights.x;
 		output.roughness += partial.roughness * weights.x;
 	}
 	if (weights.y > 0.01){
-		partial = triple_stochastic_sample(biome_normal_map,biome_texture,biome_roughness, uv_y * biome_scale);
+		partial = triple_stochastic_sample(biome_normal_map, biome_texture, biome_roughness, uv_y * biome_scale);
 		output.normal += partial.normal * weights.y;
-		output.albedo += partial.albedo  * rock_saturation * weights.y;
+		output.albedo += partial.albedo * rock_saturation * weights.y;
 		output.roughness += partial.roughness * weights.y;
 	}
 	if (weights.z > 0.01){
-		partial = triple_stochastic_sample(rock_normal_map,rock_texture,rock_roughness, uv_z * rock_scale);
+		partial = triple_stochastic_sample(rock_normal_map, rock_texture, rock_roughness, uv_z * rock_scale);
 		output.normal += partial.normal * weights.z;
-		output.albedo += partial.albedo  * rock_saturation * weights.z;
+		output.albedo += partial.albedo * rock_saturation * weights.z;
 		output.roughness += partial.roughness * weights.z;
 	}
 
@@ -125,8 +123,7 @@ void handle_biome(int biome, float influence, vec3 position, vec3 worldNormal, v
 		return ;
 	}
 
-
-	NormalAlbedoRoughness output= triple_stochastic_triplanar(position, worldNormal, adjusted_normal, texture_scale[biome],biome_normal_maps[biome], biome_textures[biome],biome_roughness[biome]);
+	NormalAlbedoRoughness output = triple_stochastic_triplanar(position, worldNormal, adjusted_normal, texture_scale[biome],biome_normal_textures[biome], biome_albedo_textures[biome],biome_roughness_textures[biome]);
 
 	output_color += (output.albedo + texture_tint[biome] - vec3(1) * texture_saturation[biome]) * influence;
 	output_normal += output.normal * influence;
@@ -134,7 +131,6 @@ void handle_biome(int biome, float influence, vec3 position, vec3 worldNormal, v
 }
 
 NormalAlbedoRoughness collect_biome_data(vec4 biome_data_1, vec4 biome_data_2,vec3 world_pos, vec3 world_normal, vec3 adjusted_normal){
-
 	vec3 output_color = vec3(0, 0, 0);
 	vec3 output_normal = vec3(0, 0, 0);
 	vec3 output_roughness = vec3(0, 0, 0);
@@ -148,8 +144,7 @@ NormalAlbedoRoughness collect_biome_data(vec4 biome_data_1, vec4 biome_data_2,ve
 	handle_biome(6, biome_data_2.b, world_pos, world_normal, adjusted_normal, output_color, output_normal, output_roughness);
 	handle_biome(7, biome_data_2.a, world_pos, world_normal, adjusted_normal, output_color, output_normal, output_roughness);
 
-
-	return NormalAlbedoAo(output_normal, output_color, output_ao);
+	return NormalAlbedoRoughness(output_normal, output_color, output_roughness);
 }
 
 void fragment(){
@@ -162,19 +157,20 @@ void fragment(){
 	vec2 uv_noise_2 = texture(uv_noise_texture_2, world_pos.xz * uv_noise_frequency_2).r * uv_noise_strength_2;
 	vec2 noisy_uv = uv_with_margin_included + uv_noise_1 + uv_noise_2 ;
 
-
 	vec4 biome_data_1 = texture(map_1[chunk_data_map_index],noisy_uv);
 	vec4 biome_data_2 = texture(map_2[chunk_data_map_index],noisy_uv);
-	NormalAlbedo output = collect_biome_data(biome_data_1, biome_data_2, world_pos, world_normal, adjusted_normal);
+	NormalAlbedoRoughness output = collect_biome_data(biome_data_1, biome_data_2, world_pos, world_normal, adjusted_normal);
 	ALBEDO = output.albedo;
 	NORMAL_MAP = output.normal;
-	ROUGHNESS  = output.roughness;
+	ROUGHNESS  = output.roughness.r;
 
 
 	//apply processing
 
 	ALBEDO *= global_brightness;
 
-	ALBEDO *= mix(0.9, 1.1, texture(other_noise, UV).r);
+	ALBEDO *= mix(0.8, 1.2, texture(other_noise, world_pos.xz*other_noise_scale).r);
 	ALBEDO -= vec3(1) * global_saturation;
+	METALLIC = texture(other_noise, world_pos.xz*other_noise_scale).r * metallic;
+	SPECULAR = texture(other_noise, world_pos.xz*other_noise_scale).r* spectacular;
 }

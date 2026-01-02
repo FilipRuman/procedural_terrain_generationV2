@@ -1,18 +1,23 @@
-[gd_scene load_steps=35 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=34 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://ie6lidlhojfd" path="res://terrain_gen/biomes/BiomeGenerator.cs" id="1_4arys"]
+[ext_resource type="Texture2D" uid="uid://070x5fvdh5e7" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_BaseColor.jpg" id="2_i0g27"]
+[ext_resource type="Texture2D" uid="uid://bk5ufqeoaqypt" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_Normal.jpg" id="3_ealrb"]
 [ext_resource type="Script" uid="uid://b6rfv7qd6bbo2" path="res://terrain_gen/ground_gen/NoiseComponent.cs" id="3_jka67"]
 [ext_resource type="PackedScene" uid="uid://mujlms5gx604" path="res://terrain_gen/chunk.tscn" id="3_r3fl7"]
-[ext_resource type="Texture2D" uid="uid://cpf7u4ay4n0h1" path="res://ground textures/Grass_A_BaseColor.png" id="4_6iypd"]
 [ext_resource type="Script" uid="uid://cy771avr8nygp" path="res://terrain_gen/TerrainGen.cs" id="4_jka67"]
+[ext_resource type="Texture2D" uid="uid://c4vgvt145u3xh" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_Roughness.jpg" id="4_jsnrv"]
 [ext_resource type="Script" uid="uid://bqpjjupyok60s" path="res://terrain_gen/biomes/Biome.cs" id="4_r3fl7"]
-[ext_resource type="Texture2D" uid="uid://dc6ewllvtanqs" path="res://ground textures/Snow_BaseColor.png" id="5_tereu"]
 [ext_resource type="Material" uid="uid://dpud1m5ciourq" path="res://terrain_gen/goundMaterial.tres" id="6_i5arm"]
-[ext_resource type="Texture2D" uid="uid://drci6sj84ad82" path="res://ground textures/Muddy_BaseColor.png" id="6_tereu"]
-[ext_resource type="Texture2D" uid="uid://070x5fvdh5e7" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_BaseColor.jpg" id="8_imku0"]
-[ext_resource type="Texture2D" uid="uid://6ledks1kf3pm" path="res://ground textures/Rock_BaseColor.png" id="9_imku0"]
-[ext_resource type="Texture2D" uid="uid://bbxv7c58rd0ru" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_AO.jpg" id="9_wlxy5"]
-[ext_resource type="Texture2D" uid="uid://bk5ufqeoaqypt" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_Normal.jpg" id="10_3v7ru"]
+[ext_resource type="Texture2D" uid="uid://rj6a6u47sfua" path="res://ground textures/rippled_sand_xd0mda1_1k/Rippled_Sand_xd0mda1_1K_BaseColor.jpg" id="7_lggff"]
+[ext_resource type="Texture2D" uid="uid://hwx7vg81eeg7" path="res://ground textures/rippled_sand_xd0mda1_1k/Rippled_Sand_xd0mda1_1K_Normal.jpg" id="8_s0gvp"]
+[ext_resource type="Texture2D" uid="uid://oqskrlja41cw" path="res://ground textures/rippled_sand_xd0mda1_1k/Rippled_Sand_xd0mda1_1K_Roughness.jpg" id="9_vxd74"]
+[ext_resource type="Texture2D" uid="uid://b2k6c88vjl8pt" path="res://ground textures/fresh_windswept_snow_ugspafgdy_1k/Fresh_Windswept_Snow_ugspafgdy_1K_BaseColor.jpg" id="10_dhlwf"]
+[ext_resource type="Texture2D" uid="uid://2oh52cjspouj" path="res://ground textures/fresh_windswept_snow_ugspafgdy_1k/Fresh_Windswept_Snow_ugspafgdy_1K_Normal.jpg" id="11_5t8nk"]
+[ext_resource type="Texture2D" uid="uid://sa2rdm3wb2tm" path="res://ground textures/fresh_windswept_snow_ugspafgdy_1k/Fresh_Windswept_Snow_ugspafgdy_1K_Roughness.jpg" id="12_j3e5s"]
+[ext_resource type="Texture2D" uid="uid://datjc43rk68k1" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_BaseColor.jpg" id="15_nu31w"]
+[ext_resource type="Texture2D" uid="uid://qy8avu837ct5" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Normal.jpg" id="16_obt1j"]
+[ext_resource type="Texture2D" uid="uid://cap62wxor08qv" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Roughness.jpg" id="17_2yde8"]
 
 [sub_resource type="Gradient" id="Gradient_6iypd"]
 interpolation_mode = 2
@@ -31,7 +36,9 @@ metadata/_custom_type_script = "uid://b6rfv7qd6bbo2"
 [sub_resource type="Resource" id="Resource_cdqbm"]
 script = ExtResource("4_r3fl7")
 terrain_mesh_noise = SubResource("Resource_wc5p8")
-texture = ExtResource("4_6iypd")
+albedo = ExtResource("2_i0g27")
+normal = ExtResource("3_ealrb")
+roughness = ExtResource("4_jsnrv")
 saturation = -0.02
 scale = 0.285
 metadata/_custom_type_script = "uid://bqpjjupyok60s"
@@ -48,7 +55,9 @@ metadata/_custom_type_script = "uid://b6rfv7qd6bbo2"
 script = ExtResource("4_r3fl7")
 terrain_mesh_noise = SubResource("Resource_4arys")
 type_index = 2
-texture = ExtResource("5_tereu")
+albedo = ExtResource("7_lggff")
+normal = ExtResource("8_s0gvp")
+roughness = ExtResource("9_vxd74")
 saturation = 0.53
 scale = -0.095
 metadata/_custom_type_script = "uid://bqpjjupyok60s"
@@ -57,74 +66,50 @@ metadata/_custom_type_script = "uid://bqpjjupyok60s"
 script = ExtResource("4_r3fl7")
 terrain_mesh_noise = SubResource("Resource_wc5p8")
 type_index = 1
-texture = ExtResource("6_tereu")
+albedo = ExtResource("10_dhlwf")
+normal = ExtResource("11_5t8nk")
+roughness = ExtResource("12_j3e5s")
 saturation = -0.13
 scale = 0.075
 metadata/_custom_type_script = "uid://bqpjjupyok60s"
 
-[sub_resource type="BoxMesh" id="BoxMesh_tcnuu"]
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_jbprs"]
+frequency = 0.0028
+fractal_octaves = 3
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tuemg"]
-albedo_texture = ExtResource("8_imku0")
-normal_enabled = true
-normal_texture = ExtResource("10_3v7ru")
-ao_enabled = true
-ao_light_affect = 1.0
-ao_texture = ExtResource("9_wlxy5")
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_id0nj"]
+noise = SubResource("FastNoiseLite_jbprs")
+seamless = true
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_lfpj5"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_1q667"]
+noise = SubResource("FastNoiseLite_lfpj5")
+seamless = true
 
 [sub_resource type="Gradient" id="Gradient_vvi4u"]
 colors = PackedColorArray(0.92099476, 0.9209946, 0.9209946, 1, 0.6255971, 0.6255971, 0.6255971, 1)
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_tcnuu"]
-frequency = 0.0015
+frequency = 0.0124
+domain_warp_enabled = true
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_tuemg"]
 noise = SubResource("FastNoiseLite_tcnuu")
 color_ramp = SubResource("Gradient_vvi4u")
 seamless = true
-
-[sub_resource type="Gradient" id="Gradient_tereu"]
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_cdqbm"]
-noise_type = 2
-frequency = 0.0001
-fractal_octaves = 2
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_imku0"]
-noise = SubResource("FastNoiseLite_cdqbm")
-color_ramp = SubResource("Gradient_tereu")
-
-[sub_resource type="Gradient" id="Gradient_i0g27"]
-offsets = PackedFloat32Array(0, 0.97590363)
-colors = PackedColorArray(0.8431842, 0.8431838, 0.84318364, 1, 1, 1, 1, 1)
-
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_ealrb"]
-gradient = SubResource("Gradient_i0g27")
-
-[sub_resource type="Gradient" id="Gradient_jsnrv"]
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_lggff"]
-noise_type = 0
-frequency = 0.0029
-fractal_type = 2
-fractal_octaves = 3
-fractal_lacunarity = 2.365
-fractal_gain = 0.37
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_s0gvp"]
-noise = SubResource("FastNoiseLite_lggff")
-color_ramp = SubResource("Gradient_jsnrv")
-seamless = true
+seamless_blend_skirt = 0.451
 
 [node name="Node3D" type="Node3D"]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.69700396, 0.3482852, 0.62680405, 0.55750585, -0.28653324, 0.7791574, 0.45096907, 0.8925226, 0.005543679, 0, 0, 1.0228882)
-light_energy = 4.595
-light_indirect_energy = 2.564
-light_volumetric_fog_energy = 0.805
-light_specular = 0.655
+light_energy = 1.181
+light_indirect_energy = 5.456
+light_volumetric_fog_energy = 0.0
+light_specular = 1.105
 shadow_enabled = true
+shadow_blur = 0.575
 directional_shadow_split_1 = 0.315
 directional_shadow_split_2 = 0.23
 directional_shadow_split_3 = 0.31
@@ -142,13 +127,6 @@ overlap_gradient = SubResource("Gradient_6iypd")
 run = true
 biomes = [SubResource("Resource_cdqbm"), SubResource("Resource_wlxy5"), SubResource("Resource_tereu")]
 
-[node name="chunk" parent="." instance=ExtResource("3_r3fl7")]
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="chunk/ground" index="0"]
-transform = Transform3D(3.0728538, 0, 0, 0, 1, 0, 0, 0, 3.0017874, 0, 1.5178459, 0)
-mesh = SubResource("BoxMesh_tcnuu")
-surface_material_override/0 = SubResource("StandardMaterial3D_tuemg")
-
 [node name="terrain_gen" type="Node3D" parent="." node_paths=PackedStringArray("biome_generator")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 200, 0)
 script = ExtResource("4_jka67")
@@ -156,19 +134,23 @@ chunk_prefab = ExtResource("3_r3fl7")
 biome_generator = NodePath("../biome gen")
 chunk_size = 40
 biomes = [SubResource("Resource_cdqbm"), SubResource("Resource_wlxy5"), SubResource("Resource_tereu")]
+refresh_frequency_sec = 0.2
 view_distance = 5
-other_noise = SubResource("NoiseTexture2D_tuemg")
-texture_repetition_noise = SubResource("NoiseTexture2D_imku0")
-roughness_gradient = SubResource("GradientTexture1D_ealrb")
-texture_uv_noise_strength = Vector2(0.1, 0.515)
-uv_noise_frequency = 0.1
-uv_noise_strength = Vector2(0.1, 0.12)
-uv_noise_texture = SubResource("NoiseTexture2D_s0gvp")
-rock_texture = ExtResource("9_imku0")
+uv_noise_frequency_1 = 0.07
+uv_noise_strength_1 = Vector2(0.12, 0.1)
+uv_noise_texture_1 = SubResource("NoiseTexture2D_id0nj")
+uv_noise_frequency_2 = 0.175
+uv_noise_strength_2 = Vector2(0.1, 0.07)
+uv_noise_texture_2 = SubResource("NoiseTexture2D_1q667")
+rock_texture = ExtResource("15_nu31w")
+rock_normal_map = ExtResource("16_obt1j")
+rock_roughness = ExtResource("17_2yde8")
 rock_scale = 0.03
 rock_saturation = 0.91
 global_saturation = 0.045
 global_brightness = 0.13
+other_noise = SubResource("NoiseTexture2D_tuemg")
+metallic = 0.015
+other_noise_scale = 0.02
+spectacular = 0.61
 ground_shader_material = ExtResource("6_i5arm")
-
-[editable path="chunk"]

@@ -12,26 +12,44 @@ public partial class TerrainGen : Node3D
     [Export] Biome[] biomes;
 
     [Export] bool run;
-    [Export(hintString: "Runs terrain generation every x seconds -Disables the refreshing if <= 0")]
+    [Export(hintString: "Runs terrain generation every x seconds. Disables the refreshing if <= 0")]
     float refresh_frequency_sec;
 
     [Export] Vector2 position;
     [Export] int view_distance;
     [Export] float y_offset;
-    [ExportGroup("ground shader settings")]
-    [Export] Texture other_noise;
-    [Export] Texture texture_repetition_noise;
-    [Export] Texture roughness_gradient;
-    [Export] Vector2 texture_uv_noise_strength;
-    [Export] float uv_noise_frequency;
 
-    [Export] Vector2 uv_noise_strength;
-    [Export] Texture uv_noise_texture;
+    [ExportCategory("ground shader settings")]
+    [ExportGroup("uv noise 1")]
+    [Export] float uv_noise_frequency_1;
+    [Export] Vector2 uv_noise_strength_1;
+    [Export] Texture uv_noise_texture_1;
+
+    [ExportGroup("uv noise 2")]
+    [Export] float uv_noise_frequency_2;
+    [Export] Vector2 uv_noise_strength_2;
+    [Export] Texture uv_noise_texture_2;
+
+    [ExportGroup("rock")]
     [Export] Texture rock_texture;
+    [Export] Texture rock_normal_map;
+    [Export] Texture rock_roughness;
     [Export] float rock_scale;
     [Export] float rock_saturation;
+
+
+    [ExportGroup("additional processing")]
     [Export] float global_saturation;
     [Export] float global_brightness;
+
+    [ExportSubgroup("other noise stats")]
+    [Export] Texture other_noise;
+    [Export] float metallic;
+    [Export] float other_noise_scale;
+    [Export] float spectacular;
+
+
+
     const int max_chunk_data_textures_count = 100;
 
     double refresh_timer;
@@ -133,34 +151,56 @@ public partial class TerrainGen : Node3D
         // }
 
 
-        var biome_textures = new Texture[biomes.Length];
+        var biome_albedo_textures = new Texture[biomes.Length];
+        var biome_normal_textures = new Texture[biomes.Length];
+        var biome_roughness_textures = new Texture[biomes.Length];
         var texture_tint = new Vector3[biomes.Length];
         var texture_saturation = new float[biomes.Length];
         var texture_scale = new float[biomes.Length];
         int i = 0;
         foreach (var biome in biomes)
         {
-            biome_textures[i] = biome.texture;
+
+            biome_albedo_textures[i] = biome.albedo;
+            biome_normal_textures[i] = biome.normal;
+            biome_roughness_textures[i] = biome.roughness;
             texture_tint[i] = new(biome.tint.R, biome.tint.G, biome.tint.B);
             texture_saturation[i] = biome.saturation;
             texture_scale[i] = biome.scale;
             i++;
         }
 
+        ground_shader_material.SetShaderParameter("uv_noise_texture_1", uv_noise_texture_1);
+        ground_shader_material.SetShaderParameter("uv_noise_frequency_1", uv_noise_frequency_1);
+        ground_shader_material.SetShaderParameter("uv_noise_strength_1", uv_noise_strength_1);
+
+        ground_shader_material.SetShaderParameter("uv_noise_texture_2", uv_noise_texture_2);
+        ground_shader_material.SetShaderParameter("uv_noise_frequency_2", uv_noise_frequency_2);
+        ground_shader_material.SetShaderParameter("uv_noise_strength_2", uv_noise_strength_2);
+
+        ground_shader_material.SetShaderParameter("rock_saturation", rock_saturation);
+        ground_shader_material.SetShaderParameter("rock_scale", rock_scale);
+        ground_shader_material.SetShaderParameter("rock_normal_map", rock_normal_map);
+        ground_shader_material.SetShaderParameter("rock_roughness", rock_roughness);
+        ground_shader_material.SetShaderParameter("rock_texture", rock_texture);
+
+        ground_shader_material.SetShaderParameter("metallic", metallic);
+        ground_shader_material.SetShaderParameter("spectacular", spectacular);
+        ground_shader_material.SetShaderParameter("other_noise_scale", other_noise_scale);
+
         ground_shader_material.SetShaderParameter("texture_tint", texture_tint);
         ground_shader_material.SetShaderParameter("texture_saturation", texture_saturation);
         ground_shader_material.SetShaderParameter("texture_scale", texture_scale);
-        ground_shader_material.SetShaderParameter("biome_textures", biome_textures);
-        ground_shader_material.SetShaderParameter("uv_noise_frequency", uv_noise_frequency);
-        ground_shader_material.SetShaderParameter("other_noise", other_noise);
-        ground_shader_material.SetShaderParameter("texture_uv_noise", texture_repetition_noise);
-        ground_shader_material.SetShaderParameter("texture_uv_noise_strength", texture_uv_noise_strength);
 
-        ground_shader_material.SetShaderParameter("uv_noise_strength", uv_noise_strength);
-        ground_shader_material.SetShaderParameter("uv_noise_texture", uv_noise_texture);
+        ground_shader_material.SetShaderParameter("biome_albedo_textures", biome_albedo_textures);
+        ground_shader_material.SetShaderParameter("biome_roughness_textures", biome_roughness_textures);
+        ground_shader_material.SetShaderParameter("biome_normal_textures", biome_normal_textures);
+
+        ground_shader_material.SetShaderParameter("other_noise", other_noise);
+
         ground_shader_material.SetShaderParameter("global_brightness", global_brightness);
         ground_shader_material.SetShaderParameter("global_saturation", global_saturation);
-        ground_shader_material.SetShaderParameter("rock_texture", rock_texture);
+
         ground_shader_material.SetShaderParameter("uv_margin", biome_generator.CalculateUvMargin(chunk_size));
         ground_shader_material.SetShaderParameter("map_1", map_1);
         ground_shader_material.SetShaderParameter("map_2", map_2);

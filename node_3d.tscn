@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=35 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://ie6lidlhojfd" path="res://terrain_gen/biomes/BiomeGenerator.cs" id="1_4arys"]
 [ext_resource type="Texture2D" uid="uid://070x5fvdh5e7" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_BaseColor.jpg" id="2_i0g27"]
@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://oqskrlja41cw" path="res://ground textures/rippled_sand_xd0mda1_1k/Rippled_Sand_xd0mda1_1K_Roughness.jpg" id="9_vxd74"]
 [ext_resource type="Texture2D" uid="uid://b2k6c88vjl8pt" path="res://ground textures/fresh_windswept_snow_ugspafgdy_1k/Fresh_Windswept_Snow_ugspafgdy_1K_BaseColor.jpg" id="10_dhlwf"]
 [ext_resource type="Texture2D" uid="uid://2oh52cjspouj" path="res://ground textures/fresh_windswept_snow_ugspafgdy_1k/Fresh_Windswept_Snow_ugspafgdy_1K_Normal.jpg" id="11_5t8nk"]
+[ext_resource type="Script" uid="uid://celpohofq3bgf" path="res://terrain_gen/biomes/biome_generation_conditions/BlackList.cs" id="11_ealrb"]
 [ext_resource type="Texture2D" uid="uid://sa2rdm3wb2tm" path="res://ground textures/fresh_windswept_snow_ugspafgdy_1k/Fresh_Windswept_Snow_ugspafgdy_1K_Roughness.jpg" id="12_j3e5s"]
 [ext_resource type="Texture2D" uid="uid://datjc43rk68k1" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_BaseColor.jpg" id="15_nu31w"]
 [ext_resource type="Texture2D" uid="uid://qy8avu837ct5" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Normal.jpg" id="16_obt1j"]
@@ -26,11 +27,13 @@ offsets = PackedFloat32Array(0, 0.9798658)
 colors = PackedColorArray(0.90134203, 0.90134215, 0.901342, 1, 0, 0, 0, 1)
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_i5arm"]
+frequency = 0.0169
+fractal_octaves = 2
 
 [sub_resource type="Resource" id="Resource_wc5p8"]
 script = ExtResource("3_jka67")
 noise = SubResource("FastNoiseLite_i5arm")
-amplitude = 2.0
+amplitude = 7.0
 metadata/_custom_type_script = "uid://b6rfv7qd6bbo2"
 
 [sub_resource type="Resource" id="Resource_cdqbm"]
@@ -41,36 +44,41 @@ normal = ExtResource("3_ealrb")
 roughness = ExtResource("4_jsnrv")
 saturation = -0.02
 scale = 0.285
+conditions = []
 metadata/_custom_type_script = "uid://bqpjjupyok60s"
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_jsk3o"]
-
-[sub_resource type="Resource" id="Resource_4arys"]
-script = ExtResource("3_jka67")
-noise = SubResource("FastNoiseLite_jsk3o")
-amplitude = 2.0
-metadata/_custom_type_script = "uid://b6rfv7qd6bbo2"
 
 [sub_resource type="Resource" id="Resource_wlxy5"]
 script = ExtResource("4_r3fl7")
-terrain_mesh_noise = SubResource("Resource_4arys")
-type_index = 2
+terrain_mesh_noise = SubResource("Resource_wc5p8")
+type_index = 1
 albedo = ExtResource("7_lggff")
 normal = ExtResource("8_s0gvp")
 roughness = ExtResource("9_vxd74")
 saturation = 0.53
 scale = -0.095
+conditions = []
 metadata/_custom_type_script = "uid://bqpjjupyok60s"
+
+[sub_resource type="Resource" id="Resource_jsnrv"]
+script = ExtResource("4_r3fl7")
+conditions = []
+metadata/_custom_type_script = "uid://bqpjjupyok60s"
+
+[sub_resource type="Resource" id="Resource_lggff"]
+script = ExtResource("11_ealrb")
+black_list = [SubResource("Resource_jsnrv")]
+metadata/_custom_type_script = "uid://celpohofq3bgf"
 
 [sub_resource type="Resource" id="Resource_tereu"]
 script = ExtResource("4_r3fl7")
 terrain_mesh_noise = SubResource("Resource_wc5p8")
-type_index = 1
+type_index = 2
 albedo = ExtResource("10_dhlwf")
 normal = ExtResource("11_5t8nk")
 roughness = ExtResource("12_j3e5s")
 saturation = -0.13
 scale = 0.075
+conditions = [SubResource("Resource_lggff")]
 metadata/_custom_type_script = "uid://bqpjjupyok60s"
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_jbprs"]
@@ -134,8 +142,8 @@ chunk_prefab = ExtResource("3_r3fl7")
 biome_generator = NodePath("../biome gen")
 chunk_size = 40
 biomes = [SubResource("Resource_cdqbm"), SubResource("Resource_wlxy5"), SubResource("Resource_tereu")]
-refresh_frequency_sec = 0.2
-view_distance = 5
+view_distance = 2
+ground_mesh_resolution = 1
 uv_noise_frequency_1 = 0.07
 uv_noise_strength_1 = Vector2(0.12, 0.1)
 uv_noise_texture_1 = SubResource("NoiseTexture2D_id0nj")

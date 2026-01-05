@@ -18,7 +18,9 @@ public partial class TerrainGen : Node3D
     [Export] Vector2 position;
     [Export] int view_distance;
     [Export] float y_offset;
-
+    [ExportCategory("ground mesh settings")]
+    [Export]
+    int ground_mesh_resolution;
     [ExportCategory("ground shader settings")]
     [ExportGroup("uv noise 1")]
     [Export] float uv_noise_frequency_1;
@@ -95,19 +97,9 @@ public partial class TerrainGen : Node3D
                 output.Add(new(x * chunk_size, y * chunk_size));
             }
         }
-        // for (int x = -radius; x <= radius; x++)
-        // {
-        // for (int y = -radius; y <= radius; y++)
-        // {
-        //     if (x * x + y * y >= radius * radius)
-        //         continue;
-        // output.Add(new(x * chunk_size, 0));
-        // }
-        // }
 
         return output;
     }
-
     private void ClearAllChildren()
     {
         foreach (var item in GetChildren())
@@ -123,32 +115,24 @@ public partial class TerrainGen : Node3D
     private void GenerateAll()
     {
         List<Vector2> chunk_relative_positions = GetAllChunksPositionsInsideACircleRelative(view_distance, chunk_size);
-        // foreach (Vector2 chunk_relative_pos in chunk_relative_positions)
-        // {
-        for (int x = 0; x < 2; x++)
+
+        float uv_margin = biome_generator.CalculateUvMargin(chunk_size);
+        foreach (Vector2 chunk_relative_pos in chunk_relative_positions)
         {
+            Vector2 chunk_world_position = chunk_relative_pos + position;
+            var biome_data = biome_generator.GenerateMaps(new(chunk_world_position.X, chunk_world_position.Y), chunk_size, biomes);
 
-            for (int y = 0; y < 2; y++)
-            {
-                Vector2 chunk_world_position = /* chunk_relative_pos + position */ new(x * chunk_size, y * chunk_size);
-                var biome_data = biome_generator.GenerateMaps(new(chunk_world_position.X, chunk_world_position.Y), chunk_size, biomes);
-                // var biome_data = biome_generator.GenerateMaps((int)i, (int)0, chunk_size, biomes);
+            var chunk = (Chunk)chunk_prefab.Instantiate();
+            AddChild(chunk);
 
+            var mesh_gen = chunk.mesh_gen;
+            mesh_gen.Run(biomes, biome_data, chunk_size, chunk_world_position, ground_mesh_resolution, uv_margin);
+            int map_index = free_data_maps.Dequeue();
 
-                var chunk = (Chunk)chunk_prefab.Instantiate();
-                AddChild(chunk);
-                chunk.GlobalPosition = new(chunk_world_position.X, y_offset, chunk_world_position.Y);
-
-                var mesh_gen = chunk.mesh_gen;
-                mesh_gen.Run(biomes, biome_data, chunk_size);
-                int map_index = free_data_maps.Dequeue();
-
-                map_1[map_index] = biome_data.GetTexture(biome_data.map_resolution, 1);
-                map_2[map_index] = biome_data.GetTexture(biome_data.map_resolution, 2);
-                mesh_gen.SetInstanceShaderParameter("chunk_data_map_index", map_index);
-            }
+            map_1[map_index] = biome_data.GetTexture(biome_data.map_resolution, 0);
+            map_2[map_index] = biome_data.GetTexture(biome_data.map_resolution, 1);
+            mesh_gen.SetInstanceShaderParameter("chunk_data_map_index", map_index);
         }
-        // }
 
 
         var biome_albedo_textures = new Texture[biomes.Length];
@@ -201,7 +185,7 @@ public partial class TerrainGen : Node3D
         ground_shader_material.SetShaderParameter("global_brightness", global_brightness);
         ground_shader_material.SetShaderParameter("global_saturation", global_saturation);
 
-        ground_shader_material.SetShaderParameter("uv_margin", biome_generator.CalculateUvMargin(chunk_size));
+        ground_shader_material.SetShaderParameter("uv_margin", uv_margin);
         ground_shader_material.SetShaderParameter("map_1", map_1);
         ground_shader_material.SetShaderParameter("map_2", map_2);
     }

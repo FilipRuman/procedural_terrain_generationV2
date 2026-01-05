@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 [Tool]
 public partial class BiomeGenerator : Node
@@ -16,7 +17,10 @@ public partial class BiomeGenerator : Node
 
     [Export] Biome[] biomes;
 
-    class GridCell
+    private const int data_maps_count = 2;
+    private const int color_channels = 4; // rgba
+
+    public class GridCell
     {
         public Vector2 world_pos;
         public Biome biome;
@@ -54,7 +58,6 @@ public partial class BiomeGenerator : Node
         return (byte)MathF.Round(v * 255f);
     }
 
-    /// map float (expected 0..1) to byte 0..255.
     static float ByteToFloat(byte v)
     {
         return v / 255f;
@@ -148,11 +151,9 @@ public partial class BiomeGenerator : Node
         {
             set_neighbor_cell_influence(neighbors, main, world_position, bakedGradient, i);
         }
+
         // normalize
-        main.influence = Mathf.Max(main.influence, 0f);
         float sum = main.influence;
-
-
         foreach (var n in neighbors)
             sum += n.influence;
 
@@ -169,12 +170,12 @@ public partial class BiomeGenerator : Node
 
         if (neighbor.cell.biome.type_index == main.cell.biome.type_index)
         {
-            if (main.influence != 1)
-            {
-                // IDK. if this is good or not I:
-                // float influ = CalculateInfluence(main, bakedGradient, neighbor);
-                // main.influence = Mathf.Clamp(main.influence + influ, 0, 1);
-            }
+            // if (main.influence != 1)
+            // {
+            //     // IDK. if this is good or not I:
+            //     // float influ = CalculateInfluence(main, bakedGradient, neighbor);
+            //     // main.influence = Mathf.Clamp(main.influence + influ, 0, 1);
+            // }
             neighbors.RemoveAt(cell_index_in_list);
             return;
         }
@@ -207,44 +208,44 @@ public partial class BiomeGenerator : Node
 
     }
 
+
     public class OutputData
     {
         public readonly int map_resolution;
-        readonly byte[] map_1_data;
-        readonly byte[] map_2_data;
+        readonly byte[][] biome_maps;
 
 
-        public OutputData(int map_resolution, byte[] map_1_data, byte[] map_2_data)
+        public OutputData(int map_resolution, byte[][] biome_maps_array)
         {
             this.map_resolution = map_resolution;
-            this.map_1_data = map_1_data;
-            this.map_2_data = map_2_data;
+            this.biome_maps = biome_maps_array;
         }
 
-        /// map_index: 1- map_1_data; other- map_2_data
         public ImageTexture GetTexture(int width_height, int map_index)
         {
-            var data = map_index == 1 ? map_1_data : map_2_data;
+            var data = biome_maps[map_index];
             var image = Image.CreateFromData(width_height, width_height, false, Image.Format.Rgba8, data);
             return ImageTexture.CreateFromImage(image);
         }
         public List<BiomeInfluenceOutput> SampleBiomeDataForMesh(Vector2 UV)
         {
-            // Redo this - 
-            int i = Mathf.FloorToInt(map_resolution * UV.X + map_resolution * map_resolution * UV.Y);
+            int pixel_x = Mathf.Clamp((int)(UV.X * map_resolution), 0, map_resolution - 1);
+            int pixel_y = Mathf.Clamp((int)(UV.Y * map_resolution), 0, map_resolution - 1);
+            int pixel_index = pixel_x + pixel_y * map_resolution;
+            int base_color_channel_index = pixel_index * color_channels;
 
-            var output = new List<BiomeInfluenceOutput>(3);
-            ReadFromMapAndAddToOutput(output, i, biome_index: 0, map_1_data);
-            ReadFromMapAndAddToOutput(output, i + 1, biome_index: 1, map_1_data);
-            ReadFromMapAndAddToOutput(output, i + 2, biome_index: 2, map_1_data);
-            ReadFromMapAndAddToOutput(output, i + 3, biome_index: 3, map_1_data);
-            ReadFromMapAndAddToOutput(output, i, biome_index: 4, map_2_data);
-            ReadFromMapAndAddToOutput(output, i + 1, biome_index: 5, map_2_data);
-            ReadFromMapAndAddToOutput(output, i + 2, biome_index: 6, map_2_data);
-            ReadFromMapAndAddToOutput(output, i + 3, biome_index: 7, map_2_data);
+            var output = new List<BiomeInfluenceOutput>(1);
+            for (int biome_map_index = 0; biome_map_index < data_maps_count; biome_map_index++)
+            {
+                for (int color_channel = 0; color_channel < color_channels; color_channel++)
+                {
+                    int index_inside_biome_map = color_channel + base_color_channel_index;
+                    int biome_index = biome_map_index * color_channel;
+                    ReadFromMapAndAddToOutput(output, index_inside_biome_map, biome_index, biome_maps[biome_map_index]);
+                }
+            }
 
             return output;
-
         }
         public struct BiomeInfluenceOutput
         {
@@ -259,11 +260,11 @@ public partial class BiomeGenerator : Node
         }
 
 
-        private static void ReadFromMapAndAddToOutput(List<BiomeInfluenceOutput> output, int i, int biome_index, byte[] map)
+        private static void ReadFromMapAndAddToOutput(List<BiomeInfluenceOutput> output, int index_inside_biome_map, int biome_index, byte[] map)
         {
-            var _byte = map[i];
-            if (biome_index == 0 || _byte == 0) return;
-            output.Add(new(biome_index, ByteToFloat(_byte)));
+            var influence = map[index_inside_biome_map];
+            if (influence == 0) return;
+            output.Add(new(biome_index, ByteToFloat(influence)));
         }
     }
     public float CalculateUvMargin(int width_height)
@@ -284,6 +285,7 @@ public partial class BiomeGenerator : Node
         this.biomes = biomes;
 
         int grid_cells_per_axis = Mathf.CeilToInt(width_height / (float)grid_size);
+        // * 2 because the margin is on each side
         int points_per_axis = grid_cells_per_axis * biome_map_resolution + margin_points * 2;
 
         float point_size = width_height / (float)(grid_cells_per_axis * biome_map_resolution);
@@ -298,11 +300,9 @@ public partial class BiomeGenerator : Node
         int grid_stride = grid_cells_per_axis + grid_margin * 2;
         Grid grid = GenerateGrid(grid_cells_per_axis, base_world_position, grid_stride, grid_margin);
 
-        //+2 for checking cells on the neighbor tiles to ensure smooth transition between them
-        var map_1_data = new byte[points_per_axis * points_per_axis * 4];
-        var map_2_data = new byte[points_per_axis * points_per_axis * 4];
+        byte[][] biome_maps = InitializeBiomeMapArray(points_per_axis);
 
-        float[] backed_gradient = bake_gradient();
+        float[] backed_gradient = BakeGradient();
 
         // alloc heap once
         List<CellDataCombo> cells = new(9);
@@ -325,23 +325,35 @@ public partial class BiomeGenerator : Node
 
                 int base_index = (x + margin_points + (y + margin_points) * points_per_axis) * 4;
 
-
                 foreach (CellDataCombo cell in cells)
                 {
-                    // using big ass switch statement would be faster, especially when using more than 2 textures but this is cleaner, so choose your poison.
-                    var map = cell.cell.biome.type_index / 4 == 0 ? map_1_data : map_2_data;
-                    int index = cell.cell.biome.type_index % 4;
+                    var map_index = cell.cell.biome.type_index / 4;
+                    int color_channel_index = cell.cell.biome.type_index % 4;
                     // So that the Byte doesn't overflow
-                    map[base_index + index] = FloatToByte(Math.Clamp(ByteToFloat(map[base_index + index]) + cell.influence, 0, 1));
+                    byte clamped_value = FloatToByte(Math.Clamp(ByteToFloat(biome_maps[map_index][base_index + color_channel_index]) + cell.influence, 0, 1));
+                    biome_maps[map_index][base_index + color_channel_index] = clamped_value;
                 }
-
             }
         }
 
-        return new(points_per_axis, map_1_data, map_2_data);
+        return new(points_per_axis, biome_maps);
     }
 
-    private float[] bake_gradient()
+    private static byte[][] InitializeBiomeMapArray(int points_per_axis)
+    {
+        var biome_maps = new byte[data_maps_count][];
+
+        int mapSize = points_per_axis * points_per_axis * color_channels;
+
+        for (int i = 0; i < data_maps_count; i++)
+        {
+            biome_maps[i] = new byte[mapSize];
+        }
+
+        return biome_maps;
+    }
+
+    private float[] BakeGradient()
     {
         var backed_gradient = new float[256];
         for (int i = 0; i < 256; i++)

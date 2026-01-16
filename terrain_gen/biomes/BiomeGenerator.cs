@@ -1,21 +1,19 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Godot;
 [Tool]
 public partial class BiomeGenerator : Node
 {
 
-    [Export] int seed;
-    [Export] int grid_size;
+    [Export] int seed_base;
+    [Export] int grid_cell_size;
     [Export] int biome_map_resolution;
     [Export] int margin_points;
     [Export] float max_overlap_distance;
     [Export] Gradient overlap_gradient;
     [Export] bool run;
-    [Export] float biome_spawn_point_exclusion_distance;
 
-    [Export] Biome[] biomes;
+    Biome[] biomes;
 
     private const int data_maps_count = 2;
     private const int color_channels = 4; // rgba
@@ -63,7 +61,7 @@ public partial class BiomeGenerator : Node
         return v / 255f;
     }
 
-    class CellDataCombo : IComparable<CellDataCombo>
+    class CellDataCombo
     {
         public GridCell cell;
         public float distance;
@@ -76,33 +74,27 @@ public partial class BiomeGenerator : Node
             this.influence = influence;
         }
 
-        public int CompareTo(CellDataCombo other)
-        {
-            return distance.CompareTo(other.distance);
-        }
     }
-    private Grid GenerateGrid(int grid_cells_per_axis, Vector2 base_world_position, int grid_stride, int grid_margin)
+    private Grid GenerateGrid(Vector2 base_world_position, int cells_per_axis_with_margin, int grid_margin)
     {
-        var cells = new GridCell[grid_stride * grid_stride];
+        var cells = new GridCell[cells_per_axis_with_margin * cells_per_axis_with_margin];
 
-        // + 2 to generate position outside of this chunk of terrain, on the: left, right, up, down. This is needed to ensure consistency between chunks.
-        for (int x = 0; x < grid_stride; x++)
+        for (int x = 0; x < cells_per_axis_with_margin; x++)
         {
-            for (int y = 0; y < grid_stride; y++)
+            for (int y = 0; y < cells_per_axis_with_margin; y++)
             {
-                // - 2 because of the buffer
-                float world_x = base_world_position.X + (x - grid_margin) * grid_size;
-                float world_y = base_world_position.Y + (y - grid_margin) * grid_size;
-                ulong s =
-    (ulong)seed ^
+                float world_x = base_world_position.X + (x - grid_margin) * grid_cell_size;
+                float world_y = base_world_position.Y + (y - grid_margin) * grid_cell_size;
+                ulong seed =
+    (ulong)seed_base ^
     (ulong)Mathf.FloorToInt(world_x) * 73856093UL ^
     (ulong)Mathf.FloorToInt(world_y) * 19349663UL;
 
-                GD.Seed(s);
+                GD.Seed(seed);
 
-                float x_offset = GD.Randf() * (grid_size * 0.5f - biome_spawn_point_exclusion_distance);
-                float y_offset = GD.Randf() * (grid_size * 0.5f - biome_spawn_point_exclusion_distance);
-                int grid_index = x + y * (grid_stride);
+                float x_offset = GD.Randf() * (grid_cell_size * 0.5f);
+                float y_offset = GD.Randf() * (grid_cell_size * 0.5f);
+                int grid_index = x + y * cells_per_axis_with_margin;
                 Vector2 final_pos = new(world_x + x_offset, world_y + y_offset);
 
 
@@ -111,7 +103,7 @@ public partial class BiomeGenerator : Node
             }
         }
 
-        Grid grid = new(cells, grid_stride, grid_margin);
+        Grid grid = new(cells, cells_per_axis_with_margin, grid_margin);
 
         return grid;
     }
@@ -138,7 +130,7 @@ public partial class BiomeGenerator : Node
 
 
 
-    private void CalculateInfluencesForCeils(
+    private void CalculateInfluencesForCells(
         List<CellDataCombo> neighbors,
         CellDataCombo main, Vector2 world_position,
         float[] bakedGradient)
@@ -168,19 +160,13 @@ public partial class BiomeGenerator : Node
 
         var neighbor = neighbors[cell_index_in_list];
 
-        if (neighbor.cell.biome.type_index == main.cell.biome.type_index)
+        if (neighbor.cell.biome.index_in_biomes_array == main.cell.biome.index_in_biomes_array)
         {
-            // if (main.influence != 1)
-            // {
-            //     // IDK. if this is good or not I:
-            //     // float influ = CalculateInfluence(main, bakedGradient, neighbor);
-            //     // main.influence = Mathf.Clamp(main.influence + influ, 0, 1);
-            // }
             neighbors.RemoveAt(cell_index_in_list);
             return;
         }
 
-        if (neighbor.cell.biome.type_index > main.cell.biome.type_index) { return; }
+        if (neighbor.cell.biome.index_in_biomes_array > main.cell.biome.index_in_biomes_array) { return; }
 
         float influence = CalculateInfluence(main, bakedGradient, neighbor);
 
@@ -202,7 +188,7 @@ public partial class BiomeGenerator : Node
         if (delta >= max_overlap_distance)
             return 0;
 
-        float overlap_percentage = delta / max_overlap_distance; // 0 at boundary
+        float overlap_percentage = delta / max_overlap_distance;
 
         return bakedGradient[FloatToByte(overlap_percentage)];
 
@@ -221,10 +207,10 @@ public partial class BiomeGenerator : Node
             this.biome_maps = biome_maps_array;
         }
 
-        public ImageTexture GetTexture(int width_height, int map_index)
+        public ImageTexture GetTexture(int map_index)
         {
             var data = biome_maps[map_index];
-            var image = Image.CreateFromData(width_height, width_height, false, Image.Format.Rgba8, data);
+            var image = Image.CreateFromData(map_resolution, map_resolution, false, Image.Format.Rgba8, data);
             return ImageTexture.CreateFromImage(image);
         }
         public List<BiomeInfluenceOutput> SampleBiomeDataForMesh(Vector2 UV)
@@ -269,7 +255,7 @@ public partial class BiomeGenerator : Node
     }
     public float CalculateUvMargin(int width_height)
     {
-        int grid_cells_per_axis = Mathf.CeilToInt(width_height / (float)grid_size);
+        int grid_cells_per_axis = Mathf.CeilToInt(width_height / (float)grid_cell_size);
         int points_per_axis = grid_cells_per_axis * biome_map_resolution + margin_points * 2;
 
         float point_size = width_height / (float)(grid_cells_per_axis * biome_map_resolution);
@@ -284,25 +270,25 @@ public partial class BiomeGenerator : Node
     {
         this.biomes = biomes;
 
-        int grid_cells_per_axis = Mathf.CeilToInt(width_height / (float)grid_size);
+        int grid_cells_per_axis = Mathf.CeilToInt(width_height / (float)grid_cell_size);
         // * 2 because the margin is on each side
         int points_per_axis = grid_cells_per_axis * biome_map_resolution + margin_points * 2;
 
         float point_size = width_height / (float)(grid_cells_per_axis * biome_map_resolution);
 
         // Chosen empirically, this works the best with my use case, but Idk. why I:
-        const int filter_padding = -1;
+        const int filter_padding = -2;
         int effective_margin_points = margin_points + filter_padding;
         float uv_margin = effective_margin_points / (float)points_per_axis;
 
-        int grid_margin = 1 + Mathf.CeilToInt(margin_points * point_size / grid_size);
+        int grid_margin = 1 + Mathf.CeilToInt(margin_points * point_size / grid_cell_size);
         // * 2 because the margin is on each side
-        int grid_stride = grid_cells_per_axis + grid_margin * 2;
-        Grid grid = GenerateGrid(grid_cells_per_axis, base_world_position, grid_stride, grid_margin);
+        int grid_cells_with_margin = grid_cells_per_axis + grid_margin * 2;
+        Grid grid = GenerateGrid(base_world_position, grid_cells_with_margin, grid_margin);
 
         byte[][] biome_maps = InitializeBiomeMapArray(points_per_axis);
 
-        float[] backed_gradient = BakeGradient();
+        float[] baked_gradient = BakeGradient();
 
         // alloc heap once
         List<CellDataCombo> cells = new(9);
@@ -315,11 +301,11 @@ public partial class BiomeGenerator : Node
                 Vector2 world_pos = new Vector2(x, y) * point_size + base_world_position;
                 Vector2I grid_pos = new(x / biome_map_resolution, y / biome_map_resolution);
                 GetCellsToCheck(grid_pos, world_pos, grid, cells);
-                cells.Sort();
 
-                var main_cell = cells[0]; cells.RemoveAt(0);
+                var main_cell = GetClosestCell(cells);
+                cells.Remove(main_cell);
 
-                CalculateInfluencesForCeils(cells, main_cell, world_pos, backed_gradient);
+                CalculateInfluencesForCells(cells, main_cell, world_pos, baked_gradient);
 
                 cells.Add(main_cell);
 
@@ -327,8 +313,8 @@ public partial class BiomeGenerator : Node
 
                 foreach (CellDataCombo cell in cells)
                 {
-                    var map_index = cell.cell.biome.type_index / 4;
-                    int color_channel_index = cell.cell.biome.type_index % 4;
+                    var map_index = cell.cell.biome.index_in_biomes_array / 4;
+                    int color_channel_index = cell.cell.biome.index_in_biomes_array % 4;
                     // So that the Byte doesn't overflow
                     byte clamped_value = FloatToByte(Math.Clamp(ByteToFloat(biome_maps[map_index][base_index + color_channel_index]) + cell.influence, 0, 1));
                     biome_maps[map_index][base_index + color_channel_index] = clamped_value;
@@ -353,14 +339,34 @@ public partial class BiomeGenerator : Node
         return biome_maps;
     }
 
-    private float[] BakeGradient()
+
+    CellDataCombo GetClosestCell(IEnumerable<CellDataCombo> cells)
     {
-        var backed_gradient = new float[256];
-        for (int i = 0; i < 256; i++)
+        CellDataCombo closest = null;
+        float minDistance = float.MaxValue;
+
+        foreach (var cell in cells)
         {
-            backed_gradient[i] = overlap_gradient.Sample(i / 255f).R;
+            if (cell == null)
+                continue;
+
+            if (cell.distance < minDistance)
+            {
+                minDistance = cell.distance;
+                closest = cell;
+            }
         }
 
-        return backed_gradient;
+        return closest;
+    }
+    private float[] BakeGradient()
+    {
+        var baked_gradient = new float[256];
+        for (int i = 0; i < 256; i++)
+        {
+            baked_gradient[i] = overlap_gradient.Sample(i / 255f).R;
+        }
+
+        return baked_gradient;
     }
 }

@@ -50,7 +50,6 @@ metadata/_custom_type_script = "uid://bqpjjupyok60s"
 [sub_resource type="Resource" id="Resource_wlxy5"]
 script = ExtResource("4_r3fl7")
 terrain_mesh_noise = SubResource("Resource_wc5p8")
-type_index = 1
 albedo = ExtResource("7_lggff")
 normal = ExtResource("8_s0gvp")
 roughness = ExtResource("9_vxd74")
@@ -72,7 +71,6 @@ metadata/_custom_type_script = "uid://celpohofq3bgf"
 [sub_resource type="Resource" id="Resource_tereu"]
 script = ExtResource("4_r3fl7")
 terrain_mesh_noise = SubResource("Resource_wc5p8")
-type_index = 2
 albedo = ExtResource("10_dhlwf")
 normal = ExtResource("11_5t8nk")
 roughness = ExtResource("12_j3e5s")
@@ -82,16 +80,21 @@ conditions = [SubResource("Resource_lggff")]
 metadata/_custom_type_script = "uid://bqpjjupyok60s"
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_jbprs"]
-frequency = 0.0028
+frequency = 0.0438
 fractal_octaves = 3
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_id0nj"]
+width = 1000
+height = 1000
 noise = SubResource("FastNoiseLite_jbprs")
 seamless = true
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_lfpj5"]
+frequency = 0.2125
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_1q667"]
+width = 1000
+height = 1000
 noise = SubResource("FastNoiseLite_lfpj5")
 seamless = true
 
@@ -112,42 +115,44 @@ seamless_blend_skirt = 0.451
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.69700396, 0.3482852, 0.62680405, 0.55750585, -0.28653324, 0.7791574, 0.45096907, 0.8925226, 0.005543679, 0, 0, 1.0228882)
-light_energy = 1.181
-light_indirect_energy = 5.456
+light_energy = 0.251
+light_indirect_energy = 5.611
 light_volumetric_fog_energy = 0.0
-light_specular = 1.105
+light_specular = 0.782
 shadow_enabled = true
-shadow_blur = 0.575
-directional_shadow_split_1 = 0.315
-directional_shadow_split_2 = 0.23
-directional_shadow_split_3 = 0.31
-directional_shadow_fade_start = 0.68
-directional_shadow_pancake_size = 20.7
+shadow_bias = 10.0
+shadow_normal_bias = 10.0
+shadow_transmittance_bias = 0.635
+shadow_blur = 5.61
+directional_shadow_split_1 = 0.476
+directional_shadow_split_2 = 0.86
+directional_shadow_split_3 = 0.627
+directional_shadow_fade_start = 0.83
+directional_shadow_max_distance = 56.5
+directional_shadow_pancake_size = 28.1
 
 [node name="biome gen" type="Node3D" parent="."]
 script = ExtResource("1_4arys")
-seed = 7219
-grid_size = 20
+grid_cell_size = 40
 biome_map_resolution = 40
-margin_points = 20
+margin_points = 25
 max_overlap_distance = 10.0
 overlap_gradient = SubResource("Gradient_6iypd")
 run = true
-biomes = [SubResource("Resource_cdqbm"), SubResource("Resource_wlxy5"), SubResource("Resource_tereu")]
 
 [node name="terrain_gen" type="Node3D" parent="." node_paths=PackedStringArray("biome_generator")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 200, 0)
 script = ExtResource("4_jka67")
 chunk_prefab = ExtResource("3_r3fl7")
 biome_generator = NodePath("../biome gen")
-chunk_size = 40
+chunk_size = 80
 biomes = [SubResource("Resource_cdqbm"), SubResource("Resource_wlxy5"), SubResource("Resource_tereu")]
-view_distance = 2
+view_distance = 4
 ground_mesh_resolution = 1
-uv_noise_frequency_1 = 0.07
+uv_noise_frequency_1 = 0.001
 uv_noise_strength_1 = Vector2(0.12, 0.1)
 uv_noise_texture_1 = SubResource("NoiseTexture2D_id0nj")
-uv_noise_frequency_2 = 0.175
+uv_noise_frequency_2 = 0.001
 uv_noise_strength_2 = Vector2(0.1, 0.07)
 uv_noise_texture_2 = SubResource("NoiseTexture2D_1q667")
 rock_texture = ExtResource("15_nu31w")
@@ -159,6 +164,5 @@ global_saturation = 0.045
 global_brightness = 0.13
 other_noise = SubResource("NoiseTexture2D_tuemg")
 metallic = 0.015
-other_noise_scale = 0.02
 spectacular = 0.61
 ground_shader_material = ExtResource("6_i5arm")

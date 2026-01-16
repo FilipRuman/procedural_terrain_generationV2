@@ -6,8 +6,10 @@ struct NormalAlbedoRoughness{
 	vec3 roughness;
 };
 
-// Implementing this shit myself seems like a torture, but thankfully there is a really nice implementation for Godot!
-// https://github.com/acegiak/Godot4TerrainShader/blob/main/addons/terrain-shader/StochasticTexture.gdshaderh
+
+//  Under the appache license https://github.com/acegiak/Godot4TerrainShader/tree/main?tab=Apache-2.0-1-ov-file#readme
+// Taken from the https://github.com/acegiak/Godot4TerrainShader/blob/main/addons/terrain-shader/StochasticTexture.gdshader.
+// Modified so that it works with multiple textures. '-'
 vec2 hash( vec2 p )
 {
 	return fract( sin( p * mat2( vec2( 127.1, 311.7 ), vec2( 269.5, 183.3 ) ) ) * 43758.5453 );
@@ -47,9 +49,10 @@ NormalAlbedoRoughness triple_stochastic_sample(sampler2D normal_texture,sampler2
 	return NormalAlbedoRoughness(normal.xyz,albedo.xyz,roughness.xyz);
 
 }
+// Rest is written by me, *FR*.
+
 
 const int BIOMES_COUNT = 8;
-const int chunk_data_maps_count = 100;
 
 uniform float global_brightness;
 uniform float global_saturation;
@@ -68,7 +71,9 @@ uniform sampler2D uv_noise_texture_2;
 uniform float uv_noise_frequency_2;
 uniform vec2 uv_noise_strength_2;
 
+const int chunk_data_maps_count = 100;
 instance uniform int chunk_data_map_index;
+// repeat is disabled, so that the data from one end of the chunk doesn't influence data form the other end of the chunk
 uniform sampler2D[chunk_data_maps_count] map_1:repeat_disable;
 uniform sampler2D[chunk_data_maps_count] map_2:repeat_disable;
 

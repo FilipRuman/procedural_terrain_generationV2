@@ -27,12 +27,10 @@ public partial class GroundMeshGen : MeshInstance3D
 
 
         GenerateVertexes(st, biomes, biome_data, base_world_position, resolution, uv_margin);
-
         GenerateIndexes(st);
 
         st.GenerateNormals();
         st.GenerateTangents();
-
 
         return st.Commit();
     }

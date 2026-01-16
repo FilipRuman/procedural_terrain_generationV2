@@ -1,0 +1,185 @@
+using System.Collections.Generic;
+using System.Linq;
+using Godot;
+
+[Tool]
+public partial class TerrainGen : Node3D
+{
+
+
+    [Export] int chunk_size;
+    [Export] PackedScene chunk_prefab;
+
+    [Export]
+    int ground_mesh_resolution;
+
+    [Export] bool run;
+
+    [Export] Vector2 base_chunk_position;
+    [Export] int view_distance;
+    [Export] BiomeGenerator biome_generator;
+    [ExportCategory("ground shader settings")]
+    [ExportGroup("uv noise 1")]
+    [Export] float uv_noise_frequency_1;
+    [Export] Vector2 uv_noise_strength_1;
+    [Export] Texture uv_noise_texture_1;
+
+    [ExportGroup("uv noise 2")]
+    [Export] float uv_noise_frequency_2;
+    [Export] Vector2 uv_noise_strength_2;
+    [Export] Texture uv_noise_texture_2;
+
+    [ExportGroup("rock")]
+    [Export] Texture rock_texture;
+    [Export] Texture rock_normal_map;
+    [Export] Texture rock_roughness;
+    [Export] float rock_scale;
+    [Export] float rock_saturation;
+
+
+    [ExportGroup("additional processing")]
+    [Export] float global_saturation;
+    [Export] float global_brightness;
+
+    [ExportSubgroup("other noise stats")]
+    [Export] Texture other_noise;
+    [Export] float metallic;
+    [Export] float other_noise_scale;
+    [Export] float spectacular;
+
+    public override void _Process(double delta)
+    {
+        if (run)
+        {
+            run = false;
+            Run();
+        }
+    }
+
+
+
+    private void ClearAllChildren()
+    {
+        foreach (var item in GetChildren())
+        {
+            item.QueueFree();
+        }
+    }
+
+    private void Run()
+    {
+        free_data_maps = new(Enumerable.Range(0, max_chunk_data_textures_count));
+        ClearAllChildren();
+        GenerateAll();
+    }
+
+
+    private static List<Vector2> GetAllChunksPositionsInsideACircleRelative(int radius, int chunk_size)
+    {
+        List<Vector2> output = new();
+
+        // could be pre-calculated once
+
+        for (int x = -radius; x <= radius; x++)
+        {
+            for (int y = -radius; y <= radius; y++)
+            {
+                if (x * x + y * y >= radius * radius)
+                    continue;
+
+                output.Add(new(x * chunk_size, y * chunk_size));
+            }
+        }
+
+        return output;
+    }
+
+    const int max_chunk_data_textures_count = 100;
+    [Export] Biome[] biomes;
+    Queue<int> free_data_maps = new(Enumerable.Range(0, max_chunk_data_textures_count));
+    ImageTexture[] map_1 = new ImageTexture[max_chunk_data_textures_count];
+    ImageTexture[] map_2 = new ImageTexture[max_chunk_data_textures_count];
+    [Export] ShaderMaterial ground_shader_material;
+    private void GenerateAll()
+    {
+
+
+        var biome_albedo_textures = new Texture[biomes.Length];
+        var biome_normal_textures = new Texture[biomes.Length];
+        var biome_roughness_textures = new Texture[biomes.Length];
+        var texture_tint = new Vector3[biomes.Length];
+        var texture_saturation = new float[biomes.Length];
+        var texture_scale = new float[biomes.Length];
+        int i = 0;
+        foreach (var biome in biomes)
+        {
+            biome.index_in_biomes_array = (byte)i;
+            biome_albedo_textures[i] = biome.albedo;
+            biome_normal_textures[i] = biome.normal;
+            biome_roughness_textures[i] = biome.roughness;
+            texture_tint[i] = new(biome.tint.R, biome.tint.G, biome.tint.B);
+            texture_saturation[i] = biome.saturation;
+            texture_scale[i] = biome.scale;
+            i++;
+        }
+
+        List<Vector2> chunk_relative_positions = GetAllChunksPositionsInsideACircleRelative(view_distance, chunk_size);
+        float uv_margin = biome_generator.CalculateUvMargin(chunk_size);
+
+        GD.Print($"chunk_size {chunk_size}, ground_mesh_resolution{ground_mesh_resolution}");
+        foreach (Vector2 chunk_relative_pos in chunk_relative_positions)
+        {
+            Vector2 chunk_world_position = chunk_relative_pos + base_chunk_position;
+            var biome_data = biome_generator.GenerateMaps(new(chunk_world_position.X, chunk_world_position.Y), chunk_size, biomes);
+
+            var chunk = (Chunk)chunk_prefab.Instantiate();
+            AddChild(chunk);
+
+            var mesh_gen = chunk.mesh_gen;
+            mesh_gen.Run(chunk_size, chunk_world_position, ground_mesh_resolution);
+
+            int map_index = free_data_maps.Dequeue();
+            map_1[map_index] = biome_data.GetTexture(0);
+            map_2[map_index] = biome_data.GetTexture(1);
+            mesh_gen.SetInstanceShaderParameter("chunk_data_map_index", map_index);
+
+        }
+
+
+        ground_shader_material.SetShaderParameter("uv_noise_texture_1", uv_noise_texture_1);
+        ground_shader_material.SetShaderParameter("uv_noise_frequency_1", uv_noise_frequency_1);
+        ground_shader_material.SetShaderParameter("uv_noise_strength_1", uv_noise_strength_1);
+
+        ground_shader_material.SetShaderParameter("uv_noise_texture_2", uv_noise_texture_2);
+        ground_shader_material.SetShaderParameter("uv_noise_frequency_2", uv_noise_frequency_2);
+        ground_shader_material.SetShaderParameter("uv_noise_strength_2", uv_noise_strength_2);
+
+        ground_shader_material.SetShaderParameter("rock_saturation", rock_saturation);
+        ground_shader_material.SetShaderParameter("rock_scale", rock_scale);
+        ground_shader_material.SetShaderParameter("rock_normal_map", rock_normal_map);
+        ground_shader_material.SetShaderParameter("rock_roughness", rock_roughness);
+        ground_shader_material.SetShaderParameter("rock_texture", rock_texture);
+
+        ground_shader_material.SetShaderParameter("metallic", metallic);
+        ground_shader_material.SetShaderParameter("spectacular", spectacular);
+        ground_shader_material.SetShaderParameter("other_noise_scale", other_noise_scale);
+
+        ground_shader_material.SetShaderParameter("texture_tint", texture_tint);
+        ground_shader_material.SetShaderParameter("texture_saturation", texture_saturation);
+        ground_shader_material.SetShaderParameter("texture_scale", texture_scale);
+
+        ground_shader_material.SetShaderParameter("biome_albedo_textures", biome_albedo_textures);
+        ground_shader_material.SetShaderParameter("biome_roughness_textures", biome_roughness_textures);
+        ground_shader_material.SetShaderParameter("biome_normal_textures", biome_normal_textures);
+
+        ground_shader_material.SetShaderParameter("other_noise", other_noise);
+
+        ground_shader_material.SetShaderParameter("global_brightness", global_brightness);
+        ground_shader_material.SetShaderParameter("global_saturation", global_saturation);
+
+        ground_shader_material.SetShaderParameter("uv_margin", uv_margin);
+
+        ground_shader_material.SetShaderParameter("map_1", map_1);
+        ground_shader_material.SetShaderParameter("map_2", map_2);
+    }
+}

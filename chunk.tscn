@@ -1,0 +1,29 @@
+[gd_scene load_steps=8 format=3 uid="uid://cyd3pre5ogvxj"]
+
+[ext_resource type="Script" uid="uid://x6eibycx14db" path="res://TerrainGeneration/Chunk.cs" id="1_a0kup"]
+[ext_resource type="Script" uid="uid://dbjfdonxv56aj" path="res://TerrainGeneration/GroundMeshGen.cs" id="2_7yqgf"]
+[ext_resource type="Material" uid="uid://dewu2jeakidc2" path="res://ground_material.tres" id="2_381vs"]
+[ext_resource type="Script" uid="uid://b6rfv7qd6bbo2" path="res://ground_gen/NoiseComponent.cs" id="3_381vs"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_eoxb4"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_wlxy5"]
+frequency = 0.0035
+
+[sub_resource type="Resource" id="Resource_tcnuu"]
+script = ExtResource("3_381vs")
+noise = SubResource("FastNoiseLite_wlxy5")
+amplitude = 10.0
+metadata/_custom_type_script = "uid://b6rfv7qd6bbo2"
+
+[node name="Chunk" type="Node3D" node_paths=PackedStringArray("mesh_gen")]
+script = ExtResource("1_a0kup")
+mesh_gen = NodePath("ground")
+
+[node name="ground" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.075717926, -0.10015869, 0.14622498)
+mesh = SubResource("BoxMesh_eoxb4")
+skeleton = NodePath("../..")
+surface_material_override/0 = ExtResource("2_381vs")
+script = ExtResource("2_7yqgf")
+noise_component = SubResource("Resource_tcnuu")

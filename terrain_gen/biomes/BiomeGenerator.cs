@@ -5,6 +5,7 @@ using Godot;
 public partial class BiomeGenerator : Node
 {
 
+
     [Export] int seed_base;
     [Export] int grid_cell_size;
     [Export] int biome_map_resolution;
@@ -12,6 +13,11 @@ public partial class BiomeGenerator : Node
     [Export] float max_overlap_distance;
     [Export] Gradient overlap_gradient;
     [Export] bool run;
+
+    [Export] FastNoiseLite x_noise;
+    [Export] FastNoiseLite y_noise;
+    [Export] Vector2 noise_amplitude;
+    [Export] float override_uv_margin;
 
     Biome[] biomes;
 
@@ -255,13 +261,14 @@ public partial class BiomeGenerator : Node
     }
     public float CalculateUvMargin(int width_height)
     {
+        if (override_uv_margin >= 0) return override_uv_margin;
         int grid_cells_per_axis = Mathf.CeilToInt(width_height / (float)grid_cell_size);
         int points_per_axis = grid_cells_per_axis * biome_map_resolution + margin_points * 2;
 
         float point_size = width_height / (float)(grid_cells_per_axis * biome_map_resolution);
 
         // Chosen empirically, this works the best with my use case, but Idk. why I:
-        const int filter_padding = -1;
+        const int filter_padding = 0;
         int effective_margin_points = margin_points + filter_padding;
         return effective_margin_points / (float)points_per_axis;
 
@@ -299,13 +306,14 @@ public partial class BiomeGenerator : Node
                 cells.Clear();
 
                 Vector2 world_pos = new Vector2(x, y) * point_size + base_world_position;
+                Vector2 noisy_world_pos = world_pos + GetNoise(world_pos);
                 Vector2I grid_pos = new(x / biome_map_resolution, y / biome_map_resolution);
-                GetCellsToCheck(grid_pos, world_pos, grid, cells);
+                GetCellsToCheck(grid_pos, noisy_world_pos, grid, cells);
 
                 var main_cell = GetClosestCell(cells);
                 cells.Remove(main_cell);
 
-                CalculateInfluencesForCells(cells, main_cell, world_pos, baked_gradient);
+                CalculateInfluencesForCells(cells, main_cell, noisy_world_pos, baked_gradient);
 
                 cells.Add(main_cell);
 
@@ -324,7 +332,10 @@ public partial class BiomeGenerator : Node
 
         return new(points_per_axis, biome_maps);
     }
-
+    private Vector2 GetNoise(Vector2 pos)
+    {
+        return new Vector2(x_noise.GetNoise2Dv(pos), y_noise.GetNoise2Dv(pos)) * noise_amplitude;
+    }
     private static byte[][] InitializeBiomeMapArray(int points_per_axis)
     {
         var biome_maps = new byte[data_maps_count][];

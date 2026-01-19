@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=38 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://ie6lidlhojfd" path="res://terrain_gen/biomes/BiomeGenerator.cs" id="1_4arys"]
 [ext_resource type="Texture2D" uid="uid://070x5fvdh5e7" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_BaseColor.jpg" id="2_i0g27"]
@@ -25,6 +25,14 @@ interpolation_mode = 2
 interpolation_color_space = 2
 offsets = PackedFloat32Array(0, 0.9798658)
 colors = PackedColorArray(0.90134203, 0.90134215, 0.901342, 1, 0, 0, 0, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ealrb"]
+frequency = 0.004
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_jsnrv"]
+seed = 2515
+frequency = 0.004
+fractal_octaves = 4
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_i5arm"]
 frequency = 0.0169
@@ -80,7 +88,7 @@ conditions = [SubResource("Resource_lggff")]
 metadata/_custom_type_script = "uid://bqpjjupyok60s"
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_jbprs"]
-frequency = 0.0438
+frequency = 0.0331
 fractal_octaves = 3
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_id0nj"]
@@ -89,6 +97,8 @@ height = 1000
 noise = SubResource("FastNoiseLite_jbprs")
 seamless = true
 
+[sub_resource type="Gradient" id="Gradient_ealrb"]
+
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_lfpj5"]
 frequency = 0.2125
 
@@ -96,6 +106,7 @@ frequency = 0.2125
 width = 1000
 height = 1000
 noise = SubResource("FastNoiseLite_lfpj5")
+color_ramp = SubResource("Gradient_ealrb")
 seamless = true
 
 [sub_resource type="Gradient" id="Gradient_vvi4u"]
@@ -133,27 +144,27 @@ directional_shadow_pancake_size = 28.1
 
 [node name="biome gen" type="Node3D" parent="."]
 script = ExtResource("1_4arys")
-grid_cell_size = 40
-biome_map_resolution = 40
-margin_points = 25
-max_overlap_distance = 10.0
+grid_cell_size = 160
+biome_map_resolution = 80
+margin_points = 1
+max_overlap_distance = 70.0
 overlap_gradient = SubResource("Gradient_6iypd")
 run = true
+x_noise = SubResource("FastNoiseLite_ealrb")
+y_noise = SubResource("FastNoiseLite_jsnrv")
+noise_amplitude = Vector2(200, 200)
+override_uv_margin = -1.0
 
 [node name="terrain_gen" type="Node3D" parent="." node_paths=PackedStringArray("biome_generator")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 200, 0)
 script = ExtResource("4_jka67")
 chunk_prefab = ExtResource("3_r3fl7")
 biome_generator = NodePath("../biome gen")
-chunk_size = 80
+chunk_size = 160
 biomes = [SubResource("Resource_cdqbm"), SubResource("Resource_wlxy5"), SubResource("Resource_tereu")]
-view_distance = 4
+view_distance = 3
 ground_mesh_resolution = 1
-uv_noise_frequency_1 = 0.001
-uv_noise_strength_1 = Vector2(0.12, 0.1)
 uv_noise_texture_1 = SubResource("NoiseTexture2D_id0nj")
-uv_noise_frequency_2 = 0.001
-uv_noise_strength_2 = Vector2(0.1, 0.07)
 uv_noise_texture_2 = SubResource("NoiseTexture2D_1q667")
 rock_texture = ExtResource("15_nu31w")
 rock_normal_map = ExtResource("16_obt1j")

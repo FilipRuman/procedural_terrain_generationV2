@@ -63,13 +63,6 @@ uniform sampler2D rock_texture;
 uniform sampler2D rock_normal_map;
 uniform sampler2D rock_roughness;
 
-uniform sampler2D uv_noise_texture_1;
-uniform float uv_noise_frequency_1;
-uniform vec2 uv_noise_strength_1;
-
-uniform sampler2D uv_noise_texture_2;
-uniform float uv_noise_frequency_2;
-uniform vec2 uv_noise_strength_2;
 
 const int chunk_data_maps_count = 100;
 instance uniform int chunk_data_map_index;
@@ -89,7 +82,6 @@ uniform float metallic;
 uniform float spectacular;
 uniform float other_noise_scale;
 
-uniform float uv_margin;
 
 NormalAlbedoRoughness triple_stochastic_triplanar (vec3 position, vec3 worldNormal, vec3 adjusted_normal, float biome_scale,
  sampler2D biome_normal_map, sampler2D biome_texture, sampler2D biome_roughness){
@@ -157,13 +149,9 @@ void fragment(){
 	vec3 world_normal = normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	vec3 adjusted_normal = pow(abs(world_normal), vec3(8.0));
 
- 	vec2 uv_with_margin_included = vec2(uv_margin, uv_margin) + UV * (1.0 - 2.0 * uv_margin);
-	vec2 uv_noise_1 = texture(uv_noise_texture_1, world_pos.xz * uv_noise_frequency_1).r * uv_noise_strength_1;
-	vec2 uv_noise_2 = texture(uv_noise_texture_2, world_pos.xz * uv_noise_frequency_2).r * uv_noise_strength_2;
-	vec2 noisy_uv = uv_with_margin_included + uv_noise_1 + uv_noise_2 ;
 
-	vec4 biome_data_1 = texture(map_1[chunk_data_map_index],noisy_uv);
-	vec4 biome_data_2 = texture(map_2[chunk_data_map_index],noisy_uv);
+	vec4 biome_data_1 = texture(map_1[chunk_data_map_index],UV);
+	vec4 biome_data_2 = texture(map_2[chunk_data_map_index],UV);
 	NormalAlbedoRoughness output = collect_biome_data(biome_data_1, biome_data_2, world_pos, world_normal, adjusted_normal);
 	ALBEDO = output.albedo;
 	NORMAL_MAP = output.normal;

@@ -9,15 +9,12 @@ public partial class BiomeGenerator : Node
     [Export] int seed_base;
     [Export] int grid_cell_size;
     [Export] int biome_map_resolution;
-    [Export] int margin_points;
     [Export] float max_overlap_distance;
     [Export] Gradient overlap_gradient;
     [Export] bool run;
 
-    [Export] FastNoiseLite x_noise;
-    [Export] FastNoiseLite y_noise;
-    [Export] Vector2 noise_amplitude;
-    [Export] float override_uv_margin;
+    [Export] NoiseComponent x_noise;
+    [Export] NoiseComponent y_noise;
 
     Biome[] biomes;
 
@@ -163,7 +160,6 @@ public partial class BiomeGenerator : Node
 
     private void set_neighbor_cell_influence(List<CellDataCombo> neighbors, CellDataCombo main, Vector2 world_pos, float[] bakedGradient, int cell_index_in_list)
     {
-
         var neighbor = neighbors[cell_index_in_list];
 
         if (neighbor.cell.biome.index_in_biomes_array == main.cell.biome.index_in_biomes_array)
@@ -259,39 +255,20 @@ public partial class BiomeGenerator : Node
             output.Add(new(biome_index, ByteToFloat(influence)));
         }
     }
-    public float CalculateUvMargin(int width_height)
-    {
-        if (override_uv_margin >= 0) return override_uv_margin;
-        int grid_cells_per_axis = Mathf.CeilToInt(width_height / (float)grid_cell_size);
-        int points_per_axis = grid_cells_per_axis * biome_map_resolution + margin_points * 2;
-
-        float point_size = width_height / (float)(grid_cells_per_axis * biome_map_resolution);
-
-        // Chosen empirically, this works the best with my use case, but Idk. why I:
-        const int filter_padding = 0;
-        int effective_margin_points = margin_points + filter_padding;
-        return effective_margin_points / (float)points_per_axis;
-
-    }
     public OutputData GenerateMaps(Vector2 base_world_position, int width_height, Biome[] biomes)
     {
         this.biomes = biomes;
 
         int grid_cells_per_axis = Mathf.CeilToInt(width_height / (float)grid_cell_size);
-        // * 2 because the margin is on each side
-        int points_per_axis = grid_cells_per_axis * biome_map_resolution + margin_points * 2;
+        int points_per_axis = grid_cells_per_axis * biome_map_resolution;
 
         float point_size = width_height / (float)(grid_cells_per_axis * biome_map_resolution);
 
-        // Chosen empirically, this works the best with my use case, but Idk. why I:
-        const int filter_padding = -2;
-        int effective_margin_points = margin_points + filter_padding;
-        float uv_margin = effective_margin_points / (float)points_per_axis;
 
-        int grid_margin = 1 + Mathf.CeilToInt(margin_points * point_size / grid_cell_size);
-        // * 2 because the margin is on each side
+        // 1 on each side + noise displacement(grid cells) so that the margin points good looking values 
+        int grid_margin = 1 + Mathf.CeilToInt(Mathf.Max(x_noise.Amplitude, y_noise.Amplitude) / (float)grid_cell_size);
         int grid_cells_with_margin = grid_cells_per_axis + grid_margin * 2;
-        Grid grid = GenerateGrid(base_world_position, grid_cells_with_margin, grid_margin);
+        Grid grid = GenerateGrid(base_world_position, grid_cells_with_margin, grid_margin: grid_margin);
 
         byte[][] biome_maps = InitializeBiomeMapArray(points_per_axis);
 
@@ -299,9 +276,10 @@ public partial class BiomeGenerator : Node
 
         // alloc heap once
         List<CellDataCombo> cells = new(9);
-        for (int x = -margin_points; x < points_per_axis - margin_points; x++)
+
+        for (int x = 0; x < points_per_axis; x++)
         {
-            for (int y = -margin_points; y < points_per_axis - margin_points; y++)
+            for (int y = 0; y < points_per_axis; y++)
             {
                 cells.Clear();
 
@@ -317,7 +295,7 @@ public partial class BiomeGenerator : Node
 
                 cells.Add(main_cell);
 
-                int base_index = (x + margin_points + (y + margin_points) * points_per_axis) * 4;
+                int base_index = (x + y * points_per_axis) * 4;
 
                 foreach (CellDataCombo cell in cells)
                 {
@@ -334,7 +312,7 @@ public partial class BiomeGenerator : Node
     }
     private Vector2 GetNoise(Vector2 pos)
     {
-        return new Vector2(x_noise.GetNoise2Dv(pos), y_noise.GetNoise2Dv(pos)) * noise_amplitude;
+        return new Vector2(x_noise.Sample(pos), y_noise.Sample(pos));
     }
     private static byte[][] InitializeBiomeMapArray(int points_per_axis)
     {

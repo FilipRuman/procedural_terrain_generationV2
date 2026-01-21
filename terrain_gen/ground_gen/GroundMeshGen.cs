@@ -7,26 +7,26 @@ public partial class GroundMeshGen : MeshInstance3D
 
     private int triangle_count_per_dimension;
     private float triangle_size;
-    public void Run(Biome[] biomes, BiomeGenerator.OutputData biome_data, int size, Vector2 base_world_position, int resolution, float uv_margin)
+    public void Run(Biome[] biomes, BiomeGenerator.OutputData biome_data, int size, Vector2 base_world_position, int resolution)
     {
         // needed because otherwise there will be a gap of 1 triangle size
         size += 1;
         triangle_count_per_dimension = size * resolution;
         triangle_size = 1f / resolution;
 
-        var arrayMesh = GenerateTerrainMesh(biomes, biome_data, base_world_position, resolution, uv_margin);
+        var arrayMesh = GenerateTerrainMesh(biomes, biome_data, base_world_position, resolution);
         Mesh = arrayMesh;
 
     }
 
 
-    private ArrayMesh GenerateTerrainMesh(Biome[] biomes, BiomeGenerator.OutputData biome_data, Vector2 base_world_position, int resolution, float uv_margin)
+    private ArrayMesh GenerateTerrainMesh(Biome[] biomes, BiomeGenerator.OutputData biome_data, Vector2 base_world_position, int resolution)
     {
         var st = new SurfaceTool();
         st.Begin(Mesh.PrimitiveType.Triangles);
 
 
-        GenerateVertexes(st, biomes, biome_data, base_world_position, resolution, uv_margin);
+        GenerateVertexes(st, biomes, biome_data, base_world_position, resolution);
         GenerateIndexes(st);
 
         st.GenerateNormals();
@@ -59,20 +59,20 @@ public partial class GroundMeshGen : MeshInstance3D
         return new Vector2(relative_x * triangle_size, relative_z * triangle_size) + base_world_position;
     }
 
-    private float CalculateHeight(Vector2 uv_with_margin_included, Vector2 world_position, Biome[] biomes, BiomeGenerator.OutputData biome_data)
+    private float CalculateHeight(Vector2 uv, Vector2 world_position, Biome[] biomes, BiomeGenerator.OutputData biome_data)
     {
-        List<BiomeGenerator.OutputData.BiomeInfluenceOutput> biome_influences = biome_data.SampleBiomeDataForMesh(uv_with_margin_included);
+        List<BiomeGenerator.OutputData.BiomeInfluenceOutput> biome_influences = biome_data.SampleBiomeDataForMesh(uv);
         var output = 0f;
         foreach (var biome_influence_data in biome_influences)
         {
             var biome = biomes[biome_influence_data.biome_type_index];
             // TODO: Bake gradient
-            output += biome.terrain_mesh_noise.Sample(world_position) * biome_influence_data.influence;
+            // output += biome.terrain_mesh_noise.Sample(world_position) * biome_influence_data.influence;
         }
         return output;
     }
 
-    private void GenerateVertexes(SurfaceTool st, Biome[] biomes, BiomeGenerator.OutputData biome_data, Vector2 base_world_position, int resolution, float uv_margin)
+    private void GenerateVertexes(SurfaceTool st, Biome[] biomes, BiomeGenerator.OutputData biome_data, Vector2 base_world_position, int resolution)
     {
         for (uint relative_x = 0; relative_x < triangle_count_per_dimension; relative_x++)
         {
@@ -84,9 +84,7 @@ public partial class GroundMeshGen : MeshInstance3D
 
 
                 Vector2 world_pos = CalculateVertexWorldPosition(relative_x, relative_z, base_world_position);
-                // needed for smooth transitions between chunks, because margins are added to the biome maps so that the biome map sampling can be modified by noise 
-                var uv_with_margin_included = new Vector2(uv_margin, uv_margin) + uv * (1f - 2f * uv_margin);
-                float height = CalculateHeight(uv_with_margin_included, world_pos, biomes, biome_data);
+                float height = CalculateHeight(uv, world_pos, biomes, biome_data);
 
                 st.AddVertex(new(world_pos.X, height, world_pos.Y));
             }

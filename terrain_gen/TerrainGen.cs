@@ -137,20 +137,18 @@ public partial class TerrainGen : Node3D
 
         List<Vector2> chunk_relative_positions = GetAllChunksPositionsInsideACircleRelative(view_distance, chunk_size);
 
-        float uv_margin = biome_generator.CalculateUvMargin(chunk_size);
         foreach (Vector2 chunk_relative_pos in chunk_relative_positions)
         {
             Vector2 chunk_world_position = chunk_relative_pos + position;
-            var biome_data = biome_generator.GenerateMaps(new(chunk_world_position.X, chunk_world_position.Y), chunk_size, biomes);
+            var biome_data = biome_generator.GenerateMaps(new(chunk_world_position.X, chunk_world_position.Y), chunk_size + 1, biomes);
 
             var chunk = (Chunk)chunk_prefab.Instantiate();
 
             AddChild(chunk);
 
             var mesh_gen = chunk.mesh_gen;
-            mesh_gen.Run(biomes, biome_data, chunk_size, chunk_world_position, ground_mesh_resolution, uv_margin);
+            mesh_gen.Run(biomes, biome_data, chunk_size, chunk_world_position, ground_mesh_resolution);
             int map_index = free_data_maps.Dequeue();
-
             map_1[map_index] = biome_data.GetTexture(0);
             map_2[map_index] = biome_data.GetTexture(1);
             mesh_gen.SetInstanceShaderParameter("chunk_data_map_index", map_index);
@@ -188,7 +186,6 @@ public partial class TerrainGen : Node3D
         ground_shader_material.SetShaderParameter("global_brightness", global_brightness);
         ground_shader_material.SetShaderParameter("global_saturation", global_saturation);
 
-        ground_shader_material.SetShaderParameter("uv_margin", uv_margin);
         ground_shader_material.SetShaderParameter("map_1", map_1);
         ground_shader_material.SetShaderParameter("map_2", map_2);
     }

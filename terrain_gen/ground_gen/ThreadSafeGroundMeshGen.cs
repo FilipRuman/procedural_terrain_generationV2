@@ -23,7 +23,7 @@ public partial class ThreadSafeGroundMeshGen : Node
         arrays[(int)Mesh.ArrayType.Index] = data.indices;
         arrays[(int)Mesh.ArrayType.Normal] = data.normals;
         arrays[(int)Mesh.ArrayType.TexUV] = data.uvs;
-        arrays[(int)Mesh.ArrayType.Tangent] = data.tangents;
+        // arrays[(int)Mesh.ArrayType.Tangent] = data.tangents;
 
 
         var mesh = new ArrayMesh();
@@ -69,7 +69,7 @@ public partial class ThreadSafeGroundMeshGen : Node
         Vector2[] uvs;
         GenerateUvAndVertex(base_world_position, config, out verticesPadded, out vertices, out uvs);
 
-        var normals = GetNormals(config, vertices_padded, paddedWidth);
+        var normals = GetNormals(config, verticesPadded);
         var tangents = GenerateTangents(vertices, normals, uvs, indices);
 
 
@@ -136,24 +136,32 @@ public partial class ThreadSafeGroundMeshGen : Node
 
         return output_height;
     }
-    static Vector3[] GetNormals(Config config, Vector3[] padded, int paddedWidth)
+    static Vector3[] GetNormals(Config config, Vector3[] verticesPadded)
     {
-        int Q = config.triangle_count_per_dimension;
-        var normals = new Vector3[Q * Q];
+        int Q = config.triangle_count_per_dimension;       // main vertex count per dimension
+        int paddedWidth = Q + 2;                           // width of padded vertex array
+        Vector3[] normals = new Vector3[Q * Q];           // output normals for main vertices
 
-        for (int z = 0; z < Q; z++)
+        for (int x = 0; x < Q; x++)
         {
-            for (int x = 0; x < Q; x++)
+            for (int z = 0; z < Q; z++)
             {
-                int p = (x + 1) + (z + 1) * paddedWidth;
+                // padded indices
+                int center = (x + 1) + (z + 1) * paddedWidth;
+                int left = (x + 0) + (z + 1) * paddedWidth;
+                int right = (x + 2) + (z + 1) * paddedWidth;
+                int down = (x + 1) + (z + 0) * paddedWidth;
+                int up = (x + 1) + (z + 2) * paddedWidth;
 
-                float l = padded[p - 1].Y;
-                float r = padded[p + 1].Y;
-                float d = padded[p - paddedWidth].Y;
-                float u = padded[p + paddedWidth].Y;
+                // central difference for normal
+                Vector3 n = new Vector3(
+                    verticesPadded[left].Y - verticesPadded[right].Y,
+                    2.0f,
+                    verticesPadded[down].Y - verticesPadded[up].Y
+                ).Normalized();
 
-                normals[x + z * Q] =
-                    new Vector3(l - r, 2f, d - u).Normalized();
+                // store normal in main vertex array
+                normals[x + z * Q] = n;
             }
         }
 
@@ -251,9 +259,9 @@ public partial class ThreadSafeGroundMeshGen : Node
             {
                 int i = x + z * Q;
 
+                indices[idx++] = i;
                 indices[idx++] = i + 1;
                 indices[idx++] = i + Q;
-                indices[idx++] = i;
 
                 indices[idx++] = i + Q + 1;
                 indices[idx++] = i + Q;

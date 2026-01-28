@@ -275,7 +275,7 @@ metadata/_custom_type_script = "uid://bui0bab8snonk"
 [node name="Node3D" type="Node3D"]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(-0.69700396, 0.3482852, 0.62680405, 0.55750585, -0.28653324, 0.7791574, 0.45096907, 0.8925226, 0.005543679, 0, 0, 1.0228882)
+transform = Transform3D(0.59315026, -0.6308906, -0.50015074, 0.5480949, -0.13860977, 0.82485175, -0.58971643, -0.7633911, 0.26357123, 0, 0, 1.0228882)
 light_energy = 0.251
 light_indirect_energy = 5.611
 light_volumetric_fog_energy = 0.0
@@ -339,5 +339,5 @@ roughness_effect = SubResource("Resource_gx5qu")
 
 [node name="biome gen" type="Node3D" parent="."]
 script = ExtResource("1_4arys")
-biome_map_resolution = 40
+biome_map_resolution = 80
 biome_transitions_smoothness = 0.1

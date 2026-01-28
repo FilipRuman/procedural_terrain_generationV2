@@ -154,7 +154,7 @@ void fragment(){
 	vec4 biome_data_2 = texture(map_2[chunk_data_map_index],UV);
 	NormalAlbedoRoughness output = collect_biome_data(biome_data_1, biome_data_2, world_pos, world_normal, adjusted_normal);
 	ALBEDO = output.albedo;
-	NORMAL_MAP = output.normal;
+	//NORMAL_MAP = output.normal;
 	ROUGHNESS  = output.roughness.r;
 
 

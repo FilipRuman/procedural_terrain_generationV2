@@ -2,22 +2,18 @@ using Godot;
 [Tool, GlobalClass]
 public partial class Biome : Resource
 {
-    [Export] public NoiseComponent terrain_mesh_noise;
     public byte index_in_biomes_array;
+
+    [ExportGroup("Preferred terrain aspects")]
+    [Export] public FloatRange preferred_moisture;
+    [Export] public FloatRange preferred_elevation;
+    [Export] public FloatRange preferred_temperature;
+
+    [ExportGroup("Ground texture")]
     [Export] public Texture albedo;
     [Export] public Texture normal;
     [Export] public Texture roughness;
     [Export(PropertyHint.ColorNoAlpha)] public Color tint;
     [Export] public float saturation;
     [Export] public float scale;
-    [Export] public Resource[] conditions;
-
-
-
-
-    public interface IBiomeGenerationCondition
-    {
-        public void InitialSetup();
-        public bool CheckCondition(BiomeGenerator.GridCell[] neighbors);
-    }
 }

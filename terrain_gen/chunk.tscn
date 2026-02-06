@@ -1,149 +1,21 @@
-[gd_scene load_steps=37 format=3 uid="uid://mujlms5gx604"]
+[gd_scene format=3 uid="uid://mujlms5gx604"]
 
-[ext_resource type="Script" uid="uid://re04wmktwwri" path="res://terrain_gen/Chunk.cs" id="1_y1pun"]
+[ext_resource type="Script" uid="uid://re04wmktwwri" path="res://terrain_gen/Chunk.cs" id="1_52qx0"]
 [ext_resource type="Material" uid="uid://dpud1m5ciourq" path="res://terrain_gen/goundMaterial.tres" id="2_j4kne"]
-[ext_resource type="Script" uid="uid://c0gk086ch2wdh" path="res://terrain_gen/NoisePart.cs" id="4_sgih8"]
-[ext_resource type="Script" uid="uid://6crrxj5mbydy" path="res://terrain_gen/NoiseComponent.cs" id="5_3ge0o"]
-[ext_resource type="Script" uid="uid://bmni8uj46ikxf" path="res://terrain_gen/ObjestsGeneration/ObjectsGenerator.cs" id="6_3ge0o"]
-[ext_resource type="Script" uid="uid://bui0bab8snonk" path="res://terrain_gen/biomes/terrain_aspect/TerrainAspectEffectOnMesh.cs" id="6_gxbo6"]
-[ext_resource type="Script" uid="uid://d42wvv1ein13" path="res://terrain_gen/ground_gen/GroundMeshGen.cs" id="7_gogqm"]
 
-[sub_resource type="BoxMesh" id="BoxMesh_y1pun"]
+[sub_resource type="BoxMesh" id="BoxMesh_j4kne"]
+material = ExtResource("2_j4kne")
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_y1pun"]
+[sub_resource type="HeightMapShape3D" id="HeightMapShape3D_52qx0"]
+map_data = PackedFloat32Array(5.73, 0, 0, 0)
 
-[sub_resource type="Resource" id="Resource_gxbo6"]
-script = ExtResource("4_sgih8")
-noise = SubResource("FastNoiseLite_y1pun")
-amplitude = 50.0
-metadata/_custom_type_script = "uid://c0gk086ch2wdh"
+[node name="chunk" type="StaticBody3D" unique_id=1882061216 node_paths=PackedStringArray("mesh_instance", "collider")]
+script = ExtResource("1_52qx0")
+mesh_instance = NodePath("MeshInstance3D")
+collider = NodePath("CollisionShape3D")
 
-[sub_resource type="Resource" id="Resource_50xq3"]
-script = ExtResource("5_3ge0o")
-noises = [SubResource("Resource_gxbo6")]
-metadata/_custom_type_script = "uid://6crrxj5mbydy"
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=411280401]
+mesh = SubResource("BoxMesh_j4kne")
 
-[sub_resource type="Resource" id="Resource_6t7qw"]
-script = ExtResource("4_sgih8")
-noise = SubResource("FastNoiseLite_y1pun")
-amplitude = 100.0
-frequency = 0.1
-metadata/_custom_type_script = "uid://c0gk086ch2wdh"
-
-[sub_resource type="Resource" id="Resource_0u6gv"]
-script = ExtResource("5_3ge0o")
-noises = [SubResource("Resource_6t7qw")]
-metadata/_custom_type_script = "uid://6crrxj5mbydy"
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_pri30"]
-
-[sub_resource type="Resource" id="Resource_gogqm"]
-script = ExtResource("4_sgih8")
-noise = SubResource("FastNoiseLite_pri30")
-amplitude = 100.0
-frequency = 0.01
-metadata/_custom_type_script = "uid://c0gk086ch2wdh"
-
-[sub_resource type="Resource" id="Resource_f46p6"]
-script = ExtResource("5_3ge0o")
-noises = [SubResource("Resource_gogqm")]
-metadata/_custom_type_script = "uid://6crrxj5mbydy"
-
-[sub_resource type="Curve" id="Curve_50xq3"]
-
-[sub_resource type="Curve" id="Curve_6t7qw"]
-
-[sub_resource type="Curve" id="Curve_0u6gv"]
-
-[sub_resource type="Curve" id="Curve_pri30"]
-
-[sub_resource type="Resource" id="Resource_1tnq5"]
-script = ExtResource("6_gxbo6")
-base_height = SubResource("Curve_50xq3")
-low_freq_noise_amplitude = SubResource("Curve_0u6gv")
-medium_freq_noise_amplitude = SubResource("Curve_pri30")
-high_freq_noise_amplitude = SubResource("Curve_6t7qw")
-metadata/_custom_type_script = "uid://bui0bab8snonk"
-
-[sub_resource type="Curve" id="Curve_07b41"]
-_limits = [0.0, 91.35, 0.0, 1.0]
-_data = [Vector2(0, 0), 0.0, 50.17443, 0, 0, Vector2(1, 91.35), 161.79744, 0.0, 0, 0]
-point_count = 2
-
-[sub_resource type="Curve" id="Curve_nqegd"]
-_data = [Vector2(0, 0), 0.0, 0.17219847, 0, 0]
-point_count = 1
-
-[sub_resource type="Curve" id="Curve_l1gg2"]
-_data = [Vector2(0, 0), 0.0, -0.0010506291, 0, 0]
-point_count = 1
-
-[sub_resource type="Curve" id="Curve_1hlua"]
-_data = [Vector2(0, 0), 0.0, 2.5697296, 0, 0, Vector2(1, 0.32225335), -1.1300509, 0.0, 0, 0]
-point_count = 2
-
-[sub_resource type="Resource" id="Resource_rlj2k"]
-script = ExtResource("6_gxbo6")
-base_height = SubResource("Curve_07b41")
-low_freq_noise_amplitude = SubResource("Curve_l1gg2")
-medium_freq_noise_amplitude = SubResource("Curve_1hlua")
-high_freq_noise_amplitude = SubResource("Curve_nqegd")
-metadata/_custom_type_script = "uid://bui0bab8snonk"
-
-[sub_resource type="Curve" id="Curve_3nhec"]
-
-[sub_resource type="Curve" id="Curve_cjnv1"]
-
-[sub_resource type="Curve" id="Curve_3m2fv"]
-
-[sub_resource type="Curve" id="Curve_l03cc"]
-
-[sub_resource type="Resource" id="Resource_5sv0i"]
-script = ExtResource("6_gxbo6")
-base_height = SubResource("Curve_3nhec")
-low_freq_noise_amplitude = SubResource("Curve_3m2fv")
-medium_freq_noise_amplitude = SubResource("Curve_l03cc")
-high_freq_noise_amplitude = SubResource("Curve_cjnv1")
-metadata/_custom_type_script = "uid://bui0bab8snonk"
-
-[sub_resource type="Curve" id="Curve_pswfb"]
-
-[sub_resource type="Curve" id="Curve_1xavw"]
-_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 0.4541638), 0.0, 0.0, 0, 0]
-point_count = 2
-
-[sub_resource type="Curve" id="Curve_ipdi6"]
-
-[sub_resource type="Curve" id="Curve_xgxgg"]
-
-[sub_resource type="Resource" id="Resource_gx5qu"]
-script = ExtResource("6_gxbo6")
-base_height = SubResource("Curve_pswfb")
-low_freq_noise_amplitude = SubResource("Curve_ipdi6")
-medium_freq_noise_amplitude = SubResource("Curve_xgxgg")
-high_freq_noise_amplitude = SubResource("Curve_1xavw")
-metadata/_custom_type_script = "uid://bui0bab8snonk"
-
-[node name="chunk" type="Node3D" node_paths=PackedStringArray("mesh_instance", "mesh_gen")]
-script = ExtResource("1_y1pun")
-mesh_instance = NodePath("ground")
-mesh_gen = NodePath("ground")
-
-[node name="ground" type="MeshInstance3D" parent="." node_paths=PackedStringArray("objects_generator")]
-mesh = SubResource("BoxMesh_y1pun")
-skeleton = NodePath("../..")
-surface_material_override/0 = ExtResource("2_j4kne")
-script = ExtResource("7_gogqm")
-objects_generator = NodePath("objects generator")
-high_frequency_noise = SubResource("Resource_50xq3")
-medium_frequency_noise = SubResource("Resource_0u6gv")
-low_frequency_noise = SubResource("Resource_f46p6")
-mousture_effect = SubResource("Resource_1tnq5")
-elevation_effect = SubResource("Resource_rlj2k")
-temperature_effect = SubResource("Resource_5sv0i")
-roughness_effect = SubResource("Resource_gx5qu")
-
-[node name="objects generator" type="Node3D" parent="ground"]
-script = ExtResource("6_3ge0o")
-minimal_tree_spacing_sqrt = 60.0
-tree_count = 200
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=258669764]
+shape = SubResource("HeightMapShape3D_52qx0")

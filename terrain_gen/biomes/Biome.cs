@@ -3,6 +3,7 @@ using Godot;
 public partial class Biome : Resource
 {
     public byte index_in_biomes_array;
+    [Export] public BiomeObjectsGenData objects_data;
 
     [ExportGroup("Preferred terrain aspects")]
     [Export] public FloatRange preferred_moisture;
@@ -16,4 +17,6 @@ public partial class Biome : Resource
     [Export(PropertyHint.ColorNoAlpha)] public Color tint;
     [Export] public float saturation;
     [Export] public float scale;
+
+
 }

@@ -1,107 +1,22 @@
-[gd_scene load_steps=75 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://ie6lidlhojfd" path="res://terrain_gen/biomes/BiomeGenerator.cs" id="1_4arys"]
 [ext_resource type="Script" uid="uid://c0gk086ch2wdh" path="res://terrain_gen/NoisePart.cs" id="2_6iypd"]
-[ext_resource type="Texture2D" uid="uid://070x5fvdh5e7" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_BaseColor.jpg" id="2_i0g27"]
-[ext_resource type="Texture2D" uid="uid://bk5ufqeoaqypt" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_Normal.jpg" id="3_ealrb"]
+[ext_resource type="Resource" uid="uid://c7tligpk7bhuq" path="res://biomes/plains.tres" id="3_lggff"]
 [ext_resource type="PackedScene" uid="uid://mujlms5gx604" path="res://terrain_gen/chunk.tscn" id="3_r3fl7"]
 [ext_resource type="Script" uid="uid://6crrxj5mbydy" path="res://terrain_gen/NoiseComponent.cs" id="3_tereu"]
 [ext_resource type="Script" uid="uid://cy771avr8nygp" path="res://terrain_gen/TerrainGen.cs" id="4_jka67"]
-[ext_resource type="Texture2D" uid="uid://c4vgvt145u3xh" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_Roughness.jpg" id="4_jsnrv"]
-[ext_resource type="Script" uid="uid://bqpjjupyok60s" path="res://terrain_gen/biomes/Biome.cs" id="4_r3fl7"]
+[ext_resource type="Resource" uid="uid://do5i57jnsh6sa" path="res://biomes/snow desert.tres" id="4_s0gvp"]
+[ext_resource type="Resource" uid="uid://ciu68hetij58k" path="res://biomes/desert.tres" id="5_tcnuu"]
 [ext_resource type="Material" uid="uid://dpud1m5ciourq" path="res://terrain_gen/goundMaterial.tres" id="6_i5arm"]
-[ext_resource type="Script" uid="uid://dholhd543qnco" path="res://terrain_gen/FloatRange.cs" id="6_lggff"]
-[ext_resource type="Texture2D" uid="uid://rj6a6u47sfua" path="res://ground textures/rippled_sand_xd0mda1_1k/Rippled_Sand_xd0mda1_1K_BaseColor.jpg" id="7_lggff"]
-[ext_resource type="Texture2D" uid="uid://hwx7vg81eeg7" path="res://ground textures/rippled_sand_xd0mda1_1k/Rippled_Sand_xd0mda1_1K_Normal.jpg" id="8_s0gvp"]
-[ext_resource type="Texture2D" uid="uid://oqskrlja41cw" path="res://ground textures/rippled_sand_xd0mda1_1k/Rippled_Sand_xd0mda1_1K_Roughness.jpg" id="9_vxd74"]
-[ext_resource type="Texture2D" uid="uid://b2k6c88vjl8pt" path="res://ground textures/fresh_windswept_snow_ugspafgdy_1k/Fresh_Windswept_Snow_ugspafgdy_1K_BaseColor.jpg" id="10_dhlwf"]
-[ext_resource type="Texture2D" uid="uid://2oh52cjspouj" path="res://ground textures/fresh_windswept_snow_ugspafgdy_1k/Fresh_Windswept_Snow_ugspafgdy_1K_Normal.jpg" id="11_5t8nk"]
-[ext_resource type="Texture2D" uid="uid://sa2rdm3wb2tm" path="res://ground textures/fresh_windswept_snow_ugspafgdy_1k/Fresh_Windswept_Snow_ugspafgdy_1K_Roughness.jpg" id="12_j3e5s"]
 [ext_resource type="Texture2D" uid="uid://datjc43rk68k1" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_BaseColor.jpg" id="15_nu31w"]
 [ext_resource type="Texture2D" uid="uid://qy8avu837ct5" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Normal.jpg" id="16_obt1j"]
+[ext_resource type="Script" uid="uid://djlnrowcinv33" path="res://player/PlayerController.cs" id="16_tuemg"]
 [ext_resource type="Texture2D" uid="uid://cap62wxor08qv" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Roughness.jpg" id="17_2yde8"]
 [ext_resource type="Script" uid="uid://bui0bab8snonk" path="res://terrain_gen/biomes/terrain_aspect/TerrainAspectEffectOnMesh.cs" id="17_s0gvp"]
 [ext_resource type="Script" uid="uid://duqibi8br3aen" path="res://terrain_gen/biomes/terrain_aspect/TerrainAspectsSolver.cs" id="18_jsnrv"]
 [ext_resource type="Script" uid="uid://cr0lgejekovi1" path="res://terrain_gen/ground_gen/ThreadSafeGroundMeshGen.cs" id="21_vxd74"]
-
-[sub_resource type="Resource" id="Resource_dhlwf"]
-script = ExtResource("6_lggff")
-max = 0.6
-metadata/_custom_type_script = "uid://dholhd543qnco"
-
-[sub_resource type="Resource" id="Resource_5t8nk"]
-script = ExtResource("6_lggff")
-min = 0.4
-max = 0.6
-metadata/_custom_type_script = "uid://dholhd543qnco"
-
-[sub_resource type="Resource" id="Resource_cdqbm"]
-script = ExtResource("4_r3fl7")
-preferred_moisture = SubResource("Resource_5t8nk")
-preferred_elevation = SubResource("Resource_dhlwf")
-preferred_temperature = SubResource("Resource_5t8nk")
-albedo = ExtResource("2_i0g27")
-normal = ExtResource("3_ealrb")
-roughness = ExtResource("4_jsnrv")
-saturation = -0.1
-scale = 0.05
-metadata/_custom_type_script = "uid://bqpjjupyok60s"
-
-[sub_resource type="Resource" id="Resource_j3e5s"]
-script = ExtResource("6_lggff")
-min = 0.5
-max = 1.0
-metadata/_custom_type_script = "uid://dholhd543qnco"
-
-[sub_resource type="Resource" id="Resource_nu31w"]
-script = ExtResource("6_lggff")
-max = 1.0
-metadata/_custom_type_script = "uid://dholhd543qnco"
-
-[sub_resource type="Resource" id="Resource_obt1j"]
-script = ExtResource("6_lggff")
-max = 0.5
-metadata/_custom_type_script = "uid://dholhd543qnco"
-
-[sub_resource type="Resource" id="Resource_wlxy5"]
-script = ExtResource("4_r3fl7")
-preferred_moisture = SubResource("Resource_nu31w")
-preferred_elevation = SubResource("Resource_j3e5s")
-preferred_temperature = SubResource("Resource_obt1j")
-albedo = ExtResource("10_dhlwf")
-normal = ExtResource("11_5t8nk")
-roughness = ExtResource("12_j3e5s")
-saturation = -0.1
-scale = 0.05
-metadata/_custom_type_script = "uid://bqpjjupyok60s"
-
-[sub_resource type="Resource" id="Resource_2yde8"]
-script = ExtResource("6_lggff")
-max = 1.0
-metadata/_custom_type_script = "uid://dholhd543qnco"
-
-[sub_resource type="Resource" id="Resource_id0nj"]
-script = ExtResource("6_lggff")
-max = 0.5
-metadata/_custom_type_script = "uid://dholhd543qnco"
-
-[sub_resource type="Resource" id="Resource_1q667"]
-script = ExtResource("6_lggff")
-min = 0.5
-max = 1.0
-metadata/_custom_type_script = "uid://dholhd543qnco"
-
-[sub_resource type="Resource" id="Resource_tereu"]
-script = ExtResource("4_r3fl7")
-preferred_moisture = SubResource("Resource_id0nj")
-preferred_elevation = SubResource("Resource_2yde8")
-preferred_temperature = SubResource("Resource_1q667")
-albedo = ExtResource("7_lggff")
-normal = ExtResource("8_s0gvp")
-roughness = ExtResource("9_vxd74")
-saturation = -0.1
-scale = 0.05
-metadata/_custom_type_script = "uid://bqpjjupyok60s"
+[ext_resource type="Script" uid="uid://bmni8uj46ikxf" path="res://terrain_gen/ObjestsGeneration/ObjectsGenerator.cs" id="24_dhlwf"]
 
 [sub_resource type="Gradient" id="Gradient_vvi4u"]
 colors = PackedColorArray(0.92099476, 0.9209946, 0.9209946, 1, 0.6255971, 0.6255971, 0.6255971, 1)
@@ -272,38 +187,50 @@ medium_freq_noise_amplitude = SubResource("Curve_xgxgg")
 high_freq_noise_amplitude = SubResource("Curve_1xavw")
 metadata/_custom_type_script = "uid://bui0bab8snonk"
 
-[node name="Node3D" type="Node3D"]
+[sub_resource type="Curve" id="Curve_tuemg"]
+_limits = [0.0, 1000.0, 0.0, 1000.0]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(401.1091, 1000), 4.6959925, 0.0, 0, 0]
+point_count = 2
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.59315026, -0.6308906, -0.50015074, 0.5480949, -0.13860977, 0.82485175, -0.58971643, -0.7633911, 0.26357123, 0, 0, 1.0228882)
-light_energy = 0.251
-light_indirect_energy = 5.611
-light_volumetric_fog_energy = 0.0
-light_specular = 0.782
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_tcnuu"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tuemg"]
+
+[node name="Node3D" type="Node3D" unique_id=1029520809]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=717498777]
+transform = Transform3D(-0.4296432, -0.7429186, 0.5133036, 0.15234157, 0.50066185, 0.8521337, -0.8900568, 0.44431055, -0.10192859, 0, 0, 1.0228882)
+light_energy = 1.329
+light_indirect_energy = 6.146
+light_volumetric_fog_energy = 1.161
+light_specular = 0.202
 shadow_enabled = true
-shadow_bias = 10.0
-shadow_normal_bias = 10.0
+shadow_bias = 1.897
+shadow_normal_bias = 4.298
 shadow_transmittance_bias = 0.635
 shadow_blur = 5.61
-directional_shadow_split_1 = 0.476
+directional_shadow_split_1 = 0.606
 directional_shadow_split_2 = 0.86
 directional_shadow_split_3 = 0.627
 directional_shadow_fade_start = 0.83
-directional_shadow_max_distance = 56.5
-directional_shadow_pancake_size = 28.1
+directional_shadow_max_distance = 49.1
+directional_shadow_pancake_size = 2.7
 
-[node name="terrain_gen" type="Node3D" parent="." node_paths=PackedStringArray("biome_generator", "mesh_gen", "terrain_aspects_solver")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 200, 0)
+[node name="terrain gen" type="Node3D" parent="." unique_id=1284310374 node_paths=PackedStringArray("player", "biome_generator", "ground_mesh_gen", "terrain_aspects_solver", "objects_generator")]
 script = ExtResource("4_jka67")
-max_chunks_processed_per_frame = 1
+max_chunks_processed_per_frame = 3
+player = NodePath("../Player2")
+player_pos_offset = Vector2(-100, 0)
 chunk_prefab = ExtResource("3_r3fl7")
 biome_generator = NodePath("../biome gen")
-mesh_gen = NodePath("../mesh gen")
+ground_mesh_gen = NodePath("../mesh gen")
 terrain_aspects_solver = NodePath("../terrain aspects solver")
+objects_generator = NodePath("../objects gen")
+player_pos = Vector2(-6964.9346, -319.14005)
 view_distance = 5
 chunk_size = 160
-biomes = [SubResource("Resource_cdqbm"), SubResource("Resource_wlxy5"), SubResource("Resource_tereu")]
-ground_mesh_resolution = 1
+biomes = [ExtResource("3_lggff"), ExtResource("4_s0gvp"), ExtResource("5_tcnuu")]
+ground_mesh_resolution = 80
 ground_shader_material = ExtResource("6_i5arm")
 rock_texture = ExtResource("15_nu31w")
 rock_normal_map = ExtResource("16_obt1j")
@@ -316,7 +243,7 @@ other_noise = SubResource("NoiseTexture2D_tuemg")
 metallic = 0.015
 spectacular = 0.61
 
-[node name="terrain aspects solver" type="Node3D" parent="."]
+[node name="terrain aspects solver" type="Node3D" parent="." unique_id=1289494523]
 script = ExtResource("18_jsnrv")
 elevation_noise = SubResource("Resource_lggff")
 temperature_noise = SubResource("Resource_s0gvp")
@@ -326,7 +253,7 @@ moisture_roughness_effect = -0.1
 elevation_roughness_effect = 1.0
 ruggedness_roughness_effect = -0.3
 
-[node name="mesh gen" type="Node" parent="." node_paths=PackedStringArray("terrain_aspects_solver")]
+[node name="mesh gen" type="Node" parent="." unique_id=348213127 node_paths=PackedStringArray("terrain_aspects_solver")]
 script = ExtResource("21_vxd74")
 terrain_aspects_solver = NodePath("../terrain aspects solver")
 high_frequency_noise = SubResource("Resource_50xq3")
@@ -337,7 +264,37 @@ elevation_effect = SubResource("Resource_rlj2k")
 temperature_effect = SubResource("Resource_5w2ad")
 roughness_effect = SubResource("Resource_gx5qu")
 
-[node name="biome gen" type="Node3D" parent="."]
+[node name="biome gen" type="Node3D" parent="." unique_id=771966112]
 script = ExtResource("1_4arys")
-biome_map_resolution = 80
+biome_map_resolution = 5
 biome_transitions_smoothness = 0.1
+
+[node name="Player2" type="CharacterBody3D" parent="." unique_id=1077830235 node_paths=PackedStringArray("camera")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6864.9346, 385.71222, -319.14005)
+floor_stop_on_slope = false
+floor_constant_speed = true
+floor_block_on_wall = false
+floor_max_angle = 3.1415927
+script = ExtResource("16_tuemg")
+movement_speed = 20.0
+sprint_mod = 2.0
+gravity = 80.0
+drag = SubResource("Curve_tuemg")
+static_drag = 13.0
+camera = NodePath("Camera3D")
+mouse_sens = Vector2(0.001, 0.001)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Player2" unique_id=1822309123]
+mesh = SubResource("CapsuleMesh_tcnuu")
+skeleton = NodePath("")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player2" unique_id=1606174447]
+shape = SubResource("CapsuleShape3D_tuemg")
+
+[node name="Camera3D" type="Camera3D" parent="Player2" unique_id=667156838]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1307755, 0)
+
+[node name="objects gen" type="Node3D" parent="." unique_id=1912808232]
+script = ExtResource("24_dhlwf")
+minimal_tree_spacing_sqrt = 20.0
+tree_count = 100

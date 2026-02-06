@@ -4,6 +4,7 @@ using Godot;
 [Tool]
 public partial class BiomeGenerator : Node
 {
+
     private const int COLOR_CHANNELS = 4;
     [Export] int biome_map_resolution;
     /// map float (expected 0..1) to byte 0..255.
@@ -28,6 +29,31 @@ public partial class BiomeGenerator : Node
             this.biome_maps = biome_maps_array;
             this.map_resolution = map_resolution;
         }
+        public List<BiomeInfluenceOutput> GetBiomeInfluenceForUV(Vector2 uv, int biome_count)
+        {
+            int x = Mathf.FloorToInt(map_resolution * uv.X);
+            int y = Mathf.FloorToInt(map_resolution * uv.Y);
+            int base_index = x + y * map_resolution;
+            List<BiomeInfluenceOutput> output = new();
+            for (int biome = 0; biome < biome_count; biome++)
+            {
+                HandleBiomeInfluenceSampling(base_index, biome, ref output);
+            }
+            return output;
+
+        }
+        private void HandleBiomeInfluenceSampling(int base_map_index, int biome_index, ref List<BiomeInfluenceOutput> output)
+        {
+            int biome_map = biome_index / COLOR_CHANNELS;
+            int index_inside_biome_map = biome_index % COLOR_CHANNELS;
+            float influence = ByteToFloat(biome_maps[biome_map][index_inside_biome_map]);
+            if (influence < 0.1f)
+            {
+                return;
+            }
+            output.Add(new(biome_index, influence));
+        }
+
 
         public ImageTexture GetTexture(int map_index)
         {

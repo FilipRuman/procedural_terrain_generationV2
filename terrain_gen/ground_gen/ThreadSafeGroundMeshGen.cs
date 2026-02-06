@@ -11,19 +11,29 @@ public partial class ThreadSafeGroundMeshGen : Node
     [Export] private TerrainAspectEffectOnMesh temperature_effect;
     [Export] private TerrainAspectEffectOnMesh roughness_effect;
 
+    private int triangles_per_dimension;
+    private float triangle_size;
 
-    public static void ApplyData(OutputData data, MeshInstance3D mesh_instance)
+
+    public void ApplyData(OutputData data, MeshInstance3D mesh_instance, CollisionShape3D collider)
     {
         var arrays = new Godot.Collections.Array();
         arrays.Resize((int)Mesh.ArrayType.Max);
 
-        GD.Print($"indices: {data.indices.Length}");
-        GD.Print($"vertices: {data.vertices.Length}");
         arrays[(int)Mesh.ArrayType.Vertex] = data.vertices;
         arrays[(int)Mesh.ArrayType.Index] = data.indices;
         arrays[(int)Mesh.ArrayType.Normal] = data.normals;
         arrays[(int)Mesh.ArrayType.TexUV] = data.uvs;
-        // arrays[(int)Mesh.ArrayType.Tangent] = data.tangents;
+        arrays[(int)Mesh.ArrayType.Tangent] = data.tangents;
+
+        HeightMapShape3D height_map = new();
+
+        height_map.MapWidth = triangles_per_dimension;
+        height_map.MapDepth = triangles_per_dimension;
+        height_map.MapData = data.height_map;
+        collider.Shape = height_map;
+        collider.Scale = new Vector3(triangle_size, 1, triangle_size);
+        collider.Position = data.chunk_base_pos;
 
 
         var mesh = new ArrayMesh();
@@ -33,17 +43,21 @@ public partial class ThreadSafeGroundMeshGen : Node
     }
     public struct OutputData
     {
+        public Vector3 chunk_base_pos;
         public Vector3[] vertices;
         public int[] indices;
         public Vector3[] normals;
         public Vector2[] uvs;
         public float[] tangents;
+        public float[] height_map;
         public OutputData(
                  Vector3[] vertices,
                  int[] indices,
                  Vector3[] normals,
                  Vector2[] uvs,
-                 float[] tangents
+                 float[] tangents,
+                float[] height_map,
+                Vector3 chunk_base_pos
         )
         {
 
@@ -52,72 +66,71 @@ public partial class ThreadSafeGroundMeshGen : Node
             this.normals = normals;
             this.uvs = uvs;
             this.tangents = tangents;
+            this.height_map = height_map;
+            this.chunk_base_pos = chunk_base_pos;
         }
     }
-    public OutputData GenerateChunk(Vector2 base_world_position, Config config)
+    public OutputData GenerateChunk(Vector2 base_world_position, int resolution, int size)
     {
-        int[] indices = GenerateIndices(config);
-        var triangle_count_per_dimension = config.triangle_count_per_dimension;
-
-        int vertsPerRow = triangle_count_per_dimension + 1;
-        int paddedWidth = vertsPerRow + 2;
-
-        var vertices_padded = new Vector3[paddedWidth * paddedWidth];
+        triangles_per_dimension = resolution + 1;
+        triangle_size = size / (float)resolution;
 
         Vector3[] verticesPadded;
         Vector3[] vertices;
         Vector2[] uvs;
-        GenerateUvAndVertex(base_world_position, config, out verticesPadded, out vertices, out uvs);
+        float[] height_map;
+        GenerateUvAndVertex(base_world_position, out verticesPadded, out vertices, out uvs, out height_map);
 
-        var normals = GetNormals(config, verticesPadded);
+        int[] indices = GenerateIndices();
+        var normals = GetNormals(verticesPadded);
         var tangents = GenerateTangents(vertices, normals, uvs, indices);
 
 
-        return new OutputData(vertices, indices, normals, uvs, tangents);
+        return new OutputData(vertices, indices, normals, uvs, tangents, height_map, new Vector3(base_world_position.X + size / 2f, 0, base_world_position.Y + size / 2f));
     }
-    private void GenerateUvAndVertex(Vector2 base_world_position, Config config,
-                                     out Vector3[] verticesPadded, out Vector3[] vertices, out Vector2[] uvs)
+    private void GenerateUvAndVertex(Vector2 base_world_position,
+                                     out Vector3[] verticesPadded, out Vector3[] vertices, out Vector2[] uvs, out float[] height_map)
     {
-        int Q = config.triangle_count_per_dimension;
-        int paddedWidth = Q + 2;
+        int paddedWidth = triangles_per_dimension + 2;
 
         verticesPadded = new Vector3[paddedWidth * paddedWidth];
-        vertices = new Vector3[Q * Q];
-        uvs = new Vector2[Q * Q];
+        vertices = new Vector3[triangles_per_dimension * triangles_per_dimension];
+        height_map = new float[triangles_per_dimension * triangles_per_dimension];
 
-        for (int x = -1; x < Q + 1; x++)
+        uvs = new Vector2[triangles_per_dimension * triangles_per_dimension];
+
+        for (int x = -1; x < triangles_per_dimension + 1; x++)
         {
-            for (int z = -1; z < Q + 1; z++)
+            for (int z = -1; z < triangles_per_dimension + 1; z++)
             {
-                Vector2 worldPos =
-                    new Vector2(x * config.triangle_size, z * config.triangle_size)
-                    + base_world_position;
+                Vector2 worldPos = new Vector2(x, z) * triangle_size + base_world_position;
 
-                float height = CalculateHeight(config, worldPos);
-                Vector3 v = new(worldPos.X, height, worldPos.Y);
+                float height = CalculateHeight(worldPos);
+                Vector3 vartex_pos = new(worldPos.X, height, worldPos.Y);
 
-                verticesPadded[(x + 1) + (z + 1) * paddedWidth] = v;
+                verticesPadded[(x + 1) + (z + 1) * paddedWidth] = vartex_pos;
 
-                if (x < 0 || z < 0 || x >= Q || z >= Q)
+                if (x < 0 || z < 0 || x >= triangles_per_dimension || z >= triangles_per_dimension)
                     continue;
 
-                int i = x + z * Q;
+                int i = x + z * triangles_per_dimension;
 
-                vertices[i] = v;
+                height_map[i] = height;
+                vertices[i] = vartex_pos;
                 uvs[i] = new Vector2(
-                    x / (float)Q,
-                    z / (float)Q
+                    x / (float)triangles_per_dimension,
+                    z / (float)triangles_per_dimension
                 );
             }
         }
     }
 
-    private static Vector2 CalculateVertexWorldPosition(Config config, int relative_x, int relative_z, Vector2 base_world_position)
+    private Vector2 CalculateVertexWorldPosition(int relative_x, int relative_z, Vector2 base_world_position)
     {
-        return new Vector2(relative_x * config.triangle_size, relative_z * config.triangle_size) + base_world_position;
+        return new Vector2(relative_x, relative_z) * triangle_size + base_world_position;
     }
 
-    private float CalculateHeight(Config config, Vector2 world_position)
+    public float CalculateHeight(Vector2 world_position)
     {
         var terrain_aspects = terrain_aspects_solver.SolveForPos(world_position);
 
@@ -136,15 +149,35 @@ public partial class ThreadSafeGroundMeshGen : Node
 
         return output_height;
     }
-    static Vector3[] GetNormals(Config config, Vector3[] verticesPadded)
-    {
-        int Q = config.triangle_count_per_dimension;       // main vertex count per dimension
-        int paddedWidth = Q + 2;                           // width of padded vertex array
-        Vector3[] normals = new Vector3[Q * Q];           // output normals for main vertices
 
-        for (int x = 0; x < Q; x++)
+    public float CalculateHeight(Vector2 world_position, out TerrainAspectsSolver.TerrainAspects terrain_aspects)
+    {
+        terrain_aspects = terrain_aspects_solver.SolveForPos(world_position);
+
+        TerrainAspectEffectOnMesh.OutputData noise_amplitude_data = new();
+        moisture_effect.AddEffectToOutput(terrain_aspects.moisture, ref noise_amplitude_data);
+        elevation_effect.AddEffectToOutput(terrain_aspects.elevation, ref noise_amplitude_data);
+        temperature_effect.AddEffectToOutput(terrain_aspects.temperature, ref noise_amplitude_data);
+        roughness_effect.AddEffectToOutput(terrain_aspects.roughness, ref noise_amplitude_data);
+
+        float output_height
+             = high_frequency_noise.Sample(world_position) * noise_amplitude_data.high_freq_noise_amplitude
+             + medium_frequency_noise.Sample(world_position) * noise_amplitude_data.medium_freq_noise_amplitude
+             + low_frequency_noise.Sample(world_position) * noise_amplitude_data.low_freq_noise_amplitude
+             + noise_amplitude_data.base_height;
+
+
+        return output_height;
+    }
+
+    Vector3[] GetNormals(Vector3[] verticesPadded)
+    {
+        int paddedWidth = triangles_per_dimension + 2;
+        Vector3[] normals = new Vector3[triangles_per_dimension * triangles_per_dimension];
+
+        for (int x = 0; x < triangles_per_dimension; x++)
         {
-            for (int z = 0; z < Q; z++)
+            for (int z = 0; z < triangles_per_dimension; z++)
             {
                 // padded indices
                 int center = (x + 1) + (z + 1) * paddedWidth;
@@ -160,8 +193,7 @@ public partial class ThreadSafeGroundMeshGen : Node
                     verticesPadded[down].Y - verticesPadded[up].Y
                 ).Normalized();
 
-                // store normal in main vertex array
-                normals[x + z * Q] = n;
+                normals[x + z * triangles_per_dimension] = n;
             }
         }
 
@@ -245,27 +277,26 @@ public partial class ThreadSafeGroundMeshGen : Node
     }
 
 
-    public static int[] GenerateIndices(Config config)
+    public int[] GenerateIndices()
     {
-        int Q = config.triangle_count_per_dimension;
-        int vertsPerRow = Q;
 
-        int[] indices = new int[(Q - 1) * (Q - 1) * 6];
-        int idx = 0;
+        int vertex_count = triangles_per_dimension - 1;
+        int[] indices = new int[vertex_count * vertex_count * 6];
+        int array_idx = 0;
 
-        for (int z = 0; z < Q - 1; z++)
+        for (int z = 0; z < vertex_count; z++)
         {
-            for (int x = 0; x < Q - 1; x++)
+            for (int x = 0; x < vertex_count; x++)
             {
-                int i = x + z * Q;
+                int vertex_idx = x + z * triangles_per_dimension;
 
-                indices[idx++] = i;
-                indices[idx++] = i + 1;
-                indices[idx++] = i + Q;
+                indices[array_idx++] = vertex_idx;
+                indices[array_idx++] = vertex_idx + 1;
+                indices[array_idx++] = vertex_idx + triangles_per_dimension;
 
-                indices[idx++] = i + Q + 1;
-                indices[idx++] = i + Q;
-                indices[idx++] = i + 1;
+                indices[array_idx++] = vertex_idx + triangles_per_dimension + 1;
+                indices[array_idx++] = vertex_idx + triangles_per_dimension;
+                indices[array_idx++] = vertex_idx + 1;
             }
         }
 
@@ -273,16 +304,4 @@ public partial class ThreadSafeGroundMeshGen : Node
     }
 
 
-    public struct Config
-    {
-        public int triangle_count_per_dimension;
-        public float triangle_size;
-
-        public Config(int size, int resolution)
-        {
-            size += 1;
-            triangle_count_per_dimension = size * resolution;
-            triangle_size = 1f / resolution;
-        }
-    }
 }

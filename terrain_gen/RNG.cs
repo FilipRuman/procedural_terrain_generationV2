@@ -28,12 +28,12 @@ public static class RNG
         GD.Seed(GenerateSeed(pos));
         return GD.Randf();
     }
-
     public static Vector2 Vector2(Vector3 pos)
     {
         GD.Seed(GenerateSeed(pos));
         return new(GD.Randf(), GD.Randf());
     }
+
     public static Vector3 Vector3(Vector3 pos)
     {
 

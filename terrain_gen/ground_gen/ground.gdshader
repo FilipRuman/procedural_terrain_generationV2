@@ -64,7 +64,7 @@ uniform sampler2D rock_normal_map;
 uniform sampler2D rock_roughness;
 
 
-const int chunk_data_maps_count = 100;
+const int chunk_data_maps_count = 400;
 instance uniform int chunk_data_map_index;
 // repeat is disabled, so that the data from one end of the chunk doesn't influence data form the other end of the chunk
 uniform sampler2D[chunk_data_maps_count] map_1:repeat_disable;
@@ -154,7 +154,7 @@ void fragment(){
 	vec4 biome_data_2 = texture(map_2[chunk_data_map_index],UV);
 	NormalAlbedoRoughness output = collect_biome_data(biome_data_1, biome_data_2, world_pos, world_normal, adjusted_normal);
 	ALBEDO = output.albedo;
-	//NORMAL_MAP = output.normal;
+	NORMAL_MAP = output.normal;
 	ROUGHNESS  = output.roughness.r;
 
 

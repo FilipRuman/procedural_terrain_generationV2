@@ -27,6 +27,7 @@ public partial class TerrainGen : Node3D
     [Export] ThreadSafeGroundMeshGen ground_mesh_gen;
     [Export] TerrainAspectsSolver terrain_aspects_solver;
     [Export] ObjectsGenerator objects_generator;
+    [Export] RiverGen river_gen;
 
     [ExportGroup("player")]
     [Export] Vector2 player_pos;
@@ -217,15 +218,14 @@ public partial class TerrainGen : Node3D
     private void ChunkDataGenerationLoop()
     {
         const int ChunksGenMillisecondsDelay = 1;
-
+        var river_data = river_gen.GenerateCell(Vector2.Zero, ground_mesh_gen, chunk_size);
         try
         {
             var last_player_chunk_grid_pos = world_to_grid_pos(player_pos);
-
             // Initial terrain generation
             {
                 var chunks_to_generate = GetAllChunksPositionsInsideACircleRelative(view_distance, chunk_size);
-                RunTerrainGeneration(chunks_to_generate.ToArray(), last_player_chunk_grid_pos * chunk_size);
+                RunTerrainGeneration(chunks_to_generate.ToArray(), last_player_chunk_grid_pos * chunk_size, river_data);
                 load_at_once = true;
             }
 
@@ -259,7 +259,7 @@ public partial class TerrainGen : Node3D
                     }
                     {
                         var chunks_to_generate = GetAllChunksPositionsInsideACircleRelative(view_distance, chunk_size);
-                        RunTerrainGeneration(chunks_to_generate.ToArray(), last_player_chunk_grid_pos * chunk_size);
+                        RunTerrainGeneration(chunks_to_generate.ToArray(), last_player_chunk_grid_pos * chunk_size, river_data);
                     }
                     continue;
                 }
@@ -280,7 +280,7 @@ public partial class TerrainGen : Node3D
                         }
                         {
                             var chunks_to_generate = GetAllChunksPositionsInsideACircleRelative(view_distance, chunk_size);
-                            RunTerrainGeneration(chunks_to_generate.ToArray(), last_player_chunk_grid_pos * chunk_size);
+                            RunTerrainGeneration(chunks_to_generate.ToArray(), last_player_chunk_grid_pos * chunk_size, river_data);
                         }
                         continue;
                     }
@@ -292,7 +292,7 @@ public partial class TerrainGen : Node3D
                 }
 
                 last_player_chunk_grid_pos = current_player_chunk_grid_pos;
-                RunTerrainGeneration(chunk_change.to_generate_relative_pos, current_player_chunk_grid_pos * chunk_size);
+                RunTerrainGeneration(chunk_change.to_generate_relative_pos, current_player_chunk_grid_pos * chunk_size, river_data);
                 load_at_once = false;
                 generated_all_chunks = false;
             }
@@ -303,13 +303,16 @@ public partial class TerrainGen : Node3D
         }
     }
     private void RunTerrainGeneration(Vector2I[] chunks_to_generate,
-Vector2I player_pos_snapped_to_chunk)
+Vector2I player_pos_snapped_to_chunk, RiverGen.OutputData river_data)
     {
+
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         Parallel.For(0, chunks_to_generate.Length, i =>
           {
               var chunk = chunks_to_generate[i];
               Vector2I chunk_world_position = chunk + player_pos_snapped_to_chunk;
+              if (river_data.world_pos_lakes.ContainsKey(chunk_world_position))
+                  GD.Print("Lake chunk!");
 
               var biome_data = biome_generator.GenerateMaps(terrain_aspects_solver, new Vector2(chunk_world_position.X, chunk_world_position.Y), chunk_size + 1, biomes);
               var mesh_data = ground_mesh_gen.GenerateChunk(chunk_world_position, ground_mesh_resolution, chunk_size);

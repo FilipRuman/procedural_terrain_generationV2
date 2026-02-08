@@ -1,22 +1,24 @@
 [gd_scene format=3 uid="uid://mgp02mkor0at"]
 
-[ext_resource type="Script" uid="uid://ie6lidlhojfd" path="res://terrain_gen/biomes/BiomeGenerator.cs" id="1_4arys"]
-[ext_resource type="Script" uid="uid://c0gk086ch2wdh" path="res://terrain_gen/NoisePart.cs" id="2_6iypd"]
-[ext_resource type="Resource" uid="uid://c7tligpk7bhuq" path="res://biomes/plains.tres" id="3_lggff"]
-[ext_resource type="PackedScene" uid="uid://mujlms5gx604" path="res://terrain_gen/chunk.tscn" id="3_r3fl7"]
-[ext_resource type="Script" uid="uid://6crrxj5mbydy" path="res://terrain_gen/NoiseComponent.cs" id="3_tereu"]
-[ext_resource type="Script" uid="uid://cy771avr8nygp" path="res://terrain_gen/TerrainGen.cs" id="4_jka67"]
-[ext_resource type="Resource" uid="uid://do5i57jnsh6sa" path="res://biomes/snow desert.tres" id="4_s0gvp"]
-[ext_resource type="Resource" uid="uid://ciu68hetij58k" path="res://biomes/desert.tres" id="5_tcnuu"]
-[ext_resource type="Material" uid="uid://dpud1m5ciourq" path="res://terrain_gen/goundMaterial.tres" id="6_i5arm"]
-[ext_resource type="Texture2D" uid="uid://datjc43rk68k1" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_BaseColor.jpg" id="15_nu31w"]
-[ext_resource type="Texture2D" uid="uid://qy8avu837ct5" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Normal.jpg" id="16_obt1j"]
-[ext_resource type="Script" uid="uid://djlnrowcinv33" path="res://player/PlayerController.cs" id="16_tuemg"]
-[ext_resource type="Texture2D" uid="uid://cap62wxor08qv" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Roughness.jpg" id="17_2yde8"]
-[ext_resource type="Script" uid="uid://bui0bab8snonk" path="res://terrain_gen/biomes/terrain_aspect/TerrainAspectEffectOnMesh.cs" id="17_s0gvp"]
-[ext_resource type="Script" uid="uid://duqibi8br3aen" path="res://terrain_gen/biomes/terrain_aspect/TerrainAspectsSolver.cs" id="18_jsnrv"]
-[ext_resource type="Script" uid="uid://cr0lgejekovi1" path="res://terrain_gen/ground_gen/ThreadSafeGroundMeshGen.cs" id="21_vxd74"]
-[ext_resource type="Script" uid="uid://bmni8uj46ikxf" path="res://terrain_gen/ObjestsGeneration/ObjectsGenerator.cs" id="24_dhlwf"]
+[ext_resource type="Script" uid="uid://cy771avr8nygp" path="res://terrain_gen/TerrainGen.cs" id="1_6jybn"]
+[ext_resource type="PackedScene" uid="uid://mujlms5gx604" path="res://terrain_gen/chunk.tscn" id="2_84odl"]
+[ext_resource type="Resource" uid="uid://c7tligpk7bhuq" path="res://biomes/plains.tres" id="3_ak604"]
+[ext_resource type="Resource" uid="uid://do5i57jnsh6sa" path="res://biomes/snow desert.tres" id="4_vimvf"]
+[ext_resource type="Resource" uid="uid://ciu68hetij58k" path="res://biomes/desert.tres" id="5_ghshe"]
+[ext_resource type="Material" uid="uid://dpud1m5ciourq" path="res://terrain_gen/goundMaterial.tres" id="6_fv2he"]
+[ext_resource type="Texture2D" uid="uid://datjc43rk68k1" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_BaseColor.jpg" id="7_5smuj"]
+[ext_resource type="Texture2D" uid="uid://qy8avu837ct5" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Normal.jpg" id="8_y5ved"]
+[ext_resource type="Texture2D" uid="uid://cap62wxor08qv" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Roughness.jpg" id="9_kv3aw"]
+[ext_resource type="Script" uid="uid://duqibi8br3aen" path="res://terrain_gen/biomes/terrain_aspect/TerrainAspectsSolver.cs" id="10_o7u2a"]
+[ext_resource type="Script" uid="uid://c0gk086ch2wdh" path="res://terrain_gen/NoisePart.cs" id="11_ijoax"]
+[ext_resource type="Script" uid="uid://6crrxj5mbydy" path="res://terrain_gen/NoiseComponent.cs" id="12_j8kkg"]
+[ext_resource type="Script" uid="uid://cr0lgejekovi1" path="res://terrain_gen/ground_gen/ThreadSafeGroundMeshGen.cs" id="13_yh4yk"]
+[ext_resource type="Script" uid="uid://bui0bab8snonk" path="res://terrain_gen/biomes/terrain_aspect/TerrainAspectEffectOnMesh.cs" id="14_p8s74"]
+[ext_resource type="Script" uid="uid://ie6lidlhojfd" path="res://terrain_gen/biomes/BiomeGenerator.cs" id="15_o4fqm"]
+[ext_resource type="Script" uid="uid://djlnrowcinv33" path="res://player/PlayerController.cs" id="16_gfmxp"]
+[ext_resource type="Script" uid="uid://bmni8uj46ikxf" path="res://terrain_gen/ObjestsGeneration/ObjectsGenerator.cs" id="17_1n88h"]
+[ext_resource type="Script" uid="uid://mj5j0ww85fl1" path="res://terrain_gen/water gen/WaterGen.cs" id="18_opjno"]
+[ext_resource type="PackedScene" uid="uid://dkae88p1ukmiq" path="res://Lake water.tscn" id="19_meb7l"]
 
 [sub_resource type="Gradient" id="Gradient_vvi4u"]
 colors = PackedColorArray(0.92099476, 0.9209946, 0.9209946, 1, 0.6255971, 0.6255971, 0.6255971, 1)
@@ -34,81 +36,81 @@ seamless_blend_skirt = 0.451
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_gxbo6"]
 
 [sub_resource type="Resource" id="Resource_pri30"]
-script = ExtResource("2_6iypd")
+script = ExtResource("11_ijoax")
 noise = SubResource("FastNoiseLite_gxbo6")
 amplitude = 1.0
-frequency = 0.1
+frequency = 0.05
 metadata/_custom_type_script = "uid://c0gk086ch2wdh"
 
 [sub_resource type="Resource" id="Resource_lggff"]
-script = ExtResource("3_tereu")
+script = ExtResource("12_j8kkg")
 noises = [SubResource("Resource_pri30")]
 metadata/_custom_type_script = "uid://6crrxj5mbydy"
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_50xq3"]
 
 [sub_resource type="Resource" id="Resource_divl1"]
-script = ExtResource("2_6iypd")
+script = ExtResource("11_ijoax")
 noise = SubResource("FastNoiseLite_50xq3")
 amplitude = 1.0
 frequency = 0.01
 metadata/_custom_type_script = "uid://c0gk086ch2wdh"
 
 [sub_resource type="Resource" id="Resource_s0gvp"]
-script = ExtResource("3_tereu")
+script = ExtResource("12_j8kkg")
 noises = [SubResource("Resource_divl1")]
 metadata/_custom_type_script = "uid://6crrxj5mbydy"
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_6t7qw"]
 
 [sub_resource type="Resource" id="Resource_3xm7k"]
-script = ExtResource("2_6iypd")
+script = ExtResource("11_ijoax")
 noise = SubResource("FastNoiseLite_6t7qw")
 amplitude = 1.0
 frequency = 0.01
 metadata/_custom_type_script = "uid://c0gk086ch2wdh"
 
 [sub_resource type="Resource" id="Resource_vxd74"]
-script = ExtResource("3_tereu")
+script = ExtResource("12_j8kkg")
 noises = [SubResource("Resource_3xm7k")]
 metadata/_custom_type_script = "uid://6crrxj5mbydy"
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_y1pun"]
 
 [sub_resource type="Resource" id="Resource_gxbo6"]
-script = ExtResource("2_6iypd")
+script = ExtResource("11_ijoax")
 noise = SubResource("FastNoiseLite_y1pun")
 amplitude = 50.0
 metadata/_custom_type_script = "uid://c0gk086ch2wdh"
 
 [sub_resource type="Resource" id="Resource_50xq3"]
-script = ExtResource("3_tereu")
+script = ExtResource("12_j8kkg")
 noises = [SubResource("Resource_gxbo6")]
 metadata/_custom_type_script = "uid://6crrxj5mbydy"
 
 [sub_resource type="Resource" id="Resource_6t7qw"]
-script = ExtResource("2_6iypd")
+script = ExtResource("11_ijoax")
 noise = SubResource("FastNoiseLite_y1pun")
 amplitude = 100.0
 frequency = 0.1
 metadata/_custom_type_script = "uid://c0gk086ch2wdh"
 
 [sub_resource type="Resource" id="Resource_0u6gv"]
-script = ExtResource("3_tereu")
+script = ExtResource("12_j8kkg")
 noises = [SubResource("Resource_6t7qw")]
 metadata/_custom_type_script = "uid://6crrxj5mbydy"
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_pri30"]
 
 [sub_resource type="Resource" id="Resource_gogqm"]
-script = ExtResource("2_6iypd")
+script = ExtResource("11_ijoax")
 noise = SubResource("FastNoiseLite_pri30")
 amplitude = 100.0
 frequency = 0.01
 metadata/_custom_type_script = "uid://c0gk086ch2wdh"
 
 [sub_resource type="Resource" id="Resource_f46p6"]
-script = ExtResource("3_tereu")
+script = ExtResource("12_j8kkg")
 noises = [SubResource("Resource_gogqm")]
 metadata/_custom_type_script = "uid://6crrxj5mbydy"
 
@@ -121,7 +123,7 @@ metadata/_custom_type_script = "uid://6crrxj5mbydy"
 [sub_resource type="Curve" id="Curve_nu31w"]
 
 [sub_resource type="Resource" id="Resource_ype4i"]
-script = ExtResource("17_s0gvp")
+script = ExtResource("14_p8s74")
 base_height = SubResource("Curve_dhlwf")
 low_freq_noise_amplitude = SubResource("Curve_j3e5s")
 medium_freq_noise_amplitude = SubResource("Curve_nu31w")
@@ -146,7 +148,7 @@ _data = [Vector2(0, 0), 0.0, 2.5697296, 0, 0, Vector2(1, 0.32225335), -1.1300509
 point_count = 2
 
 [sub_resource type="Resource" id="Resource_rlj2k"]
-script = ExtResource("17_s0gvp")
+script = ExtResource("14_p8s74")
 base_height = SubResource("Curve_07b41")
 low_freq_noise_amplitude = SubResource("Curve_l1gg2")
 medium_freq_noise_amplitude = SubResource("Curve_1hlua")
@@ -162,7 +164,7 @@ metadata/_custom_type_script = "uid://bui0bab8snonk"
 [sub_resource type="Curve" id="Curve_pf4ct"]
 
 [sub_resource type="Resource" id="Resource_5w2ad"]
-script = ExtResource("17_s0gvp")
+script = ExtResource("14_p8s74")
 base_height = SubResource("Curve_3s0n5")
 low_freq_noise_amplitude = SubResource("Curve_g4s1x")
 medium_freq_noise_amplitude = SubResource("Curve_pf4ct")
@@ -180,12 +182,17 @@ point_count = 2
 [sub_resource type="Curve" id="Curve_xgxgg"]
 
 [sub_resource type="Resource" id="Resource_gx5qu"]
-script = ExtResource("17_s0gvp")
+script = ExtResource("14_p8s74")
 base_height = SubResource("Curve_pswfb")
 low_freq_noise_amplitude = SubResource("Curve_ipdi6")
 medium_freq_noise_amplitude = SubResource("Curve_xgxgg")
 high_freq_noise_amplitude = SubResource("Curve_1xavw")
 metadata/_custom_type_script = "uid://bui0bab8snonk"
+
+[sub_resource type="Curve" id="Curve_ealrb"]
+_limits = [0.0, 50.0, 0.0, 100.0]
+_data = [Vector2(0, 50), 0.0, -0.8296479, 0, 0, Vector2(100, 0), 0.0, 0.0, 0, 0]
+point_count = 2
 
 [sub_resource type="Curve" id="Curve_tuemg"]
 _limits = [0.0, 1000.0, 0.0, 1000.0]
@@ -216,25 +223,25 @@ directional_shadow_fade_start = 0.83
 directional_shadow_max_distance = 49.1
 directional_shadow_pancake_size = 2.7
 
-[node name="terrain gen" type="Node3D" parent="." unique_id=1284310374 node_paths=PackedStringArray("player", "biome_generator", "ground_mesh_gen", "terrain_aspects_solver", "objects_generator")]
-script = ExtResource("4_jka67")
+[node name="terrain gen" type="Node3D" parent="." unique_id=1284310374 node_paths=PackedStringArray("player", "biome_generator", "ground_mesh_gen", "terrain_aspects_solver", "objects_generator", "river_gen")]
+script = ExtResource("1_6jybn")
 max_chunks_processed_per_frame = 3
 player = NodePath("../Player2")
-player_pos_offset = Vector2(-100, 0)
-chunk_prefab = ExtResource("3_r3fl7")
+chunk_prefab = ExtResource("2_84odl")
 biome_generator = NodePath("../biome gen")
 ground_mesh_gen = NodePath("../mesh gen")
 terrain_aspects_solver = NodePath("../terrain aspects solver")
 objects_generator = NodePath("../objects gen")
-player_pos = Vector2(-6964.9346, -319.14005)
+river_gen = NodePath("../river gen")
+player_pos = Vector2(298.73093, 0)
 view_distance = 5
 chunk_size = 160
-biomes = [ExtResource("3_lggff"), ExtResource("4_s0gvp"), ExtResource("5_tcnuu")]
+biomes = [ExtResource("3_ak604"), ExtResource("4_vimvf"), ExtResource("5_ghshe")]
 ground_mesh_resolution = 80
-ground_shader_material = ExtResource("6_i5arm")
-rock_texture = ExtResource("15_nu31w")
-rock_normal_map = ExtResource("16_obt1j")
-rock_roughness = ExtResource("17_2yde8")
+ground_shader_material = ExtResource("6_fv2he")
+rock_texture = ExtResource("7_5smuj")
+rock_normal_map = ExtResource("8_y5ved")
+rock_roughness = ExtResource("9_kv3aw")
 rock_scale = 0.03
 rock_saturation = 0.91
 global_saturation = 0.045
@@ -244,7 +251,7 @@ metallic = 0.015
 spectacular = 0.61
 
 [node name="terrain aspects solver" type="Node3D" parent="." unique_id=1289494523]
-script = ExtResource("18_jsnrv")
+script = ExtResource("10_o7u2a")
 elevation_noise = SubResource("Resource_lggff")
 temperature_noise = SubResource("Resource_s0gvp")
 moisture_noise = SubResource("Resource_vxd74")
@@ -254,7 +261,7 @@ elevation_roughness_effect = 1.0
 ruggedness_roughness_effect = -0.3
 
 [node name="mesh gen" type="Node" parent="." unique_id=348213127 node_paths=PackedStringArray("terrain_aspects_solver")]
-script = ExtResource("21_vxd74")
+script = ExtResource("13_yh4yk")
 terrain_aspects_solver = NodePath("../terrain aspects solver")
 high_frequency_noise = SubResource("Resource_50xq3")
 medium_frequency_noise = SubResource("Resource_0u6gv")
@@ -263,19 +270,20 @@ moisture_effect = SubResource("Resource_ype4i")
 elevation_effect = SubResource("Resource_rlj2k")
 temperature_effect = SubResource("Resource_5w2ad")
 roughness_effect = SubResource("Resource_gx5qu")
+lake_height_change_curve = SubResource("Curve_ealrb")
 
 [node name="biome gen" type="Node3D" parent="." unique_id=771966112]
-script = ExtResource("1_4arys")
+script = ExtResource("15_o4fqm")
 biome_map_resolution = 5
 biome_transitions_smoothness = 0.1
 
 [node name="Player2" type="CharacterBody3D" parent="." unique_id=1077830235 node_paths=PackedStringArray("camera")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6864.9346, 385.71222, -319.14005)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 298.73093, 0, 0)
 floor_stop_on_slope = false
 floor_constant_speed = true
 floor_block_on_wall = false
 floor_max_angle = 3.1415927
-script = ExtResource("16_tuemg")
+script = ExtResource("16_gfmxp")
 movement_speed = 20.0
 sprint_mod = 2.0
 gravity = 80.0
@@ -295,6 +303,16 @@ shape = SubResource("CapsuleShape3D_tuemg")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1307755, 0)
 
 [node name="objects gen" type="Node3D" parent="." unique_id=1912808232]
-script = ExtResource("24_dhlwf")
+script = ExtResource("17_1n88h")
 minimal_tree_spacing_sqrt = 20.0
 tree_count = 100
+
+[node name="river gen" type="Node3D" parent="." unique_id=1012030323]
+script = ExtResource("18_opjno")
+LakeWater1x1 = ExtResource("19_meb7l")
+lake_height = 20.0
+river_start_height = 200.0
+mesh_chunks_per_river_chunk = 10
+height_checks_per_chunk_sqrt = 5
+height_checks_for_lake_system_sqrt = 5
+water_lever_offset = 10.0

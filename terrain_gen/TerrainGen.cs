@@ -27,7 +27,7 @@ public partial class TerrainGen : Node3D
     [Export] ThreadSafeGroundMeshGen ground_mesh_gen;
     [Export] TerrainAspectsSolver terrain_aspects_solver;
     [Export] ObjectsGenerator objects_generator;
-    [Export] RiverGen river_gen;
+    [Export] WaterGen river_gen;
 
     [ExportGroup("player")]
     [Export] Vector2 player_pos;
@@ -218,9 +218,10 @@ public partial class TerrainGen : Node3D
     private void ChunkDataGenerationLoop()
     {
         const int ChunksGenMillisecondsDelay = 1;
-        var river_data = river_gen.GenerateCell(Vector2.Zero, ground_mesh_gen, chunk_size);
         try
         {
+
+            var river_data = river_gen.GenerateCell(Vector2I.Zero, ground_mesh_gen, chunk_size);
             var last_player_chunk_grid_pos = world_to_grid_pos(player_pos);
             // Initial terrain generation
             {
@@ -231,7 +232,6 @@ public partial class TerrainGen : Node3D
 
             while (true)
             {
-                // GD.Print("loop");
                 if (Halt) return;
                 if (!generated_all_chunks)
                 {
@@ -303,9 +303,8 @@ public partial class TerrainGen : Node3D
         }
     }
     private void RunTerrainGeneration(Vector2I[] chunks_to_generate,
-Vector2I player_pos_snapped_to_chunk, RiverGen.OutputData river_data)
+Vector2I player_pos_snapped_to_chunk, WaterGen.OutputData river_data)
     {
-
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         Parallel.For(0, chunks_to_generate.Length, i =>
           {
@@ -315,7 +314,7 @@ Vector2I player_pos_snapped_to_chunk, RiverGen.OutputData river_data)
                   GD.Print("Lake chunk!");
 
               var biome_data = biome_generator.GenerateMaps(terrain_aspects_solver, new Vector2(chunk_world_position.X, chunk_world_position.Y), chunk_size + 1, biomes);
-              var mesh_data = ground_mesh_gen.GenerateChunk(chunk_world_position, ground_mesh_resolution, chunk_size);
+              var mesh_data = ground_mesh_gen.GenerateChunk(chunk_world_position, ground_mesh_resolution, chunk_size, river_data);
 
               var objects_data = objects_generator.GenerateObjectsData(chunk_size, ground_mesh_gen, biome_data, chunk_world_position, biomes);
               completed_chunks.Enqueue(new(mesh_data, biome_data, chunk_world_position, objects_data));
@@ -351,6 +350,7 @@ Vector2I player_pos_snapped_to_chunk, RiverGen.OutputData river_data)
     }
     private void HandleGodotSideOfChunk(ChunkData chunk_data)
     {
+
         var chunk = (Chunk)chunk_prefab.Instantiate();
         chunk_per_world_position.Add(chunk_data.world_pos, chunk);
 
@@ -367,6 +367,8 @@ Vector2I player_pos_snapped_to_chunk, RiverGen.OutputData river_data)
         chunk.mesh_instance.SetInstanceShaderParameter("chunk_data_map_index", map_index);
 
         objects_generator.SpawnObjects(chunk_data.objects_data, chunk);
+        if (chunk_data.mesh.lake_spawning_data != null)
+            river_gen.HandleSpawningForChunk(chunk_data.world_pos, chunk_data.mesh.lake_spawning_data, chunk);
     }
     private void Upd()
     {

@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cy771avr8nygp" path="res://terrain_gen/TerrainGen.cs" id="1_6jybn"]
 [ext_resource type="PackedScene" uid="uid://mujlms5gx604" path="res://terrain_gen/chunk.tscn" id="2_84odl"]
 [ext_resource type="Resource" uid="uid://c7tligpk7bhuq" path="res://biomes/plains.tres" id="3_ak604"]
-[ext_resource type="Resource" uid="uid://do5i57jnsh6sa" path="res://biomes/snow desert.tres" id="4_vimvf"]
+[ext_resource type="Resource" uid="uid://bwyc1o1fgbmuv" path="res://biomes/high_mountain_snow.tres" id="4_vimvf"]
 [ext_resource type="Resource" uid="uid://ciu68hetij58k" path="res://biomes/desert.tres" id="5_ghshe"]
 [ext_resource type="Material" uid="uid://dpud1m5ciourq" path="res://terrain_gen/goundMaterial.tres" id="6_fv2he"]
 [ext_resource type="Texture2D" uid="uid://datjc43rk68k1" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_BaseColor.jpg" id="7_5smuj"]
@@ -34,12 +34,15 @@ seamless = true
 seamless_blend_skirt = 0.451
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_gxbo6"]
+frequency = 0.0058
+fractal_type = 0
+domain_warp_fractal_type = 2
 
 [sub_resource type="Resource" id="Resource_pri30"]
 script = ExtResource("11_ijoax")
 noise = SubResource("FastNoiseLite_gxbo6")
-amplitude = 1.0
-frequency = 0.05
+amplitude = -1.0
+frequency = 0.08
 metadata/_custom_type_script = "uid://c0gk086ch2wdh"
 
 [sub_resource type="Resource" id="Resource_lggff"]
@@ -80,7 +83,7 @@ metadata/_custom_type_script = "uid://6crrxj5mbydy"
 [sub_resource type="Resource" id="Resource_gxbo6"]
 script = ExtResource("11_ijoax")
 noise = SubResource("FastNoiseLite_y1pun")
-amplitude = 50.0
+amplitude = 25.0
 metadata/_custom_type_script = "uid://c0gk086ch2wdh"
 
 [sub_resource type="Resource" id="Resource_50xq3"]
@@ -91,8 +94,8 @@ metadata/_custom_type_script = "uid://6crrxj5mbydy"
 [sub_resource type="Resource" id="Resource_6t7qw"]
 script = ExtResource("11_ijoax")
 noise = SubResource("FastNoiseLite_y1pun")
-amplitude = 100.0
-frequency = 0.1
+amplitude = 600.0
+frequency = 0.03
 metadata/_custom_type_script = "uid://c0gk086ch2wdh"
 
 [sub_resource type="Resource" id="Resource_0u6gv"]
@@ -101,11 +104,13 @@ noises = [SubResource("Resource_6t7qw")]
 metadata/_custom_type_script = "uid://6crrxj5mbydy"
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_pri30"]
+frequency = 0.007
+fractal_type = 0
 
 [sub_resource type="Resource" id="Resource_gogqm"]
 script = ExtResource("11_ijoax")
 noise = SubResource("FastNoiseLite_pri30")
-amplitude = 100.0
+amplitude = -100.0
 frequency = 0.01
 metadata/_custom_type_script = "uid://c0gk086ch2wdh"
 
@@ -131,21 +136,21 @@ high_freq_noise_amplitude = SubResource("Curve_5t8nk")
 metadata/_custom_type_script = "uid://bui0bab8snonk"
 
 [sub_resource type="Curve" id="Curve_07b41"]
-_limits = [0.0, 91.35, 0.0, 1.0]
-_data = [Vector2(0, 0), 0.0, 50.17443, 0, 0, Vector2(1, 91.35), 161.79744, 0.0, 0, 0]
-point_count = 2
+_limits = [0.0, 620.0, 0.0, 1.0]
+_data = [Vector2(0, 0), 0.0, 50.17443, 0, 0, Vector2(0.1453634, 178.47006), 104.05673, 104.05673, 0, 0, Vector2(0.6115288, 272.26895), 581.1761, 581.1761, 0, 0, Vector2(0.96491224, 552.2689), 835.72534, 835.72534, 0, 0, Vector2(0.97368425, 620), 1127.2811, 0.0, 0, 0]
+point_count = 5
 
 [sub_resource type="Curve" id="Curve_nqegd"]
-_data = [Vector2(0, 0), 0.0, 0.17219847, 0, 0]
-point_count = 1
+_data = [Vector2(0, 0.065659344), 0.0, -0.08016205, 0, 0, Vector2(0.7230576, 0.17502171), 0.36184356, 0.36184356, 0, 0, Vector2(1, 0.59881186), 1.4347209, 0.0, 0, 0]
+point_count = 3
 
 [sub_resource type="Curve" id="Curve_l1gg2"]
 _data = [Vector2(0, 0), 0.0, -0.0010506291, 0, 0]
 point_count = 1
 
 [sub_resource type="Curve" id="Curve_1hlua"]
-_data = [Vector2(0, 0), 0.0, 2.5697296, 0, 0, Vector2(1, 0.32225335), -1.1300509, 0.0, 0, 0]
-point_count = 2
+_data = [Vector2(0, 0.15241957), 0.0, 0.12241986, 0, 0, Vector2(0.74937344, 0.13923502), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.39176008, 0.0, 0, 0]
+point_count = 3
 
 [sub_resource type="Resource" id="Resource_rlj2k"]
 script = ExtResource("14_p8s74")
@@ -174,7 +179,7 @@ metadata/_custom_type_script = "uid://bui0bab8snonk"
 [sub_resource type="Curve" id="Curve_pswfb"]
 
 [sub_resource type="Curve" id="Curve_1xavw"]
-_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 0.4541638), 0.0, 0.0, 0, 0]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 0.22022599), 0.772993, 0.0, 0, 0]
 point_count = 2
 
 [sub_resource type="Curve" id="Curve_ipdi6"]
@@ -190,9 +195,9 @@ high_freq_noise_amplitude = SubResource("Curve_1xavw")
 metadata/_custom_type_script = "uid://bui0bab8snonk"
 
 [sub_resource type="Curve" id="Curve_ealrb"]
-_limits = [0.0, 50.0, 0.0, 100.0]
-_data = [Vector2(0, 50), 0.0, -0.8296479, 0, 0, Vector2(100, 0), 0.0, 0.0, 0, 0]
-point_count = 2
+_limits = [0.0, 50.0, 0.0, 2000.0]
+_data = [Vector2(0, 10), 0.0, 0.0, 0, 0, Vector2(617.284, 9.94294), -0.009953941, -0.009953941, 0, 0, Vector2(2000, 0), -0.008058047, 0.0, 0, 0]
+point_count = 3
 
 [sub_resource type="Curve" id="Curve_tuemg"]
 _limits = [0.0, 1000.0, 0.0, 1000.0]
@@ -202,6 +207,16 @@ point_count = 2
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_tcnuu"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tuemg"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6jybn"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_84odl"]
+albedo_color = Color(0.87302774, 0.00043991505, 0.8377307, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_6jybn"]
+radius = 16.841
+height = 33.682
 
 [node name="Node3D" type="Node3D" unique_id=1029520809]
 
@@ -223,7 +238,7 @@ directional_shadow_fade_start = 0.83
 directional_shadow_max_distance = 49.1
 directional_shadow_pancake_size = 2.7
 
-[node name="terrain gen" type="Node3D" parent="." unique_id=1284310374 node_paths=PackedStringArray("player", "biome_generator", "ground_mesh_gen", "terrain_aspects_solver", "objects_generator", "river_gen")]
+[node name="terrain gen" type="Node3D" parent="." unique_id=1284310374 node_paths=PackedStringArray("player", "biome_generator", "ground_mesh_gen", "terrain_aspects_solver", "objects_generator", "water_gen")]
 script = ExtResource("1_6jybn")
 max_chunks_processed_per_frame = 3
 player = NodePath("../Player2")
@@ -232,8 +247,8 @@ biome_generator = NodePath("../biome gen")
 ground_mesh_gen = NodePath("../mesh gen")
 terrain_aspects_solver = NodePath("../terrain aspects solver")
 objects_generator = NodePath("../objects gen")
-river_gen = NodePath("../river gen")
-player_pos = Vector2(298.73093, 0)
+water_gen = NodePath("../water gen")
+player_pos = Vector2(1532.1815, 664.904)
 view_distance = 5
 chunk_size = 160
 biomes = [ExtResource("3_ak604"), ExtResource("4_vimvf"), ExtResource("5_ghshe")]
@@ -271,14 +286,15 @@ elevation_effect = SubResource("Resource_rlj2k")
 temperature_effect = SubResource("Resource_5w2ad")
 roughness_effect = SubResource("Resource_gx5qu")
 lake_height_change_curve = SubResource("Curve_ealrb")
+water_mesh_margin = 5.0
 
 [node name="biome gen" type="Node3D" parent="." unique_id=771966112]
 script = ExtResource("15_o4fqm")
-biome_map_resolution = 5
+biome_map_resolution = 20
 biome_transitions_smoothness = 0.1
 
 [node name="Player2" type="CharacterBody3D" parent="." unique_id=1077830235 node_paths=PackedStringArray("camera")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 298.73093, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1532.1815, 0, 664.904)
 floor_stop_on_slope = false
 floor_constant_speed = true
 floor_block_on_wall = false
@@ -305,14 +321,20 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1307755, 0)
 [node name="objects gen" type="Node3D" parent="." unique_id=1912808232]
 script = ExtResource("17_1n88h")
 minimal_tree_spacing_sqrt = 20.0
-tree_count = 100
+base_tree_spawn_chance = 0.1
 
-[node name="river gen" type="Node3D" parent="." unique_id=1012030323]
+[node name="water gen" type="Node3D" parent="." unique_id=1012030323]
 script = ExtResource("18_opjno")
 LakeWater1x1 = ExtResource("19_meb7l")
-lake_height = 20.0
+test_material = SubResource("StandardMaterial3D_6jybn")
+test_material2 = SubResource("StandardMaterial3D_84odl")
+lake_height = 180.0
 river_start_height = 200.0
-mesh_chunks_per_river_chunk = 10
+mesh_chunks_per_river_chunk = 20
 height_checks_per_chunk_sqrt = 5
-height_checks_for_lake_system_sqrt = 5
-water_lever_offset = 10.0
+height_checks_for_lake_system_sqrt = 20
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1063337869]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 961.6639, 161.8749, 2080)
+mesh = SubResource("CapsuleMesh_6jybn")
+skeleton = NodePath("")

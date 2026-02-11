@@ -77,6 +77,8 @@ uniform sampler2D[BIOMES_COUNT] biome_albedo_textures;
 uniform sampler2D[BIOMES_COUNT] biome_normal_textures;
 uniform sampler2D[BIOMES_COUNT] biome_roughness_textures;
 
+uniform int biome_texture_resolution;
+
 uniform sampler2D other_noise;
 uniform float metallic;
 uniform float spectacular;
@@ -144,14 +146,31 @@ NormalAlbedoRoughness collect_biome_data(vec4 biome_data_1, vec4 biome_data_2,ve
 	return NormalAlbedoRoughness(output_normal, output_color, output_roughness);
 }
 
+const int biome_texture_margin = 1;
+vec4 sample_texture_filtered(sampler2D tex, vec2 uv) {
+    vec2 tex_size = vec2(float(biome_texture_resolution),float(biome_texture_resolution));
+    vec2 pixel_coord = uv * tex_size - 0.5;
+    ivec2 base = ivec2(floor(pixel_coord))  + ivec2(biome_texture_margin);
+    vec2 frac = fract(pixel_coord);
+    
+    vec4 s00 = texelFetch(tex, base + ivec2(0, 0), 0);
+    vec4 s10 = texelFetch(tex, base + ivec2(1, 0), 0);
+    vec4 s01 = texelFetch(tex, base + ivec2(0, 1), 0);
+    vec4 s11 = texelFetch(tex, base + ivec2(1, 1), 0);
+    
+    vec4 s0 = mix(s00, s10, frac.x);
+    vec4 s1 = mix(s01, s11, frac.x);
+    return mix(s0, s1, frac.y);
+}
+
 void fragment(){
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 world_normal = normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	vec3 adjusted_normal = pow(abs(world_normal), vec3(8.0));
 
 
-	vec4 biome_data_1 = texture(map_1[chunk_data_map_index],UV);
-	vec4 biome_data_2 = texture(map_2[chunk_data_map_index],UV);
+	vec4 biome_data_1 =sample_texture_filtered(map_1[chunk_data_map_index],UV);
+	vec4 biome_data_2 =sample_texture_filtered(map_2[chunk_data_map_index],UV);
 	NormalAlbedoRoughness output = collect_biome_data(biome_data_1, biome_data_2, world_pos, world_normal, adjusted_normal);
 	ALBEDO = output.albedo;
 	NORMAL_MAP = output.normal;

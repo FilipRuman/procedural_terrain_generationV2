@@ -1,2 +1,6 @@
 # procedural_terrain_generationV2
-TODO:Add readme, improved version of: https://github.com/FilipRuman/proceduralMapGen
+
+TODO:Add readme, improved version of:
+https://github.com/FilipRuman/proceduralMapGen.
+
+Structures, fix ground shader, fix lakes, rivers?

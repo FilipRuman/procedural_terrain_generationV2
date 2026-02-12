@@ -3,4 +3,5 @@
 TODO:Add readme, improved version of:
 https://github.com/FilipRuman/proceduralMapGen.
 
-Structures, fix ground shader, fix lakes, rivers?
+Structures, more biomes, fix ground shader , fix lakes, rivers? 'Look at the
+memory leak problem'

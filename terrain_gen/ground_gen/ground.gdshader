@@ -145,19 +145,26 @@ NormalAlbedoRoughness collect_biome_data(vec4 biome_data_1, vec4 biome_data_2,ve
 
 	return NormalAlbedoRoughness(output_normal, output_color, output_roughness);
 }
-
-const int biome_texture_margin = 1;
 vec4 sample_texture_filtered(sampler2D tex, vec2 uv) {
-    vec2 tex_size = vec2(float(biome_texture_resolution),float(biome_texture_resolution));
-    vec2 pixel_coord = uv * tex_size - 0.5;
-    ivec2 base = ivec2(floor(pixel_coord))  + ivec2(biome_texture_margin);
+    const float margin = 1.0;
+    float tex_size = float(biome_texture_resolution);
+    float inner_size = tex_size - 2.0 * margin;
+    
+    // Remap UV from [0,1] to the inner region, accounting for margin
+    vec2 remapped_uv = (uv * inner_size + margin) / tex_size;
+    
+    // Calculate pixel coordinate
+    vec2 pixel_coord = remapped_uv * tex_size - 0.5;
+    ivec2 base = ivec2(floor(pixel_coord));
     vec2 frac = fract(pixel_coord);
     
+    // Fetch 4 texels (these can reach into the margin)
     vec4 s00 = texelFetch(tex, base + ivec2(0, 0), 0);
     vec4 s10 = texelFetch(tex, base + ivec2(1, 0), 0);
     vec4 s01 = texelFetch(tex, base + ivec2(0, 1), 0);
     vec4 s11 = texelFetch(tex, base + ivec2(1, 1), 0);
     
+    // Bilinear interpolation
     vec4 s0 = mix(s00, s10, frac.x);
     vec4 s1 = mix(s01, s11, frac.x);
     return mix(s0, s1, frac.y);

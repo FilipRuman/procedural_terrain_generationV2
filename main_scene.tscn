@@ -19,6 +19,8 @@
 [ext_resource type="Script" uid="uid://bmni8uj46ikxf" path="res://terrain_gen/ObjestsGeneration/ObjectsGenerator.cs" id="17_1n88h"]
 [ext_resource type="Script" uid="uid://mj5j0ww85fl1" path="res://terrain_gen/water gen/WaterGen.cs" id="18_opjno"]
 [ext_resource type="PackedScene" uid="uid://dkae88p1ukmiq" path="res://Lake water.tscn" id="19_meb7l"]
+[ext_resource type="Script" uid="uid://b7vnabd1g6tr8" path="res://terrain_gen/structures/StructureGen.cs" id="20_84odl"]
+[ext_resource type="Resource" uid="uid://c35matxsgkavl" path="res://structures/test.tres" id="21_ak604"]
 
 [sub_resource type="Gradient" id="Gradient_vvi4u"]
 colors = PackedColorArray(0.92099476, 0.9209946, 0.9209946, 1, 0.6255971, 0.6255971, 0.6255971, 1)
@@ -218,6 +220,8 @@ albedo_color = Color(0.87302774, 0.00043991505, 0.8377307, 1)
 radius = 16.841
 height = 33.682
 
+[sub_resource type="SphereMesh" id="SphereMesh_ak604"]
+
 [node name="Node3D" type="Node3D" unique_id=1029520809]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=717498777]
@@ -238,7 +242,7 @@ directional_shadow_fade_start = 0.83
 directional_shadow_max_distance = 49.1
 directional_shadow_pancake_size = 2.7
 
-[node name="terrain gen" type="Node3D" parent="." unique_id=1284310374 node_paths=PackedStringArray("player", "biome_generator", "ground_mesh_gen", "terrain_aspects_solver", "objects_generator", "water_gen")]
+[node name="terrain gen" type="Node3D" parent="." unique_id=1284310374 node_paths=PackedStringArray("player", "biome_generator", "ground_mesh_gen", "terrain_aspects_solver", "objects_generator", "water_gen", "structure_gen")]
 script = ExtResource("1_6jybn")
 max_chunks_processed_per_frame = 3
 player = NodePath("../Player2")
@@ -248,7 +252,8 @@ ground_mesh_gen = NodePath("../mesh gen")
 terrain_aspects_solver = NodePath("../terrain aspects solver")
 objects_generator = NodePath("../objects gen")
 water_gen = NodePath("../water gen")
-player_pos = Vector2(1532.1815, 664.904)
+structure_gen = NodePath("../structure gen")
+player_pos = Vector2(2299.621, 1470.2642)
 view_distance = 5
 chunk_size = 160
 biomes = [ExtResource("3_ak604"), ExtResource("4_vimvf"), ExtResource("5_ghshe")]
@@ -294,7 +299,7 @@ biome_map_resolution = 20
 biome_transitions_smoothness = 0.1
 
 [node name="Player2" type="CharacterBody3D" parent="." unique_id=1077830235 node_paths=PackedStringArray("camera")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1532.1815, 0, 664.904)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2299.621, 0, 1470.2642)
 floor_stop_on_slope = false
 floor_constant_speed = true
 floor_block_on_wall = false
@@ -321,7 +326,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1307755, 0)
 [node name="objects gen" type="Node3D" parent="." unique_id=1912808232]
 script = ExtResource("17_1n88h")
 minimal_tree_spacing_sqrt = 20.0
-base_tree_spawn_chance = 0.1
+base_tree_spawn_chance = 0.731
 
 [node name="water gen" type="Node3D" parent="." unique_id=1012030323]
 script = ExtResource("18_opjno")
@@ -338,3 +343,16 @@ height_checks_for_lake_system_sqrt = 20
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 961.6639, 161.8749, 2080)
 mesh = SubResource("CapsuleMesh_6jybn")
 skeleton = NodePath("")
+
+[node name="structure gen" type="Node3D" parent="." unique_id=1271643402]
+script = ExtResource("20_84odl")
+structure_pool = [ExtResource("21_ak604")]
+mesh_chunks_per_structure_grid_cell = 30
+
+[node name="Node3D" type="Node3D" parent="." unique_id=1978462520]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2505, 306.99597, -1978)
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=489778434]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3189.269, 244.37056, -1514.4635)
+mesh = SubResource("SphereMesh_ak604")
+skeleton = NodePath("../Player2")

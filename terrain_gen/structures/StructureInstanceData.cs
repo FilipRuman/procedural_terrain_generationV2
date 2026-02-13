@@ -69,7 +69,6 @@ public class StructureInstanceData
                         if (max_height - min_height > structure_type.maximal_height_delta_inside_the_shapes)
                                 return false;
                 }
-                GD.Print($"Height delta{max_height - min_height}");
 
                 return true;
         }

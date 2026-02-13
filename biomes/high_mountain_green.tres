@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Biome" format=4 uid="uid://bjntftk3kutwh"]
 
-[ext_resource type="Texture2D" uid="uid://070x5fvdh5e7" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_BaseColor.jpg" id="1_y2x1j"]
+[ext_resource type="Texture2D" uid="uid://dm8xpfubef4mu" path="res://ground textures/mud/brown_mud_leaves_01_diff_4k.jpg" id="1_y2x1j"]
 [ext_resource type="Texture2D" uid="uid://bk5ufqeoaqypt" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_Normal.jpg" id="2_lrfe6"]
 [ext_resource type="Script" uid="uid://dch0mlun246nw" path="res://terrain_gen/ObjestsGeneration/BiomeObjectsGenData.cs" id="3_752uo"]
 [ext_resource type="PackedScene" uid="uid://cohn25v4j6dgp" path="res://biomes/ash_collider.tscn" id="4_yuk4q"]
@@ -10,12 +10,12 @@
 [ext_resource type="Texture2D" uid="uid://c4vgvt145u3xh" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_Roughness.jpg" id="8_s278w"]
 [ext_resource type="Script" uid="uid://bqpjjupyok60s" path="res://terrain_gen/biomes/Biome.cs" id="9_gtfif"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_s8l2d"]
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_y2x1j"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_n8g2i"]
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_lrfe6"]
 frequency = 0.1
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_ei52u"]
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_752uo"]
 frequency = 0.002
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_bdmm2"]
@@ -32,7 +32,7 @@ _surfaces = [{
 }]
 blend_shape_mode = 0
 
-[sub_resource type="ArrayMesh" id="ArrayMesh_27sjy"]
+[sub_resource type="ArrayMesh" id="ArrayMesh_y2x1j"]
 resource_name = "Cube_167"
 _surfaces = [{
 "aabb": AABB(-0.053492244, 1.3732613e-05, -0.041144893, 0.096894935, 0.13342215, 0.08298597),
@@ -53,8 +53,8 @@ shadow_mesh = SubResource("ArrayMesh_bdmm2")
 [sub_resource type="Resource" id="Resource_riyl1"]
 script = ExtResource("6_b47wl")
 collision_shape = ExtResource("4_yuk4q")
-mesh = SubResource("ArrayMesh_27sjy")
-mesh_y_offset = 1.0
+mesh = SubResource("ArrayMesh_y2x1j")
+mesh_y_offset = 25.0
 base_sale = 250.0
 scale_change_amplitude = 50.0
 rotation_amplitude = 30
@@ -62,35 +62,42 @@ base_chance_to_spawn = 0.3
 max_ruggedness = 0.8
 metadata/_custom_type_script = "uid://dettvmn8bgkhu"
 
-[sub_resource type="Resource" id="Resource_8p5mg"]
+[sub_resource type="Resource" id="Resource_yuk4q"]
 script = ExtResource("3_752uo")
 trees = [SubResource("Resource_riyl1")]
 grass = []
-rotation_noise = SubResource("FastNoiseLite_s8l2d")
-scale_noise = SubResource("FastNoiseLite_n8g2i")
-spawn_chance_noise = SubResource("FastNoiseLite_ei52u")
+rotation_noise = SubResource("FastNoiseLite_y2x1j")
+scale_noise = SubResource("FastNoiseLite_lrfe6")
+spawn_chance_noise = SubResource("FastNoiseLite_752uo")
 metadata/_custom_type_script = "uid://dch0mlun246nw"
 
-[sub_resource type="Resource" id="Resource_dhlwf"]
+[sub_resource type="Resource" id="Resource_y2x1j"]
 script = ExtResource("7_x8ct3")
-max = 0.6
+min = 0.8
+max = 0.9
 metadata/_custom_type_script = "uid://dholhd543qnco"
 
-[sub_resource type="Resource" id="Resource_5t8nk"]
+[sub_resource type="Resource" id="Resource_lrfe6"]
 script = ExtResource("7_x8ct3")
-min = 0.4
-max = 0.6
+min = 0.3
+max = 0.7
+metadata/_custom_type_script = "uid://dholhd543qnco"
+
+[sub_resource type="Resource" id="Resource_752uo"]
+script = ExtResource("7_x8ct3")
+min = 0.3
+max = 0.7
 metadata/_custom_type_script = "uid://dholhd543qnco"
 
 [resource]
 script = ExtResource("9_gtfif")
-objects_data = SubResource("Resource_8p5mg")
-preferred_moisture = SubResource("Resource_5t8nk")
-preferred_elevation = SubResource("Resource_dhlwf")
-preferred_temperature = SubResource("Resource_5t8nk")
+objects_data = SubResource("Resource_yuk4q")
+preferred_moisture = SubResource("Resource_lrfe6")
+preferred_elevation = SubResource("Resource_y2x1j")
+preferred_temperature = SubResource("Resource_752uo")
 albedo = ExtResource("1_y2x1j")
 normal = ExtResource("2_lrfe6")
 roughness = ExtResource("8_s278w")
-saturation = -0.1
+saturation = -0.3
 scale = 0.05
 metadata/_custom_type_script = "uid://bqpjjupyok60s"

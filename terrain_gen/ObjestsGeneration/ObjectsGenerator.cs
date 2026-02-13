@@ -123,7 +123,8 @@ public partial class ObjectsGenerator : Node3D
                 Vector3 world_pos_3d = new(world_pos_2d.X, height, world_pos_2d.Y);
                 foreach (var biome_influence in biomes_influence)
                 {
-                        if (RNG.Float(uv) > biome_influence.influence * biome_influence.influence)
+                        var better_influence = biome_influence.influence * biome_influence.influence * biome_influence.influence;
+                        if (RNG.Float(uv) > better_influence)
                                 continue;
                         var biome = biomes[biome_influence.biome_type_index];
                         var object_inst_data = biome.objects_data.GetTree(world_pos_3d, terrain_aspects);
@@ -139,8 +140,7 @@ public partial class ObjectsGenerator : Node3D
                                 }
                                 else
                                 {
-                                        List<ObjectInstantiationData> list = new();
-                                        list.Add(object_inst_data.Value);
+                                        List<ObjectInstantiationData> list = [object_inst_data.Value];
                                         instances_data_for_object_type.Add(object_inst_data.Value.obj, list);
                                 }
                         }

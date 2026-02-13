@@ -89,7 +89,7 @@ public partial class StructureGen : Node3D
                 }
                 public StructureGrid(StructureGen structure_gen, ThreadSafeGroundMeshGen mesh_gen, int mesh_chunk_size, Vector2 player_world_pos)
                 {
-                        this.grid_cell_size = (int)structure_gen.mesh_chunks_per_structure_grid_cell * mesh_chunk_size;
+                        grid_cell_size = structure_gen.mesh_chunks_per_structure_grid_cell * mesh_chunk_size;
                         this.structure_gen = structure_gen;
                         this.mesh_gen = mesh_gen;
                         this.mesh_chunk_size = mesh_chunk_size;
@@ -110,7 +110,6 @@ public partial class StructureGen : Node3D
 
                 public StructureChunk GenerateChunk(Vector2I base_world_pos)
                 {
-
                         Dictionary<Vector2I, StructureInstanceData> structure_gen_for_mesh_chunk_world_pos = [];
                         Dictionary<Vector2I, StructureInstanceData> structures_for_mesh_chunk_world_pos = [];
                         GD.Seed(RNG.GenerateSeed(base_world_pos));
@@ -148,7 +147,6 @@ public partial class StructureGen : Node3D
 
                                         foreach (var chunk_world_pos in all_chunks)
                                         {
-
                                                 if (structures_for_mesh_chunk_world_pos.ContainsKey(chunk_world_pos))
                                                 {
                                                         there_already_was_struct_on_one_of_the_chunks = true;

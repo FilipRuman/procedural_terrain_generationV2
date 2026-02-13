@@ -10,12 +10,12 @@
 [ext_resource type="Texture2D" uid="uid://c4vgvt145u3xh" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_Roughness.jpg" id="6_lwxx2"]
 [ext_resource type="Script" uid="uid://bqpjjupyok60s" path="res://terrain_gen/biomes/Biome.cs" id="7_n46fe"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_s8l2d"]
-
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_n8g2i"]
-frequency = 0.1
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_ei52u"]
+frequency = 0.1
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_53uj7"]
 frequency = 0.002
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_bdmm2"]
@@ -62,21 +62,27 @@ base_chance_to_spawn = 0.3
 max_ruggedness = 0.8
 metadata/_custom_type_script = "uid://dettvmn8bgkhu"
 
-[sub_resource type="Resource" id="Resource_8p5mg"]
+[sub_resource type="Resource" id="Resource_lwxx2"]
 script = ExtResource("3_n8g2i")
 trees = [SubResource("Resource_riyl1")]
 grass = []
-rotation_noise = SubResource("FastNoiseLite_s8l2d")
-scale_noise = SubResource("FastNoiseLite_n8g2i")
-spawn_chance_noise = SubResource("FastNoiseLite_ei52u")
+rotation_noise = SubResource("FastNoiseLite_n8g2i")
+scale_noise = SubResource("FastNoiseLite_ei52u")
+spawn_chance_noise = SubResource("FastNoiseLite_53uj7")
 metadata/_custom_type_script = "uid://dch0mlun246nw"
 
-[sub_resource type="Resource" id="Resource_dhlwf"]
+[sub_resource type="Resource" id="Resource_n8g2i"]
 script = ExtResource("5_53uj7")
 max = 0.6
 metadata/_custom_type_script = "uid://dholhd543qnco"
 
-[sub_resource type="Resource" id="Resource_5t8nk"]
+[sub_resource type="Resource" id="Resource_ei52u"]
+script = ExtResource("5_53uj7")
+min = 0.4
+max = 0.6
+metadata/_custom_type_script = "uid://dholhd543qnco"
+
+[sub_resource type="Resource" id="Resource_53uj7"]
 script = ExtResource("5_53uj7")
 min = 0.4
 max = 0.6
@@ -84,10 +90,10 @@ metadata/_custom_type_script = "uid://dholhd543qnco"
 
 [resource]
 script = ExtResource("7_n46fe")
-objects_data = SubResource("Resource_8p5mg")
-preferred_moisture = SubResource("Resource_5t8nk")
-preferred_elevation = SubResource("Resource_dhlwf")
-preferred_temperature = SubResource("Resource_5t8nk")
+objects_data = SubResource("Resource_lwxx2")
+preferred_moisture = SubResource("Resource_ei52u")
+preferred_elevation = SubResource("Resource_n8g2i")
+preferred_temperature = SubResource("Resource_53uj7")
 albedo = ExtResource("1_t5jjv")
 normal = ExtResource("2_s8l2d")
 roughness = ExtResource("6_lwxx2")

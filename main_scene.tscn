@@ -3,12 +3,16 @@
 [ext_resource type="Script" uid="uid://cy771avr8nygp" path="res://terrain_gen/TerrainGen.cs" id="1_6jybn"]
 [ext_resource type="PackedScene" uid="uid://mujlms5gx604" path="res://terrain_gen/chunk.tscn" id="2_84odl"]
 [ext_resource type="Resource" uid="uid://c7tligpk7bhuq" path="res://biomes/plains.tres" id="3_ak604"]
+[ext_resource type="Resource" uid="uid://bmstcmmc38flq" path="res://biomes/dry_grass.tres" id="4_ghshe"]
 [ext_resource type="Resource" uid="uid://bwyc1o1fgbmuv" path="res://biomes/high_mountain_snow.tres" id="4_vimvf"]
+[ext_resource type="Resource" uid="uid://bjntftk3kutwh" path="res://biomes/high_mountain_green.tres" id="5_fv2he"]
 [ext_resource type="Resource" uid="uid://ciu68hetij58k" path="res://biomes/desert.tres" id="5_ghshe"]
 [ext_resource type="Material" uid="uid://dpud1m5ciourq" path="res://terrain_gen/goundMaterial.tres" id="6_fv2he"]
 [ext_resource type="Texture2D" uid="uid://datjc43rk68k1" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_BaseColor.jpg" id="7_5smuj"]
+[ext_resource type="Resource" uid="uid://dpmmjjeg0xibs" path="res://biomes/snow.tres" id="8_5smuj"]
 [ext_resource type="Texture2D" uid="uid://qy8avu837ct5" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Normal.jpg" id="8_y5ved"]
 [ext_resource type="Texture2D" uid="uid://cap62wxor08qv" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Roughness.jpg" id="9_kv3aw"]
+[ext_resource type="Resource" uid="uid://dalilcqe722id" path="res://biomes/swamp.tres" id="9_y5ved"]
 [ext_resource type="Script" uid="uid://duqibi8br3aen" path="res://terrain_gen/biomes/terrain_aspect/TerrainAspectsSolver.cs" id="10_o7u2a"]
 [ext_resource type="Script" uid="uid://c0gk086ch2wdh" path="res://terrain_gen/NoisePart.cs" id="11_ijoax"]
 [ext_resource type="Script" uid="uid://6crrxj5mbydy" path="res://terrain_gen/NoiseComponent.cs" id="12_j8kkg"]
@@ -253,10 +257,10 @@ terrain_aspects_solver = NodePath("../terrain aspects solver")
 objects_generator = NodePath("../objects gen")
 water_gen = NodePath("../water gen")
 structure_gen = NodePath("../structure gen")
-player_pos = Vector2(2299.621, 1470.2642)
+player_pos = Vector2(14098.779, 9432.562)
 view_distance = 5
 chunk_size = 160
-biomes = [ExtResource("3_ak604"), ExtResource("4_vimvf"), ExtResource("5_ghshe")]
+biomes = [ExtResource("5_ghshe"), ExtResource("4_ghshe"), ExtResource("5_fv2he"), ExtResource("4_vimvf"), ExtResource("3_ak604"), ExtResource("8_5smuj"), ExtResource("9_y5ved")]
 ground_mesh_resolution = 80
 ground_shader_material = ExtResource("6_fv2he")
 rock_texture = ExtResource("7_5smuj")
@@ -299,7 +303,7 @@ biome_map_resolution = 20
 biome_transitions_smoothness = 0.1
 
 [node name="Player2" type="CharacterBody3D" parent="." unique_id=1077830235 node_paths=PackedStringArray("camera")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2299.621, 0, 1470.2642)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14098.779, 0, 9432.562)
 floor_stop_on_slope = false
 floor_constant_speed = true
 floor_block_on_wall = false

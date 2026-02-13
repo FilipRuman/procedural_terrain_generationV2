@@ -248,7 +248,7 @@ albedo_color = Color(0.87302774, 0.00043991505, 0.8377307, 1)
 radius = 16.841
 height = 33.682
 
-[sub_resource type="SphereMesh" id="SphereMesh_ak604"]
+[sub_resource type="SphereMesh" id="SphereMesh_y5ved"]
 
 [node name="Node3D" type="Node3D" unique_id=1029520809]
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
@@ -282,7 +282,7 @@ terrain_aspects_solver = NodePath("../terrain aspects solver")
 objects_generator = NodePath("../objects gen")
 water_gen = NodePath("../water gen")
 structure_gen = NodePath("../structure gen")
-player_pos = Vector2(23499.78, 2023.6873)
+player_pos = Vector2(23499.78, 3841.396)
 view_distance = 13
 chunk_size = 160
 biomes = [ExtResource("5_ghshe"), ExtResource("4_ghshe"), ExtResource("5_fv2he"), ExtResource("4_vimvf"), ExtResource("3_ak604"), ExtResource("8_5smuj"), ExtResource("9_y5ved")]
@@ -328,7 +328,7 @@ biome_map_resolution = 20
 biome_transitions_smoothness = 0.1
 
 [node name="Player2" type="CharacterBody3D" parent="." unique_id=1077830235 node_paths=PackedStringArray("camera")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23499.78, 723.1982, 2023.6873)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23499.78, 723.1982, 3841.396)
 floor_stop_on_slope = false
 floor_constant_speed = true
 floor_block_on_wall = false
@@ -356,6 +356,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1307755, 0)
 script = ExtResource("17_1n88h")
 minimal_tree_spacing_sqrt = 20.0
 base_tree_spawn_chance = 0.731
+rock_spawn_attempts_per_mesh_chunk = 3
+grass_spawn_attempts_per_mesh_chunk = 80
 
 [node name="water gen" type="Node3D" parent="." unique_id=1012030323]
 script = ExtResource("18_opjno")
@@ -365,7 +367,7 @@ test_material2 = SubResource("StandardMaterial3D_84odl")
 lake_height = 180.0
 river_start_height = 200.0
 mesh_chunks_per_river_chunk = 20
-height_checks_per_chunk_sqrt = 5
+height_checks_per_chunk_sqrt = 10
 height_checks_for_lake_system_sqrt = 20
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1063337869]
@@ -381,7 +383,9 @@ mesh_chunks_per_structure_grid_cell = 30
 [node name="Node3D" type="Node3D" parent="." unique_id=1978462520]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2505, 306.99597, -1978)
 
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=489778434]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3189.269, 244.37056, -1514.4635)
-mesh = SubResource("SphereMesh_ak604")
-skeleton = NodePath("../Player2")
+[node name="Node3D2" type="Node3D" parent="." unique_id=506169734]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23189.93, 163.1614, 6394.196)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D2" unique_id=1881576066]
+transform = Transform3D(4.975, 0, 0, 0, 4.975, 0, 0, 0, 4.975, 0, 0, 0)
+mesh = SubResource("SphereMesh_y5ved")

@@ -4,178 +4,12 @@ using Godot;
 public partial class ObjectsGenerator : Node3D
 {
 
+
         [Export] float minimal_tree_spacing_sqrt;
         [Export(PropertyHint.Range, "0,1,0.001")] float base_tree_spawn_chance;
+        [Export] int rock_spawn_attempts_per_mesh_chunk;
+        [Export] int grass_spawn_attempts_per_mesh_chunk;
 
-        public void SpawnObjects(ObjectTypeSpawnData[] input, Node3D parent_for_objects)
-        {
-                foreach (var spawn_data in input)
-                {
-                        SpawnObjectType(spawn_data, parent_for_objects);
-                }
-        }
-        private class ObjectsSpacingGrid
-        {
-                // 1'st dimension -> x + y * grid_width 
-                // 2'nd dimension -> all objects in this grid cell
-                private List<ObjectsSpacingData>[] grid;
-                private int grid_width;
-#nullable enable
-                public List<ObjectsSpacingData>? this[Vector2I pos]
-                {
-                        get
-                        {
-                                if (pos.X < -1 || pos.X >= grid_width - 1 || pos.Y < -1 || pos.Y >= grid_width - 1)
-                                        return null;
-
-                                int idx = (pos.X + grid_padding / 2) + (pos.Y + grid_padding / 2) * grid_width;
-                                return grid[idx];
-                        }
-                }
-                public ObjectsSpacingGrid(int width_height)
-                {
-                        grid_width = width_height;
-                        grid = new List<ObjectsSpacingData>[width_height * width_height];
-                        for (int x = 0; x < width_height; x++)
-                        {
-                                for (int y = 0; y < width_height; y++)
-                                {
-                                        grid[x + y * width_height] = new();
-                                }
-                        }
-                }
-
-        }
-        public struct ObjectsSpacingData
-        {
-                public Vector2 pos;
-                public float min_distance_sqrt;
-
-                public ObjectsSpacingData(Vector2 pos, float min_distance_sqrt)
-                {
-                        this.pos = pos;
-                        this.min_distance_sqrt = min_distance_sqrt;
-                }
-        }
-        private float GridCellWidth()
-        {
-                var dist_max = minimal_tree_spacing_sqrt;
-                return dist_max / Mathf.Sqrt2;
-        }
-
-        const int grid_padding = 2;
-        public ObjectTypeSpawnData[] GenerateObjectsData(int chunk_size, ThreadSafeGroundMeshGen ground_mesh_gen,
-                BiomeGenerator.OutputData biome_data, Vector2 base_world_position, Biome[] biomes, StructureGen.StructureGrid structure_grid)
-        {
-                float grid_cell_width = GridCellWidth();
-                chunk_size -= 2;
-                // var grid_cell_widt = GridCellWidth();
-                var grid_width = Mathf.CeilToInt((float)chunk_size / grid_cell_width) + grid_padding;
-                var grid = new ObjectsSpacingGrid(grid_width);
-
-                var seed = RNG.GenerateSeed(base_world_position);
-                Dictionary<TerrainObject, List<ObjectInstantiationData>> instances_data_for_object_type = new();
-                for (int x = -1; x < grid_width - 1; x++)
-                {
-                        for (int y = -1; y < grid_width - 1; y++)
-                        {
-                                if (RNG.Float(new Vector2(x, y)) > base_tree_spawn_chance)
-                                        continue;
-                                var base_cell_world_pos = base_world_position + new Vector2(x, y) * grid_cell_width;
-                                bool is_margin = x == -1 || y == -1 || x == grid_width - 2 || y == grid_width - 2;
-                                GenerateForGridCell(base_cell_world_pos, new(x, y), grid_cell_width, is_margin,
-                                        biomes, ground_mesh_gen, biome_data, structure_grid, ref grid, ref instances_data_for_object_type);
-                                GD.Seed(seed);
-                        }
-                }
-
-
-                {
-                        var output = new ObjectTypeSpawnData[instances_data_for_object_type.Count];
-                        int i = 0;
-                        foreach (var instances_for_type in instances_data_for_object_type)
-                        {
-                                output[i] = new(instances_for_type.Key.mesh, instances_for_type.Key.collision_shape, instances_for_type.Value);
-                                i++;
-                        }
-
-                        return output;
-                }
-        }
-        private void GenerateForGridCell(Vector2 base_cell_world_pos, Vector2I grid_pos, float grid_cell_width, bool is_margin,
-            Biome[] biomes, ThreadSafeGroundMeshGen ground_mesh_gen, BiomeGenerator.OutputData biome_data, StructureGen.StructureGrid structure_grid,
-            ref ObjectsSpacingGrid grid, ref Dictionary<TerrainObject, List<ObjectInstantiationData>> instances_data_for_object_type)
-        {
-
-                Vector2 uv = new(GD.Randf(), GD.Randf());
-                var world_pos_2d = uv * grid_cell_width + base_cell_world_pos;
-                if (!structure_grid.IsObjectValid(world_pos_2d))
-                {
-                        return;
-                }
-                if (!IsPosValid(world_pos_2d, minimal_tree_spacing_sqrt, grid_pos, grid))
-                {
-                        return;
-                }
-
-                var height = ground_mesh_gen.CalculateHeight(world_pos_2d, out var terrain_aspects);
-                var biomes_influence = biome_data.GetBiomeInfluenceForUV(uv, biomes.Length);
-                Vector3 world_pos_3d = new(world_pos_2d.X, height, world_pos_2d.Y);
-                foreach (var biome_influence in biomes_influence)
-                {
-                        var better_influence = biome_influence.influence * biome_influence.influence * biome_influence.influence;
-                        if (RNG.Float(uv) > better_influence)
-                                continue;
-                        var biome = biomes[biome_influence.biome_type_index];
-                        var object_inst_data = biome.objects_data.GetTree(world_pos_3d, terrain_aspects);
-
-                        if (object_inst_data == null)
-                                continue;
-
-                        if (!is_margin)
-                        {
-                                if (instances_data_for_object_type.TryGetValue(object_inst_data.Value.obj, out var object_type_array))
-                                {
-                                        object_type_array.Add(object_inst_data.Value);
-                                }
-                                else
-                                {
-                                        List<ObjectInstantiationData> list = [object_inst_data.Value];
-                                        instances_data_for_object_type.Add(object_inst_data.Value.obj, list);
-                                }
-                        }
-
-                        grid[grid_pos]!.Add(new(world_pos_2d, minimal_tree_spacing_sqrt));
-                        break;
-                }
-
-        }
-        private bool IsPosValid(Vector2 pos, float main_min_distance_sqrt, Vector2I grid_pos, ObjectsSpacingGrid grid)
-        {
-                for (int x = -1; x <= 1; x++)
-                {
-                        for (int y = -1; y <= 1; y++)
-                        {
-                                var cell = grid[grid_pos + new Vector2I(x, y)];
-                                if (cell == null)
-                                        continue;
-                                if (!IsFarEnoughtFromObjects(pos, main_min_distance_sqrt, cell))
-                                        return false;
-
-                        }
-                }
-                return true;
-        }
-        private bool IsFarEnoughtFromObjects(Vector2 pos, float main_min_distance_sqrt, List<ObjectsSpacingData> to_check)
-        {
-                foreach (var obj in to_check)
-                {
-                        var spacing = Mathf.Max(main_min_distance_sqrt, obj.min_distance_sqrt);
-                        if (pos.DistanceSquaredTo(obj.pos) < spacing * spacing)
-                                return false;
-                }
-                return true;
-        }
         public class ObjectTypeSpawnData
         {
                 public int instance_count;
@@ -218,17 +52,97 @@ public partial class ObjectsGenerator : Node3D
                 }
 
         }
+
+        public ObjectTypeSpawnData[] GenerateObjectsData(int chunk_size, ThreadSafeGroundMeshGen ground_mesh_gen,
+                BiomeGenerator.OutputData biome_data, Vector2 base_world_position, Biome[] biomes, StructureGen.StructureGrid structure_grid)
+        {
+                chunk_size -= 2;
+
+                var seed = RNG.GenerateSeed(base_world_position);
+                Dictionary<TerrainObject, List<ObjectInstantiationData>> instances_data_for_object_type = [];
+
+                TreeObjectsGenerator.GenerateTreesForMeshChunk(seed, base_tree_spawn_chance, minimal_tree_spacing_sqrt, chunk_size, ground_mesh_gen,
+                                 biome_data, base_world_position, biomes, structure_grid, ref instances_data_for_object_type);
+
+                GenerateNotSpacedObjectsOfType(BiomeObjectsGenData.GetterType.grass, grass_spawn_attempts_per_mesh_chunk, seed, chunk_size, ground_mesh_gen,
+                                        biome_data, base_world_position, biomes, structure_grid, ref instances_data_for_object_type);
+
+                GenerateNotSpacedObjectsOfType(BiomeObjectsGenData.GetterType.rock, rock_spawn_attempts_per_mesh_chunk, seed, chunk_size, ground_mesh_gen,
+                                        biome_data, base_world_position, biomes, structure_grid, ref instances_data_for_object_type);
+
+
+                {
+                        var output = new ObjectTypeSpawnData[instances_data_for_object_type.Count];
+                        int i = 0;
+                        foreach (var instances_for_type in instances_data_for_object_type)
+                        {
+                                output[i] = new(instances_for_type.Key.mesh, instances_for_type.Key.collision_shape, instances_for_type.Value);
+                                i++;
+                        }
+
+                        return output;
+                }
+        }
+        public void GenerateNotSpacedObjectsOfType(BiomeObjectsGenData.GetterType object_type, int spawn_attempts_per_mesh_chunk, ulong seed, int chunk_size, ThreadSafeGroundMeshGen ground_mesh_gen,
+                BiomeGenerator.OutputData biome_data, Vector2 base_world_position, Biome[] biomes, StructureGen.StructureGrid structure_grid,
+                ref Dictionary<TerrainObject, List<ObjectInstantiationData>> instances_data_for_object_type)
+        {
+
+                GD.Seed(seed);
+                for (int i = 0; i < spawn_attempts_per_mesh_chunk; i++)
+                {
+                        Vector2 uv = new(GD.Randf(), GD.Randf());
+                        var world_pos_2d = uv * chunk_size + base_world_position;
+                        if (!structure_grid.IsObjectValid(world_pos_2d))
+                        {
+                                return;
+                        }
+
+                        var height = ground_mesh_gen.CalculateHeight(world_pos_2d, out var terrain_aspects);
+                        var biomes_influence = biome_data.GetBiomeInfluenceForUV(uv, biomes.Length);
+                        Vector3 world_pos_3d = new(world_pos_2d.X, height, world_pos_2d.Y);
+
+                        foreach (var biome_influence in biomes_influence)
+                        {
+                                var better_influence = biome_influence.influence * biome_influence.influence * biome_influence.influence;
+                                if (GD.Randf() > better_influence)
+                                        continue;
+                                var biome = biomes[biome_influence.biome_type_index];
+                                var object_inst_data = biome.objects_data.GetObjectOfType(object_type, world_pos_3d, terrain_aspects);
+
+                                if (object_inst_data == null)
+                                        continue;
+                                if (instances_data_for_object_type.TryGetValue(object_inst_data.Value.obj, out var list_of_instances))
+                                {
+                                        list_of_instances.Add(object_inst_data.Value);
+                                }
+                                else
+                                {
+                                        instances_data_for_object_type.Add(object_inst_data.Value.obj, [object_inst_data.Value]);
+                                }
+                                break;
+                        }
+
+
+
+                }
+
+        }
         private void SpawnObjectType(ObjectTypeSpawnData spawn_data, Node3D parent_for_objects)
         {
                 var mesh_instance = new MultiMeshInstance3D();
                 parent_for_objects.AddChild(mesh_instance);
-                var multi_mesh = new MultiMesh();
-                multi_mesh.Mesh = spawn_data.mesh;
-                multi_mesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
-                multi_mesh.InstanceCount = spawn_data.instance_count;
-                multi_mesh.Buffer = spawn_data.mesh_buffer;
 
-                mesh_instance.Multimesh = multi_mesh;
+                mesh_instance.Multimesh = new()
+                {
+                        Mesh = spawn_data.mesh,
+                        TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
+                        InstanceCount = spawn_data.instance_count,
+                        Buffer = spawn_data.mesh_buffer
+                };
+
+                if (spawn_data.collision_shape == null)
+                        return;
                 foreach (var collider_data in spawn_data.colliders_pos_scale)
                 {
                         var pos = new Vector3(collider_data.X, collider_data.Y, collider_data.Z);
@@ -239,6 +153,14 @@ public partial class ObjectsGenerator : Node3D
                         collision_node.Position = pos;
                         parent_for_objects.AddChild(collision_node);
                 }
+
         }
 
+        public void SpawnObjects(ObjectTypeSpawnData[] input, Node3D parent_for_objects)
+        {
+                foreach (var spawn_data in input)
+                {
+                        SpawnObjectType(spawn_data, parent_for_objects);
+                }
+        }
 }

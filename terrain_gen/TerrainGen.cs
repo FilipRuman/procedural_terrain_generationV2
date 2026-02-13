@@ -71,7 +71,7 @@ public partial class TerrainGen : Node3D
         }
 
         /// When you want to change you need to also change the value in the ground shader 
-        const int max_chunk_data_textures_count = 400;
+        const int max_chunk_data_textures_count = 517;
         double refresh_timer;
         public override void _Process(double delta)
         {
@@ -213,7 +213,7 @@ public partial class TerrainGen : Node3D
         private void ChunkDataGenerationLoop()
         {
 
-                const int ChunksGenMillisecondsDelay = 1;
+                const int ChunksGenMillisecondsDelay = 2;
                 try
                 {
 

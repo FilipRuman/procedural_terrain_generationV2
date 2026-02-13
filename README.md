@@ -3,5 +3,4 @@
 TODO:Add readme, improved version of:
 https://github.com/FilipRuman/proceduralMapGen.
 
-fix ground shader, rock and grass objects, fix lakes, rivers? 'Look at the
-memory leak problem'
+rock and grass objects, fix lakes, rivers? 'Look at the memory leak problem'

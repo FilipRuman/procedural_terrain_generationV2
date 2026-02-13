@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://cy771avr8nygp" path="res://terrain_gen/TerrainGen.cs" id="1_6jybn"]
+[ext_resource type="Texture2D" uid="uid://d3k6uofc7sr8h" path="res://skybox/daytime.hdr" id="1_y5ved"]
 [ext_resource type="PackedScene" uid="uid://mujlms5gx604" path="res://terrain_gen/chunk.tscn" id="2_84odl"]
 [ext_resource type="Resource" uid="uid://c7tligpk7bhuq" path="res://biomes/plains.tres" id="3_ak604"]
 [ext_resource type="Resource" uid="uid://bmstcmmc38flq" path="res://biomes/dry_grass.tres" id="4_ghshe"]
@@ -25,6 +26,29 @@
 [ext_resource type="PackedScene" uid="uid://dkae88p1ukmiq" path="res://Lake water.tscn" id="19_meb7l"]
 [ext_resource type="Script" uid="uid://b7vnabd1g6tr8" path="res://terrain_gen/structures/StructureGen.cs" id="20_84odl"]
 [ext_resource type="Resource" uid="uid://c35matxsgkavl" path="res://structures/test.tres" id="21_ak604"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_kv3aw"]
+panorama = ExtResource("1_y5ved")
+
+[sub_resource type="Sky" id="Sky_o7u2a"]
+sky_material = SubResource("PanoramaSkyMaterial_kv3aw")
+
+[sub_resource type="Environment" id="Environment_ijoax"]
+background_mode = 2
+sky = SubResource("Sky_o7u2a")
+ambient_light_source = 3
+reflected_light_source = 2
+tonemap_mode = 2
+tonemap_exposure = 0.75
+ssr_enabled = true
+ssao_enabled = true
+ssil_enabled = true
+sdfgi_enabled = true
+sdfgi_min_cell_size = 16.17
+glow_enabled = true
+fog_aerial_perspective = 1.0
+fog_depth_begin = 109.8
+fog_depth_end = 229.5
 
 [sub_resource type="Gradient" id="Gradient_vvi4u"]
 colors = PackedColorArray(0.92099476, 0.9209946, 0.9209946, 1, 0.6255971, 0.6255971, 0.6255971, 1)
@@ -227,6 +251,7 @@ height = 33.682
 [sub_resource type="SphereMesh" id="SphereMesh_ak604"]
 
 [node name="Node3D" type="Node3D" unique_id=1029520809]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=717498777]
 transform = Transform3D(-0.4296432, -0.7429186, 0.5133036, 0.15234157, 0.50066185, 0.8521337, -0.8900568, 0.44431055, -0.10192859, 0, 0, 1.0228882)
@@ -235,20 +260,20 @@ light_indirect_energy = 6.146
 light_volumetric_fog_energy = 1.161
 light_specular = 0.202
 shadow_enabled = true
-shadow_bias = 1.897
-shadow_normal_bias = 4.298
-shadow_transmittance_bias = 0.635
-shadow_blur = 5.61
-directional_shadow_split_1 = 0.606
-directional_shadow_split_2 = 0.86
-directional_shadow_split_3 = 0.627
-directional_shadow_fade_start = 0.83
-directional_shadow_max_distance = 49.1
-directional_shadow_pancake_size = 2.7
+directional_shadow_mode = 0
+directional_shadow_split_1 = 1.0
+directional_shadow_split_2 = 1.0
+directional_shadow_split_3 = 1.0
+directional_shadow_fade_start = 0.867
+directional_shadow_max_distance = 33.8
+directional_shadow_pancake_size = 0.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="DirectionalLight3D" unique_id=1705210602]
+environment = SubResource("Environment_ijoax")
 
 [node name="terrain gen" type="Node3D" parent="." unique_id=1284310374 node_paths=PackedStringArray("player", "biome_generator", "ground_mesh_gen", "terrain_aspects_solver", "objects_generator", "water_gen", "structure_gen")]
 script = ExtResource("1_6jybn")
-max_chunks_processed_per_frame = 3
+max_chunks_processed_per_frame = 5
 player = NodePath("../Player2")
 chunk_prefab = ExtResource("2_84odl")
 biome_generator = NodePath("../biome gen")
@@ -257,8 +282,8 @@ terrain_aspects_solver = NodePath("../terrain aspects solver")
 objects_generator = NodePath("../objects gen")
 water_gen = NodePath("../water gen")
 structure_gen = NodePath("../structure gen")
-player_pos = Vector2(14098.779, 9432.562)
-view_distance = 5
+player_pos = Vector2(23499.78, 2023.6873)
+view_distance = 13
 chunk_size = 160
 biomes = [ExtResource("5_ghshe"), ExtResource("4_ghshe"), ExtResource("5_fv2he"), ExtResource("4_vimvf"), ExtResource("3_ak604"), ExtResource("8_5smuj"), ExtResource("9_y5ved")]
 ground_mesh_resolution = 80
@@ -303,7 +328,7 @@ biome_map_resolution = 20
 biome_transitions_smoothness = 0.1
 
 [node name="Player2" type="CharacterBody3D" parent="." unique_id=1077830235 node_paths=PackedStringArray("camera")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14098.779, 0, 9432.562)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23499.78, 723.1982, 2023.6873)
 floor_stop_on_slope = false
 floor_constant_speed = true
 floor_block_on_wall = false

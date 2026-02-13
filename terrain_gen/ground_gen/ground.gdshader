@@ -63,8 +63,8 @@ uniform sampler2D rock_texture;
 uniform sampler2D rock_normal_map;
 uniform sampler2D rock_roughness;
 
-
-const int chunk_data_maps_count = 400;
+//WARN: this value HAS TO BE THE SAME as the one in the TerrianGen.cs !!!
+const int chunk_data_maps_count = 517;
 instance uniform int chunk_data_map_index;
 // repeat is disabled, so that the data from one end of the chunk doesn't influence data form the other end of the chunk
 uniform sampler2D[chunk_data_maps_count] map_1:repeat_disable;
@@ -145,30 +145,6 @@ NormalAlbedoRoughness collect_biome_data(vec4 biome_data_1, vec4 biome_data_2,ve
 
 	return NormalAlbedoRoughness(output_normal, output_color, output_roughness);
 }
-vec4 sample_texture_filtered(sampler2D tex, vec2 uv) {
-    const float margin = 1.0;
-    float tex_size = float(biome_texture_resolution);
-    float inner_size = tex_size - 2.0 * margin;
-    
-    // Remap UV from [0,1] to the inner region, accounting for margin
-    vec2 remapped_uv = (uv * inner_size + margin) / tex_size;
-    
-    // Calculate pixel coordinate
-    vec2 pixel_coord = remapped_uv * tex_size - 0.5;
-    ivec2 base = ivec2(floor(pixel_coord));
-    vec2 frac = fract(pixel_coord);
-    
-    // Fetch 4 texels (these can reach into the margin)
-    vec4 s00 = texelFetch(tex, base + ivec2(0, 0), 0);
-    vec4 s10 = texelFetch(tex, base + ivec2(1, 0), 0);
-    vec4 s01 = texelFetch(tex, base + ivec2(0, 1), 0);
-    vec4 s11 = texelFetch(tex, base + ivec2(1, 1), 0);
-    
-    // Bilinear interpolation
-    vec4 s0 = mix(s00, s10, frac.x);
-    vec4 s1 = mix(s01, s11, frac.x);
-    return mix(s0, s1, frac.y);
-}
 
 void fragment(){
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -176,8 +152,8 @@ void fragment(){
 	vec3 adjusted_normal = pow(abs(world_normal), vec3(8.0));
 
 
-	vec4 biome_data_1 =sample_texture_filtered(map_1[chunk_data_map_index],UV);
-	vec4 biome_data_2 =sample_texture_filtered(map_2[chunk_data_map_index],UV);
+	vec4 biome_data_1 =texture(map_1[chunk_data_map_index],UV);
+	vec4 biome_data_2 =texture(map_2[chunk_data_map_index],UV);
 	NormalAlbedoRoughness output = collect_biome_data(biome_data_1, biome_data_2, world_pos, world_normal, adjusted_normal);
 	ALBEDO = output.albedo;
 	NORMAL_MAP = output.normal;

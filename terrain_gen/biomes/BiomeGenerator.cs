@@ -6,6 +6,7 @@ using Godot;
 public partial class BiomeGenerator : Node
 {
 
+        private const int margin_pixels = 0;
         private const int COLOR_CHANNELS = 4;
         [Export] int biome_map_resolution;
         [Export] int backup_biome_index;
@@ -35,7 +36,7 @@ public partial class BiomeGenerator : Node
                 {
                         int x = Mathf.FloorToInt(map_resolution * uv.X);
                         int y = Mathf.FloorToInt(map_resolution * uv.Y);
-                        int base_index = x + y * map_resolution;
+                        int base_index = x + margin_pixels + (y + margin_pixels) * (map_resolution + 2 * margin_pixels);
                         List<BiomeInfluenceOutput> output = new();
                         for (int biome = 0; biome < biome_count; biome++)
                         {
@@ -63,13 +64,13 @@ public partial class BiomeGenerator : Node
                         {
                                 GD.PushWarning($"The requested biome map texture index was outside of the array, returning blank texture\n requested-{map_index} length- {biome_maps.Length}");
 
-                                var image = Image.CreateEmpty(map_resolution, map_resolution, false, Image.Format.Rgba8);
+                                var image = Image.CreateEmpty(map_resolution + margin_pixels * 2, map_resolution + margin_pixels * 2, false, Image.Format.Rgba8);
                                 return ImageTexture.CreateFromImage(image);
                         }
                         else
                         {
                                 var data = biome_maps[map_index];
-                                var image = Image.CreateFromData(map_resolution, map_resolution, false, Image.Format.Rgba8, data);
+                                var image = Image.CreateFromData(map_resolution + margin_pixels * 2, map_resolution + margin_pixels * 2, false, Image.Format.Rgba8, data);
                                 return ImageTexture.CreateFromImage(image);
 
                         }
@@ -123,10 +124,10 @@ public partial class BiomeGenerator : Node
                                     get_aspect_influence(biome.preferred_moisture, terrain_aspects.moisture) *
                                     get_aspect_influence(biome.preferred_elevation, terrain_aspects.elevation) *
                                     get_aspect_influence(biome.preferred_temperature, terrain_aspects.temperature);
-                        // if (influence <= 0.05)
-                        // {
-                        //     continue;
-                        // }
+                        if (influence == 0)
+                        {
+                                continue;
+                        }
                         influence_sum += influence;
                         output.Add(new(biome, influence));
                 }
@@ -145,7 +146,8 @@ public partial class BiomeGenerator : Node
         }
         public static byte[][] InitializeBiomeMapArray(int maps_count, int points_per_axis)
         {
-                int map_size = points_per_axis * points_per_axis * COLOR_CHANNELS;
+
+                int map_size = (points_per_axis + margin_pixels * 2) * (points_per_axis + margin_pixels * 2) * COLOR_CHANNELS;
                 byte[][] biome_maps = new byte[maps_count][];
 
                 for (int i = 0; i < maps_count; i++)
@@ -165,15 +167,15 @@ public partial class BiomeGenerator : Node
                 var biome_maps_count = Mathf.CeilToInt((float)biomes.Length / COLOR_CHANNELS);
                 byte[][] biome_maps = InitializeBiomeMapArray(biome_maps_count, points_per_axis);
 
-                for (int x = 0; x < points_per_axis; x++)
+                for (int x = -margin_pixels; x < points_per_axis + margin_pixels; x++)
                 {
-                        for (int y = 0; y < points_per_axis; y++)
+                        for (int y = -margin_pixels; y < points_per_axis + margin_pixels; y++)
                         {
                                 Vector2 world_pos = new Vector2(x, y) * point_size + base_world_position;
 
 
                                 List<BiomeInfluence> biome_influences = GetBiomeInfluences(terrain_aspects_solver.SolveForPos(world_pos), biomes);
-                                int base_index = (x + y * points_per_axis) * COLOR_CHANNELS;
+                                int base_index = (x + margin_pixels + (y + margin_pixels) * (points_per_axis + 2 * margin_pixels)) * COLOR_CHANNELS;
 
                                 foreach (var biome_influence in biome_influences)
                                 {

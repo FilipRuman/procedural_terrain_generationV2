@@ -217,8 +217,15 @@ public partial class TerrainGen : Node3D
                 try
                 {
 
+                        if (water_gen.mesh_chunks_per_water_chunk < structure_gen.mesh_chunks_per_structure_grid_cell)
+                        {
+                                /// This is required because otherwise the  structure gen will try to access water chunks that are outside the view distance.
+                                /// This happens because the structure gen needs to check every structure whether it is under the water or not, when generating it's position.
+                                GD.Print("'WaterGen.mesh_chunks_per_water_chunk' has to be greater than the 'StructureGen.mesh_chunks_per_structure_grid_cell'");
+                        }
+
                         var water_data = new WaterGen.WaterDataGrid(water_gen, ground_mesh_gen, chunk_size, player_pos);
-                        var structure_grid = new StructureGen.StructureGrid(structure_gen, ground_mesh_gen, chunk_size, player_pos);
+                        var structure_grid = new StructureGen.StructureGrid(structure_gen, ground_mesh_gen, chunk_size, player_pos, water_data);
                         var last_player_chunk_grid_pos = world_to_grid_pos(player_pos);
                         // Initial terrain generation
                         {
@@ -302,7 +309,7 @@ public partial class TerrainGen : Node3D
                 }
         }
         private void RunTerrainGeneration(Vector2I[] chunks_to_generate,
-    Vector2I player_pos_snapped_to_chunk, WaterGen.WaterDataGrid water_data, StructureGen.StructureGrid structure_grid)
+    Vector2I player_pos_snapped_to_chunk, WaterGen.WaterDataGrid water_grid, StructureGen.StructureGrid structure_grid)
         {
                 var stopwatch = System.Diagnostics.Stopwatch.StartNew();
                 Parallel.For(0, chunks_to_generate.Length, i =>
@@ -310,7 +317,7 @@ public partial class TerrainGen : Node3D
                           var chunk = chunks_to_generate[i];
                           Vector2I chunk_world_position = chunk + player_pos_snapped_to_chunk;
 
-                          var chunk_water_data = water_data[chunk_world_position];
+                          var chunk_water_data = water_grid[chunk_world_position];
 
                           structure_grid[chunk_world_position].structure_gen_for_mesh_chunk_world_pos.TryGetValue(chunk_world_position, out var chunk_structure_data);
                           // if (chunk_water_data.world_pos_lakes.ContainsKey(chunk_world_position))
@@ -319,7 +326,7 @@ public partial class TerrainGen : Node3D
                           var biome_data = biome_generator.GenerateMaps(terrain_aspects_solver, new Vector2(chunk_world_position.X, chunk_world_position.Y), chunk_size + 1, biomes);
                           var mesh_data = ground_mesh_gen.GenerateChunk(chunk_world_position, ground_mesh_resolution, chunk_size, chunk_water_data);
 
-                          var objects_data = objects_generator.GenerateObjectsData(chunk_size, ground_mesh_gen, biome_data, chunk_world_position, biomes, structure_grid);
+                          var objects_data = objects_generator.GenerateObjectsData(chunk_size, ground_mesh_gen, biome_data, chunk_world_position, biomes, structure_grid, water_grid);
 
                           completed_chunks.Enqueue(new(mesh_data, biome_data, chunk_world_position, objects_data, chunk_structure_data));
                   });

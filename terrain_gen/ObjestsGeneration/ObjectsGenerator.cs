@@ -54,7 +54,7 @@ public partial class ObjectsGenerator : Node3D
         }
 
         public ObjectTypeSpawnData[] GenerateObjectsData(int chunk_size, ThreadSafeGroundMeshGen ground_mesh_gen,
-                BiomeGenerator.OutputData biome_data, Vector2 base_world_position, Biome[] biomes, StructureGen.StructureGrid structure_grid)
+                BiomeGenerator.OutputData biome_data, Vector2 base_world_position, Biome[] biomes, StructureGen.StructureGrid structure_grid, WaterGen.WaterDataGrid water_grid)
         {
                 chunk_size -= 2;
 
@@ -62,13 +62,13 @@ public partial class ObjectsGenerator : Node3D
                 Dictionary<TerrainObject, List<ObjectInstantiationData>> instances_data_for_object_type = [];
 
                 TreeObjectsGenerator.GenerateTreesForMeshChunk(seed, base_tree_spawn_chance, minimal_tree_spacing_sqrt, chunk_size, ground_mesh_gen,
-                                 biome_data, base_world_position, biomes, structure_grid, ref instances_data_for_object_type);
+                                 biome_data, base_world_position, biomes, structure_grid, water_grid, ref instances_data_for_object_type);
 
                 GenerateNotSpacedObjectsOfType(BiomeObjectsGenData.GetterType.grass, grass_spawn_attempts_per_mesh_chunk, seed, chunk_size, ground_mesh_gen,
-                                        biome_data, base_world_position, biomes, structure_grid, ref instances_data_for_object_type);
+                                        biome_data, base_world_position, biomes, structure_grid, water_grid, ref instances_data_for_object_type);
 
                 GenerateNotSpacedObjectsOfType(BiomeObjectsGenData.GetterType.rock, rock_spawn_attempts_per_mesh_chunk, seed, chunk_size, ground_mesh_gen,
-                                        biome_data, base_world_position, biomes, structure_grid, ref instances_data_for_object_type);
+                                        biome_data, base_world_position, biomes, structure_grid, water_grid, ref instances_data_for_object_type);
 
 
                 {
@@ -84,7 +84,7 @@ public partial class ObjectsGenerator : Node3D
                 }
         }
         public void GenerateNotSpacedObjectsOfType(BiomeObjectsGenData.GetterType object_type, int spawn_attempts_per_mesh_chunk, ulong seed, int chunk_size, ThreadSafeGroundMeshGen ground_mesh_gen,
-                BiomeGenerator.OutputData biome_data, Vector2 base_world_position, Biome[] biomes, StructureGen.StructureGrid structure_grid,
+                BiomeGenerator.OutputData biome_data, Vector2 base_world_position, Biome[] biomes, StructureGen.StructureGrid structure_grid, WaterGen.WaterDataGrid water_grid,
                 ref Dictionary<TerrainObject, List<ObjectInstantiationData>> instances_data_for_object_type)
         {
 
@@ -97,8 +97,11 @@ public partial class ObjectsGenerator : Node3D
                         {
                                 return;
                         }
-
                         var height = ground_mesh_gen.CalculateHeight(world_pos_2d, out var terrain_aspects);
+                        if (water_grid.IsObjectUnderTheWater(new(world_pos_2d.X, height, world_pos_2d.Y)))
+                        {
+                                return;
+                        }
                         var biomes_influence = biome_data.GetBiomeInfluenceForUV(uv, biomes.Length);
                         Vector3 world_pos_3d = new(world_pos_2d.X, height, world_pos_2d.Y);
 

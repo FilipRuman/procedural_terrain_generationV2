@@ -9,7 +9,7 @@ public partial class WaterGen : Node3D
         [Export] Material test_material2;
         public float ChunkSize(float mesh_chunk_size)
         {
-                return mesh_chunk_size * mesh_chunks_per_river_chunk;
+                return mesh_chunk_size * mesh_chunks_per_water_chunk;
         }
         public void HandleSpawningForChunk(Vector2I mesh_chunk_world_pos, LakeSpawningData lake_spawning_data, Node3D parent_node)
         {
@@ -103,25 +103,24 @@ public partial class WaterGen : Node3D
 
         [Export] float lake_height;
         [Export] float river_start_height;
-        [Export] uint mesh_chunks_per_river_chunk;
+        [Export] public uint mesh_chunks_per_water_chunk;
         [Export] uint height_checks_per_chunk_sqrt;
         [Export] uint height_checks_for_lake_system_sqrt;
         [Export] float lake_water_level_offset;
-        public class LakeSpawningData
+        public class LakeSpawningData(float water_height, float water_mesh_margin)
         {
                 float min_x = float.MaxValue;
                 float max_x = float.MinValue;
-
                 float min_z = float.MaxValue;
                 float max_z = float.MinValue;
-                public float water_height;
-                public List<Vector3> test_points;
+                public float water_height = water_height;
+                public List<Vector3> test_points = [];
                 public List<Vector3> test_points2;
                 public Vector3 scale;
                 public Vector3 pos;
-                float water_mesh_margin;
+                private readonly float water_mesh_margin = water_mesh_margin;
 
-                public void handle_new_vertex(Vector3 vertex)
+                public void HandleNewVertex(Vector3 vertex)
                 {
 
                         if (vertex.Y > water_height)
@@ -135,47 +134,52 @@ public partial class WaterGen : Node3D
                         // test_points.Add(new(vertex.X, water_height, vertex.Z));
                         test_points.Add(vertex);
                 }
-                public LakeSpawningData(float water_height, float water_mesh_margin)
-                {
-                        // GD.Print($"LakeSpawningData: {water_height}");
-                        test_points = new();
-                        this.water_height = water_height;
-                        this.water_mesh_margin = water_mesh_margin;
-                }
+
                 public void FinishCalculation()
                 {
-                        var length_x = (max_x - min_x) + water_mesh_margin;
-                        var length_z = (max_z - min_z) + water_mesh_margin;
+                        var length_x = max_x - min_x + water_mesh_margin;
+                        var length_z = max_z - min_z + water_mesh_margin;
                         scale = new(length_x, 1, length_z);
                         pos = new Vector3(min_x - water_mesh_margin / 2f + length_x / 2f, water_height, min_z - water_mesh_margin / 2f + length_z / 2f);
                 }
         }
-        public class OutputData
+        public class OutputData(Dictionary<Vector2I, LakeData> world_pos_lakes)
         {
-                public Dictionary<Vector2I, LakeData> world_pos_lakes;
-                public OutputData(Dictionary<Vector2I, LakeData> world_pos_lakes)
-                {
-                        this.world_pos_lakes = world_pos_lakes;
-                }
+                public Dictionary<Vector2I, LakeData> world_pos_lakes = world_pos_lakes;
         }
         public class WaterDataGrid
         {
                 const int grid_width = 3;
-                OutputData[] grid;
+                private readonly OutputData[] grid;
                 private Vector2I current_player_grid_pos;
 
-                private int grid_cell_size;
-                private WaterGen water_gen;
-                private ThreadSafeGroundMeshGen mesh_gen;
-                private int mesh_chunk_size;
+                private readonly int grid_cell_size;
+                private readonly WaterGen water_gen;
+                private readonly ThreadSafeGroundMeshGen mesh_gen;
+                private readonly int mesh_chunk_size;
                 public OutputData this[Vector2I world_pos]
                 {
                         get
                         {
                                 var global_grid_pos = world_pos / grid_cell_size;
                                 var relative_grid_pos = global_grid_pos - current_player_grid_pos;
+
+                                GD.Print($"world_pos:{world_pos} global_grid_pos:{global_grid_pos} grid_cell_size{grid_cell_size} current_player_grid_pos:{current_player_grid_pos}, min world pos_x: {(current_player_grid_pos.X - 1) * grid_cell_size}");
                                 return grid[relative_grid_pos.X + 1 + (relative_grid_pos.Y + 1) * grid_width];
                         }
+
+                }
+                public bool IsObjectUnderTheWater(Vector3 world_pos_f)
+                {
+                        Vector2I world_pos = new((int)world_pos_f.X, (int)world_pos_f.Z);
+                        Vector3 mesh_chunk_pos_f = world_pos_f / mesh_chunk_size;
+                        Vector2I mesh_chunk_pos = new((int)mesh_chunk_pos_f.X, (int)mesh_chunk_pos_f.Z);
+                        Vector2I mesh_chunk_world_pos = mesh_chunk_pos * mesh_chunk_size;
+                        if (this[world_pos].world_pos_lakes.TryGetValue(mesh_chunk_world_pos, out var lake))
+                        {
+                                return lake.water_height > world_pos_f.Y;
+                        }
+                        return false;
 
                 }
 
@@ -216,7 +220,7 @@ public partial class WaterGen : Node3D
                 }
                 public WaterDataGrid(WaterGen water_gen, ThreadSafeGroundMeshGen mesh_gen, int mesh_chunk_size, Vector2 player_world_pos)
                 {
-                        this.grid_cell_size = (int)water_gen.mesh_chunks_per_river_chunk * mesh_chunk_size;
+                        grid_cell_size = (int)water_gen.mesh_chunks_per_water_chunk * mesh_chunk_size;
                         this.water_gen = water_gen;
                         this.mesh_gen = mesh_gen;
                         this.mesh_chunk_size = mesh_chunk_size;
@@ -240,11 +244,11 @@ public partial class WaterGen : Node3D
                 List<LakeData> lakes = new();
                 List<Vector2I> river_start_points = new();
 
-                ChunkHeightGrid average_height_grid = new(mesh_chunks_per_river_chunk);
-                ChunkHeightGrid min_height_grid = new(mesh_chunks_per_river_chunk);
-                for (int x = 0; x < mesh_chunks_per_river_chunk; x++)
+                ChunkHeightGrid average_height_grid = new(mesh_chunks_per_water_chunk);
+                ChunkHeightGrid min_height_grid = new(mesh_chunks_per_water_chunk);
+                for (int x = 0; x < mesh_chunks_per_water_chunk; x++)
                 {
-                        for (int y = 0; y < mesh_chunks_per_river_chunk; y++)
+                        for (int y = 0; y < mesh_chunks_per_water_chunk; y++)
                         {
                                 var chunk_base_pos = world_base_pos + new Vector2(x, y) * mesh_chunk_size;
                                 GetChunkHeightStats(mesh_chunk_size, chunk_base_pos, mesh_gen, out float average_height, out float min_height);

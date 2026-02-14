@@ -366,7 +366,7 @@ test_material = SubResource("StandardMaterial3D_6jybn")
 test_material2 = SubResource("StandardMaterial3D_84odl")
 lake_height = 180.0
 river_start_height = 200.0
-mesh_chunks_per_river_chunk = 20
+mesh_chunks_per_water_chunk = 20
 height_checks_per_chunk_sqrt = 10
 height_checks_for_lake_system_sqrt = 20
 
@@ -378,7 +378,7 @@ skeleton = NodePath("")
 [node name="structure gen" type="Node3D" parent="." unique_id=1271643402]
 script = ExtResource("20_84odl")
 structure_pool = [ExtResource("21_ak604")]
-mesh_chunks_per_structure_grid_cell = 30
+mesh_chunks_per_structure_grid_cell = 20
 
 [node name="Node3D" type="Node3D" parent="." unique_id=1978462520]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2505, 306.99597, -1978)

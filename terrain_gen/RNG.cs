@@ -21,12 +21,14 @@ public static class RNG
 
         public static int Range(int min, int max)
         {
-                return (int)GD.Randi() % (max - min) + min;
+                // the Abs is needed because the GD.Randi Generates a uint value so when we convert it into a int it can overflow and become negative
+                return Mathf.Abs((int)GD.Randi()) % (max - min) + min;
         }
         public static int Range(Vector2 seed, int min, int max)
         {
+                // the Abs is needed because the GD.Randi Generates a uint value so when we convert it into a int it can overflow and become negative
                 GD.Seed(GenerateSeed(seed));
-                return (int)GD.Randi() % (max - min) + min;
+                return Mathf.Abs((int)GD.Randi()) % (max - min) + min;
         }
         public static float Float(Vector2 seed)
         {

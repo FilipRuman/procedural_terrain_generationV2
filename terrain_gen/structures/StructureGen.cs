@@ -5,7 +5,7 @@ public partial class StructureGen : Node3D
 {
         [Export] StructureType[] structure_pool;
 
-        [Export] int mesh_chunks_per_structure_grid_cell;
+        [Export] public int mesh_chunks_per_structure_grid_cell;
 
         public class StructureChunk
         {
@@ -28,6 +28,7 @@ public partial class StructureGen : Node3D
                 private readonly StructureGen structure_gen;
                 private readonly ThreadSafeGroundMeshGen mesh_gen;
                 private readonly int mesh_chunk_size;
+                private readonly WaterGen.WaterDataGrid water_grid;
                 public bool IsObjectValid(Vector2 world_pos_f)
                 {
                         Vector2I world_pos = (Vector2I)world_pos_f;
@@ -87,14 +88,16 @@ public partial class StructureGen : Node3D
                         }
 
                 }
-                public StructureGrid(StructureGen structure_gen, ThreadSafeGroundMeshGen mesh_gen, int mesh_chunk_size, Vector2 player_world_pos)
+                public StructureGrid(StructureGen structure_gen, ThreadSafeGroundMeshGen mesh_gen, int mesh_chunk_size, Vector2 player_world_pos, WaterGen.WaterDataGrid water_grid)
                 {
+                        this.water_grid = water_grid;
                         grid_cell_size = structure_gen.mesh_chunks_per_structure_grid_cell * mesh_chunk_size;
                         this.structure_gen = structure_gen;
                         this.mesh_gen = mesh_gen;
                         this.mesh_chunk_size = mesh_chunk_size;
 
                         current_player_grid_pos = new Vector2I((int)player_world_pos.X / grid_cell_size, (int)player_world_pos.Y / grid_cell_size);
+                        GD.Print($"struct min grid pos_x: {(current_player_grid_pos.X - 1) * grid_cell_size} player grid pos: {current_player_grid_pos} grid_cell_size{grid_cell_size} ");
                         grid = new StructureChunk[grid_width * grid_width];
                         for (int x = 0; x < grid_width; x++)
                         {
@@ -115,6 +118,7 @@ public partial class StructureGen : Node3D
                         GD.Seed(RNG.GenerateSeed(base_world_pos));
                         foreach (var structure_type in structure_gen.structure_pool)
                         {
+
                                 for (int i = 0; i < structure_type.generation_attempts_per_structure_chunk; i++)
                                 {
 
@@ -122,6 +126,7 @@ public partial class StructureGen : Node3D
                                                 continue;
                                         if (structure_gen.mesh_chunks_per_structure_grid_cell < 2 * structure_type.min_distance_from_grid_border_in_mesh_chunks)
                                                 GD.PrintErr("structure_gen.mesh_chunks_per_structure_grid_cell has to ge at least 2x the structure_type.min_distance_from_grid_border_in_mesh_chunks.");
+
 
                                         var mesh_chunk_x = RNG.Range(structure_type.min_distance_from_grid_border_in_mesh_chunks, structure_gen.mesh_chunks_per_structure_grid_cell - structure_type.min_distance_from_grid_border_in_mesh_chunks);
                                         var mesh_chunk_y = RNG.Range(structure_type.min_distance_from_grid_border_in_mesh_chunks, structure_gen.mesh_chunks_per_structure_grid_cell - structure_type.min_distance_from_grid_border_in_mesh_chunks);
@@ -137,6 +142,15 @@ public partial class StructureGen : Node3D
                                         if (!structure_instance.IsValid(mesh_gen))
                                                 continue;
                                         structure_instance.base_height = mesh_gen.CalculateHeight(structure_world_pos);
+
+
+                                        GD.Print($"structure instance: structure_world_pos{structure_world_pos} base_chunk_world_pos{base_chunk_world_pos}  mesh_chunk_x{mesh_chunk_x} mesh_chunk_y {mesh_chunk_y}");
+
+                                        GD.Print($"1:{structure_type.min_distance_from_grid_border_in_mesh_chunks} 2: {structure_gen.mesh_chunks_per_structure_grid_cell - structure_type.min_distance_from_grid_border_in_mesh_chunks} ");
+                                        if (water_grid.IsObjectUnderTheWater(new(structure_world_pos.X, structure_instance.base_height, structure_world_pos.Y)))
+                                        {
+                                                continue;
+                                        }
 
                                         bool there_already_was_struct_on_one_of_the_chunks = false;
 

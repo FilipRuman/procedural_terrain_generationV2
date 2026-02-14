@@ -52,7 +52,7 @@ public static class TreeObjectsGenerator
                 return dist_max / Mathf.Sqrt2;
         }
         public static void GenerateTreesForMeshChunk(ulong seed, float base_tree_spawn_chance, float minimal_tree_spacing_sqrt, int chunk_size, ThreadSafeGroundMeshGen ground_mesh_gen,
-                BiomeGenerator.OutputData biome_data, Vector2 base_world_position, Biome[] biomes, StructureGen.StructureGrid structure_grid,
+                BiomeGenerator.OutputData biome_data, Vector2 base_world_position, Biome[] biomes, StructureGen.StructureGrid structure_grid, WaterGen.WaterDataGrid water_grid,
                 ref Dictionary<TerrainObject, List<ObjectInstantiationData>> instances_data_for_object_type)
         {
 
@@ -69,14 +69,14 @@ public static class TreeObjectsGenerator
                                 bool is_margin = x == -1 || y == -1 || x == grid_width - 2 || y == grid_width - 2;
 
                                 GenerateForGridCell(minimal_tree_spacing_sqrt, base_cell_world_pos, new(x, y), grid_cell_width, is_margin,
-                                        biomes, ground_mesh_gen, biome_data, structure_grid, ref grid, ref instances_data_for_object_type);
+                                        biomes, ground_mesh_gen, biome_data, structure_grid, water_grid, ref grid, ref instances_data_for_object_type);
                                 GD.Seed(seed);
                         }
                 }
         }
 
         private static void GenerateForGridCell(float minimal_tree_spacing_sqrt, Vector2 base_cell_world_pos, Vector2I grid_pos, float grid_cell_width, bool is_margin,
-            Biome[] biomes, ThreadSafeGroundMeshGen ground_mesh_gen, BiomeGenerator.OutputData biome_data, StructureGen.StructureGrid structure_grid,
+            Biome[] biomes, ThreadSafeGroundMeshGen ground_mesh_gen, BiomeGenerator.OutputData biome_data, StructureGen.StructureGrid structure_grid, WaterGen.WaterDataGrid water_grid,
              ref ObjectsSpacingGrid grid, ref Dictionary<TerrainObject, List<ObjectInstantiationData>> instances_data_for_object_type)
         {
 
@@ -92,6 +92,10 @@ public static class TreeObjectsGenerator
                 }
 
                 var height = ground_mesh_gen.CalculateHeight(world_pos_2d, out var terrain_aspects);
+                if (water_grid.IsObjectUnderTheWater(new(world_pos_2d.X, height, world_pos_2d.Y)))
+                {
+                        return;
+                }
                 var biomes_influence = biome_data.GetBiomeInfluenceForUV(uv, biomes.Length);
                 Vector3 world_pos_3d = new(world_pos_2d.X, height, world_pos_2d.Y);
 

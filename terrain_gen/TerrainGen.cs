@@ -389,8 +389,8 @@ public partial class TerrainGen : Node3D
                 free_data_maps = new(Enumerable.Range(0, max_chunk_data_textures_count));
                 map_1 = new ImageTexture[max_chunk_data_textures_count];
                 map_2 = new ImageTexture[max_chunk_data_textures_count];
-                chunk_change_for_position_delta = new();
-                chunk_per_world_position = new();
+                chunk_change_for_position_delta = [];
+                chunk_per_world_position = [];
                 Vector2I delta = new(-1, 0);
                 chunk_change_for_position_delta.Add(delta, CaluclateChunkChangeForPosDelta(delta));
                 delta = new(-1, 1);
@@ -414,10 +414,7 @@ public partial class TerrainGen : Node3D
 
         private void Init()
         {
-                if (chunk_data_gen_task == null)
-                {
-                        chunk_data_gen_task = Task.Run(() => ChunkDataGenerationLoop());
-                }
+                chunk_data_gen_task ??= Task.Run(ChunkDataGenerationLoop);
 
                 var biome_albedo_textures = new Texture[biomes.Length];
                 var biome_normal_textures = new Texture[biomes.Length];

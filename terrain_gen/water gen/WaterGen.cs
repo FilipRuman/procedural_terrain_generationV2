@@ -1,73 +1,19 @@
 using System.Collections.Generic;
-using System.Linq;
 using Godot;
+using static LakeGen;
 [Tool]
 public partial class WaterGen : Node3D
 {
-        [Export] PackedScene LakeWater1x1;
+        [Export] public RiverGen river_gen;
+        [Export] LakeGen lake_gen;
         [Export] Material test_material;
-        [Export] Material test_material2;
         public float ChunkSize(float mesh_chunk_size)
         {
                 return mesh_chunk_size * mesh_chunks_per_water_chunk;
         }
-        public void HandleSpawningForChunk(Vector2I mesh_chunk_world_pos, LakeSpawningData lake_spawning_data, Node3D parent_node)
+        public void HandleSpawningForChunk(Vector2I mesh_chunk_world_pos, LakeGen.LakeSpawningData lake_spawning_data, Node3D parent_node)
         {
-
-                var water_node = (Node3D)LakeWater1x1.Instantiate();
-                parent_node.AddChild(water_node);
-
-                water_node.Scale = lake_spawning_data.scale;
-                water_node.Position = lake_spawning_data.pos;
-                // {
-                //     var meshInstance = new MeshInstance3D();
-                //     meshInstance.Position = new(mesh_chunk_world_pos.X, lake_spawning_data.water_height, mesh_chunk_world_pos.Y);
-                //     var sphereMesh = new SphereMesh
-                //     {
-                //         Radius = 6.0f,
-                //         Height = 6.0f,  // diameter
-                //         RadialSegments = 32,
-                //         Rings = 16
-                //     };
-                //     sphereMesh.Material = test_material;
-                //
-                //     meshInstance.Mesh = sphereMesh;
-                //     AddChild(meshInstance);
-                // }
-
-                if (lake_spawning_data.test_points2 != null)
-                        foreach (var test_point in lake_spawning_data.test_points2)
-                        {
-                                var meshInstance = new MeshInstance3D();
-                                meshInstance.Position = test_point;
-                                var sphereMesh = new SphereMesh
-                                {
-                                        Radius = 4.0f,
-                                        Height = 4.0f,  // diameter
-                                        RadialSegments = 32,
-                                        Rings = 16
-                                };
-
-                                sphereMesh.Material = test_material2;
-
-                                meshInstance.Mesh = sphereMesh;
-                                AddChild(meshInstance);
-                        }
-                // foreach (var test_point in lake_spawning_data.test_points)
-                // {
-                //     var meshInstance = new MeshInstance3D();
-                //     meshInstance.Position = test_point;
-                //     var sphereMesh = new SphereMesh
-                //     {
-                //         Radius = 1.0f,
-                //         Height = 2.0f,  // diameter
-                //         RadialSegments = 32,
-                //         Rings = 16
-                //     };
-                //
-                //     meshInstance.Mesh = sphereMesh;
-                //     AddChild(meshInstance);
-                // }
+                lake_gen.SpawnLake(parent_node, lake_spawning_data);
         }
         public struct ChunkHeightGrid
         {
@@ -82,6 +28,18 @@ public partial class WaterGen : Node3D
                         }
                         return this[x, y];
 
+                }
+
+                public float this[Vector2I pos]
+                {
+                        get
+                        {
+                                return grid[pos.X + pos.Y * grid_width];
+                        }
+                        set
+                        {
+                                grid[pos.X + pos.Y * grid_width] = value;
+                        }
                 }
                 public float this[int x, int y]
                 {
@@ -101,51 +59,16 @@ public partial class WaterGen : Node3D
                 }
         }
 
-        [Export] float lake_height;
-        [Export] float river_start_height;
         [Export] public uint mesh_chunks_per_water_chunk;
+
         [Export] uint height_checks_per_chunk_sqrt;
         [Export] uint height_checks_for_lake_system_sqrt;
-        [Export] float lake_water_level_offset;
-        public class LakeSpawningData(float water_height, float water_mesh_margin)
-        {
-                float min_x = float.MaxValue;
-                float max_x = float.MinValue;
-                float min_z = float.MaxValue;
-                float max_z = float.MinValue;
-                public float water_height = water_height;
-                public List<Vector3> test_points = [];
-                public List<Vector3> test_points2;
-                public Vector3 scale;
-                public Vector3 pos;
-                private readonly float water_mesh_margin = water_mesh_margin;
 
-                public void HandleNewVertex(Vector3 vertex)
-                {
-
-                        if (vertex.Y > water_height)
-                                return;
-                        // GD.Print("handle_new_vertex- is under the water_height");
-                        // there is a faster way
-                        min_x = Mathf.Min(vertex.X, min_x);
-                        max_x = Mathf.Max(vertex.X, max_x);
-                        min_z = Mathf.Min(vertex.Z, min_z);
-                        max_z = Mathf.Max(vertex.Z, max_z);
-                        // test_points.Add(new(vertex.X, water_height, vertex.Z));
-                        test_points.Add(vertex);
-                }
-
-                public void FinishCalculation()
-                {
-                        var length_x = max_x - min_x + water_mesh_margin;
-                        var length_z = max_z - min_z + water_mesh_margin;
-                        scale = new(length_x, 1, length_z);
-                        pos = new Vector3(min_x - water_mesh_margin / 2f + length_x / 2f, water_height, min_z - water_mesh_margin / 2f + length_z / 2f);
-                }
-        }
-        public class OutputData(Dictionary<Vector2I, LakeData> world_pos_lakes)
+        public class OutputData(Dictionary<Vector2I, LakeData> world_pos_lakes, RiverGen.RiverDataGrid river_grid, Vector2I test_world_base_pos)
         {
                 public Dictionary<Vector2I, LakeData> world_pos_lakes = world_pos_lakes;
+                public RiverGen.RiverDataGrid river_grid = river_grid;
+                public Vector2I test_world_base_pos = test_world_base_pos;
         }
         public class WaterDataGrid
         {
@@ -164,7 +87,6 @@ public partial class WaterGen : Node3D
                                 var global_grid_pos = world_pos / grid_cell_size;
                                 var relative_grid_pos = global_grid_pos - current_player_grid_pos;
 
-                                GD.Print($"world_pos:{world_pos} global_grid_pos:{global_grid_pos} grid_cell_size{grid_cell_size} current_player_grid_pos:{current_player_grid_pos}, min world pos_x: {(current_player_grid_pos.X - 1) * grid_cell_size}");
                                 return grid[relative_grid_pos.X + 1 + (relative_grid_pos.Y + 1) * grid_width];
                         }
 
@@ -241,8 +163,8 @@ public partial class WaterGen : Node3D
         }
         public OutputData GenerateCell(Vector2I world_base_pos, ThreadSafeGroundMeshGen mesh_gen, int mesh_chunk_size)
         {
-                List<LakeData> lakes = new();
-                List<Vector2I> river_start_points = new();
+                List<LakeGen.LakeData> lakes = [];
+                List<Vector2I> river_start_points = [];
 
                 ChunkHeightGrid average_height_grid = new(mesh_chunks_per_water_chunk);
                 ChunkHeightGrid min_height_grid = new(mesh_chunks_per_water_chunk);
@@ -254,214 +176,45 @@ public partial class WaterGen : Node3D
                                 GetChunkHeightStats(mesh_chunk_size, chunk_base_pos, mesh_gen, out float average_height, out float min_height);
                                 average_height_grid[x, y] = average_height;
                                 min_height_grid[x, y] = min_height;
+
                                 AddChunkToLakesOrRivers(average_height, new(x, y), ref lakes, ref river_start_points);
                         }
                 }
-
-                Dictionary<Vector2I, LakeData> world_pos_lakes = new();
-                var connected_lakes = ConnectLakeTiles(lakes);
-                foreach (var lake_system in connected_lakes)
+                var rivers = new RiverGen.RiverGoalsData[river_start_points.Count];
+                for (int i = 0; i < river_start_points.Count; i++)
                 {
-                        var water_height = GetWatterLevelOfLakeSystem(min_height_grid, lake_system.Value, mesh_gen, world_base_pos, mesh_chunk_size);
-                        foreach (var lake in lake_system.Value)
+                        Vector2I river_start_point = river_start_points[i];
+                        var min_distance = float.MaxValue;
+                        LakeData min_distance_lake = null;
+                        foreach (var lake in lakes)
                         {
-                                var world_pos = world_base_pos + lake.chunk_grid_pos * mesh_chunk_size;
-                                world_pos_lakes.Add(world_pos, lake);
-                                lake.water_height = water_height;
-                        }
-                }
-
-                return new(world_pos_lakes);
-        }
-
-
-        /// Find all border chunks.
-        /// Get the lowest point at all of the chunks border -> Set it as the water level, minus some margin like 1.
-        private float GetWatterLevelOfLakeSystem(ChunkHeightGrid min_height_grid, List<LakeData> lake_system, ThreadSafeGroundMeshGen mesh_gen, Vector2I world_base_pos, int mesh_chunk_size)
-        {
-
-                var border_chunks = GetBorderChunksForLakeSystem(lake_system);
-
-                var min_height_for_border_chunks = float.MaxValue;
-
-                lake_system[0].test_points = new();
-                foreach (var chunk in border_chunks)
-                {
-
-                        float? chunk_min_height = min_height_grid.TryGetValue(chunk.X, chunk.Y);
-
-                        //calculate chunk height on the fly. this will only be triggered for the chunks at the end of the lake cell
-                        if (chunk_min_height == null)
-                        {
-                                var chunk_world_pos = world_base_pos + chunk * mesh_chunk_size;
-                                GetChunkHeightStats(mesh_chunk_size, chunk_world_pos, mesh_gen, out _, out var min_height);
-                                // GD.Print($"border chunk- {chunk_world_pos}, min height{min_height} lake_system- {lake_system[0]}, current min height{min_height_for_border_chunks}");
-                                chunk_min_height = min_height;
-
-                                // var sum = 0f;
-                                // min_height = float.MaxValue;
-                                // var distance_per_check = mesh_chunk_size / height_checks_per_chunk_sqrt;
-                                // for (int x = 0; x < height_checks_per_chunk_sqrt; x++)
-                                // {
-                                //         for (int y = 0; y < height_checks_per_chunk_sqrt; y++)
-                                //         {
-                                //                 var pos = chunk_world_pos + new Vector2(x, y) * distance_per_check;
-                                //                 var height = mesh_gen.CalculateHeight(pos);
-                                //                 sum += height;
-                                //                 min_height = Mathf.Min(min_height, height);
-                                //
-                                //                 lake_system[0].test_points.Add(new(pos.X, height, pos.Y));
-                                //         }
-                                // }
-                        }
-
-                        min_height_for_border_chunks = Mathf.Min(min_height_for_border_chunks, chunk_min_height.Value);
-
-                        {
-                                var chunk_world_pos = world_base_pos + chunk * mesh_chunk_size;
-                                // lake_system[0].test_points.Add(new(chunk_world_pos.X, chunk_min_height.Value, chunk_world_pos.Y));
-                        }
-                }
-                return min_height_for_border_chunks - lake_water_level_offset;
-        }
-        private HashSet<Vector2I> GetBorderChunksForLakeSystem(List<LakeData> lake_system)
-        {
-                HashSet<Vector2I> border_chunks = new();
-
-                foreach (var lake in lake_system)
-                {
-                        border_chunks.Add(lake.chunk_grid_pos - new Vector2I(-1, 1));
-                        border_chunks.Add(lake.chunk_grid_pos - new Vector2I(0, 1));
-                        border_chunks.Add(lake.chunk_grid_pos - new Vector2I(1, 1));
-                        border_chunks.Add(lake.chunk_grid_pos - new Vector2I(-1, 0));
-                        border_chunks.Add(lake.chunk_grid_pos - new Vector2I(1, 0));
-                        border_chunks.Add(lake.chunk_grid_pos - new Vector2I(-1, -1));
-                        border_chunks.Add(lake.chunk_grid_pos - new Vector2I(0, -1));
-                        border_chunks.Add(lake.chunk_grid_pos - new Vector2I(1, -1));
-                }
-                foreach (var lake in lake_system)
-                {
-                        border_chunks.Remove(lake.chunk_grid_pos);
-                }
-                return border_chunks;
-        }
-
-
-
-        // TODO: CleanUp
-        private Dictionary<int, List<LakeData>> ConnectLakeTiles(List<LakeData> all_lakes)
-        {
-                // Build spatial lookup for O(1) neighbor checks
-                var lake_map = all_lakes.ToDictionary(l => l.chunk_grid_pos);
-
-                // Find neighbors and connect
-                foreach (var lake in all_lakes)
-                {
-                        var neighbors = new[] {
-            lake.chunk_grid_pos + new Vector2I(1, 0),
-            lake.chunk_grid_pos + new Vector2I(-1, 0),
-            lake.chunk_grid_pos + new Vector2I(0, 1),
-            lake.chunk_grid_pos + new Vector2I(0, -1)
-        };
-
-                        foreach (var neighbor_pos in neighbors)
-                        {
-                                if (lake_map.TryGetValue(neighbor_pos, out var neighbor))
+                                var distance = river_start_point.DistanceSquaredTo(lake.chunk_grid_pos);
+                                if (distance < min_distance)
                                 {
-                                        if (!lake.connected_lakes.Contains(neighbor))
-                                        {
-                                                lake.connected_lakes.Add(neighbor);
-                                                neighbor.connected_lakes.Add(lake);
-                                        }
+                                        min_distance = distance;
+                                        min_distance_lake = lake;
                                 }
                         }
+                        rivers[i] = new(river_start_point, min_distance_lake.chunk_grid_pos);
                 }
+                var world_pos_lakes = lake_gen.GenerateForWaterChunk(lakes, min_height_grid, mesh_gen, world_base_pos, mesh_chunk_size);
+                var river_data = river_gen.GenerateDataForWaterChunk(average_height_grid, rivers, (int)mesh_chunks_per_water_chunk, world_base_pos, mesh_chunk_size);
 
-                // Assign system IDs using flood fill
-                int current_system_id = 0;
-                foreach (var lake in all_lakes)
-                {
-                        if (lake.lake_system_id == -1)
-                        {
-                                FloodFillSystemId(lake, current_system_id);
-                                current_system_id++;
-                        }
-                }
-
-                // Group by system ID
-                return all_lakes
-                    .GroupBy(l => l.lake_system_id)
-                    .ToDictionary(g => g.Key, g => g.ToList());
+                return new(world_pos_lakes, river_data, world_base_pos);
         }
 
-        private void FloodFillSystemId(LakeData start, int system_id)
-        {
-                var stack = new Stack<LakeData>();
-                stack.Push(start);
 
-                while (stack.Count > 0)
-                {
-                        var current = stack.Pop();
 
-                        if (current.lake_system_id != -1)
-                                continue;
 
-                        current.lake_system_id = system_id;
-
-                        foreach (var neighbor in current.connected_lakes)
-                        {
-                                if (neighbor.lake_system_id == -1)
-                                {
-                                        stack.Push(neighbor);
-                                }
-                        }
-                }
-        }
-        private void SetConnectedLakeIdRecursive(LakeData lake, int id, HashSet<LakeData> done)
-        {
-                lake.lake_system_id = id;
-                foreach (var connected in lake.connected_lakes)
-                {
-                        if (done.Contains(connected))
-                                continue;
-                        connected.lake_system_id = id;
-                        done.Add(connected);
-                        SetConnectedLakeIdRecursive(connected, id, done);
-                }
-        }
-        private static int ManhattanDistance(Vector2I a, Vector2I b)
-        {
-                return Mathf.Abs(a.X - b.X) + Mathf.Abs(a.Y - b.Y);
-        }
-
-        public class LakeData
-        {
-                public int lake_system_id = -1;
-                public Vector2I chunk_grid_pos;//?
-                public float water_height;
-                public List<LakeData> connected_lakes;
-                public List<Vector3> test_points;
-
-                public LakeData(Vector2I pos)
-                {
-                        this.connected_lakes = new();
-                        this.chunk_grid_pos = pos;
-                }
-        }
         private void AddChunkToLakesOrRivers(float average_height, Vector2I chunk, ref List<LakeData> lakes, ref List<Vector2I> river_start_points)
         {
-                if (average_height < lake_height)
-                {
+                if (lake_gen.IsChunkLake(average_height))
                         lakes.Add(new(chunk));
-                        return;
-                }
-                if (average_height > river_start_height)
-                {
+                if (river_gen.DoesChunkContainRiverStart(average_height))
                         river_start_points.Add(chunk);
-                }
-
         }
-        private void GetChunkHeightStats(int mesh_chunk_size, Vector2 chunk_base_world_pos, ThreadSafeGroundMeshGen mesh_gen, out float average_height, out float min_height)
+
+        public void GetChunkHeightStats(int mesh_chunk_size, Vector2 chunk_base_world_pos, ThreadSafeGroundMeshGen mesh_gen, out float average_height, out float min_height)
         {
                 var sum = 0f;
                 min_height = float.MaxValue;

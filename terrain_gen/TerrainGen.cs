@@ -15,7 +15,6 @@ public partial class TerrainGen : Node3D
         [Export(hintString: "Runs terrain generation every x seconds. Disables the refreshing if <= 0")]
         float refresh_frequency_sec;
         [Export] bool Halt;
-        [Export] int test_lod;
 
         [Export] public int max_chunks_processed_per_frame;
 
@@ -43,7 +42,6 @@ public partial class TerrainGen : Node3D
 
         [ExportCategory("ground shader settings")]
         [Export] ShaderMaterial ground_shader_material;
-        [Export] Curve LOD_curve;
 
         [ExportGroup("rock")]
         [Export] Texture rock_texture;
@@ -98,8 +96,8 @@ public partial class TerrainGen : Node3D
                 free_data_maps = new(Enumerable.Range(0, max_chunk_data_textures_count));
                 map_1 = new ImageTexture[max_chunk_data_textures_count];
                 map_2 = new ImageTexture[max_chunk_data_textures_count];
-                chunk_change_for_position_delta = new();
-                chunk_per_world_position = new();
+                chunk_change_for_position_delta = [];
+                chunk_per_world_position = [];
                 Vector2I delta = new(-1, 0);
                 chunk_change_for_position_delta.Add(delta, CaluclateChunkChangeForPosDelta(delta));
                 delta = new(-1, 1);
@@ -130,11 +128,7 @@ public partial class TerrainGen : Node3D
 
                 var to_destroy = oldSet.Except(newSet).ToArray();
 
-                // var to_generate = chunks
-                //     .Where(c => !oldSet.Contains(c.pos + delta))
-                //     .Select(c => new ChunkSettings(c.pos, c.lod))
-                //     .ToArray();
-                List<Vector2I> to_generate = new();
+                List<Vector2I> to_generate = [];
                 foreach (var chunk in chunks)
                 {
                         var new_pos = chunk + delta;
@@ -144,16 +138,12 @@ public partial class TerrainGen : Node3D
                         }
                 }
 
-                return new ChunkChange(to_destroy, to_generate.ToArray());
+                return new ChunkChange(to_destroy, [.. to_generate]);
         }
 
-        private int GetLod(float distance)
+        private static List<Vector2I> GetAllChunksPositionsInsideACircleRelative(int radius, int chunk_size)
         {
-                return test_lod;
-        }
-        private List<Vector2I> GetAllChunksPositionsInsideACircleRelative(int radius, int chunk_size)
-        {
-                List<Vector2I> output = new();
+                List<Vector2I> output = [];
 
                 // could be pre-calculated once
                 for (int x = -radius; x <= radius; x++)
@@ -184,28 +174,24 @@ public partial class TerrainGen : Node3D
                 public BiomeGenerator.OutputData biome = biome;
                 public Vector2I world_pos = world_pos;
                 public ObjectsGenerator.ObjectTypeSpawnData[] objects_data = objects_data;
+#nullable enable
                 public StructureInstanceData? structure = structure;
         }
 
 
 
 
-        struct ChunkChange
+        struct ChunkChange(Vector2I[] chunks_to_destroy_relative_positions, Vector2I[] chunks_to_instantiate)
         {
-                public Vector2I[] to_destroy_relative_pos;
-                public Vector2I[] to_generate_relative_pos;
-                public ChunkChange(Vector2I[] chunks_to_destroy_relative_positions, Vector2I[] chunks_to_instantiate)
-                {
-                        this.to_destroy_relative_pos = chunks_to_destroy_relative_positions;
-                        this.to_generate_relative_pos = chunks_to_instantiate;
-                }
+                public Vector2I[] to_destroy_relative_pos = chunks_to_destroy_relative_positions;
+                public Vector2I[] to_generate_relative_pos = chunks_to_instantiate;
         }
-        Vector2I world_to_grid_pos(Vector2 world_pos)
+        Vector2I WorldToGridPos(Vector2 world_pos)
         {
                 return new Vector2I(Mathf.RoundToInt(world_pos.X / chunk_size), Mathf.RoundToInt(world_pos.Y / chunk_size));
         }
         Dictionary<Vector2I, Chunk> chunk_per_world_position;
-        Dictionary<Vector2I, ChunkChange> chunk_change_for_position_delta = new();
+        Dictionary<Vector2I, ChunkChange> chunk_change_for_position_delta = [];
 
         bool generated_all_chunks;
         bool clear_all;
@@ -226,11 +212,11 @@ public partial class TerrainGen : Node3D
 
                         var water_data = new WaterGen.WaterDataGrid(water_gen, ground_mesh_gen, chunk_size, player_pos);
                         var structure_grid = new StructureGen.StructureGrid(structure_gen, ground_mesh_gen, chunk_size, player_pos, water_data);
-                        var last_player_chunk_grid_pos = world_to_grid_pos(player_pos);
+                        var last_player_chunk_grid_pos = WorldToGridPos(player_pos);
                         // Initial terrain generation
                         {
                                 var chunks_to_generate = GetAllChunksPositionsInsideACircleRelative(view_distance, chunk_size);
-                                RunTerrainGeneration(chunks_to_generate.ToArray(), last_player_chunk_grid_pos * chunk_size, water_data, structure_grid);
+                                RunTerrainGeneration([.. chunks_to_generate], last_player_chunk_grid_pos * chunk_size, water_data, structure_grid);
                                 load_at_once = true;
                         }
 
@@ -243,7 +229,7 @@ public partial class TerrainGen : Node3D
                                 {
                                         continue;
                                 }
-                                var current_player_chunk_grid_pos = world_to_grid_pos(player_pos);
+                                var current_player_chunk_grid_pos = WorldToGridPos(player_pos);
                                 if (last_player_chunk_grid_pos == current_player_chunk_grid_pos)
                                 {
                                         Task.Delay(ChunksGenMillisecondsDelay);
@@ -253,7 +239,7 @@ public partial class TerrainGen : Node3D
 
                                 var grid_pos_delta = current_player_chunk_grid_pos - last_player_chunk_grid_pos;
 
-                                // TODO: Wrap this in a nice funciton
+                                // TODO: Wrap this in a nice function
                                 if (!chunk_change_for_position_delta.TryGetValue(grid_pos_delta, out var chunk_change))
                                 {
                                         last_player_chunk_grid_pos = current_player_chunk_grid_pos;
@@ -265,7 +251,7 @@ public partial class TerrainGen : Node3D
                                         }
                                         {
                                                 var chunks_to_generate = GetAllChunksPositionsInsideACircleRelative(view_distance, chunk_size);
-                                                RunTerrainGeneration(chunks_to_generate.ToArray(), last_player_chunk_grid_pos * chunk_size, water_data, structure_grid);
+                                                RunTerrainGeneration([.. chunks_to_generate], last_player_chunk_grid_pos * chunk_size, water_data, structure_grid);
                                         }
                                         continue;
                                 }
@@ -314,21 +300,27 @@ public partial class TerrainGen : Node3D
                 var stopwatch = System.Diagnostics.Stopwatch.StartNew();
                 Parallel.For(0, chunks_to_generate.Length, i =>
                   {
-                          var chunk = chunks_to_generate[i];
-                          Vector2I chunk_world_position = chunk + player_pos_snapped_to_chunk;
+                          try
+                          {
 
-                          var chunk_water_data = water_grid[chunk_world_position];
+                                  var chunk = chunks_to_generate[i];
+                                  Vector2I chunk_world_position = chunk + player_pos_snapped_to_chunk;
 
-                          structure_grid[chunk_world_position].structure_gen_for_mesh_chunk_world_pos.TryGetValue(chunk_world_position, out var chunk_structure_data);
-                          // if (chunk_water_data.world_pos_lakes.ContainsKey(chunk_world_position))
-                          //         GD.Print("Lake chunk!");
+                                  var chunk_water_data = water_grid[chunk_world_position];
 
-                          var biome_data = biome_generator.GenerateMaps(terrain_aspects_solver, new Vector2(chunk_world_position.X, chunk_world_position.Y), chunk_size + 1, biomes);
-                          var mesh_data = ground_mesh_gen.GenerateChunk(chunk_world_position, ground_mesh_resolution, chunk_size, chunk_water_data);
+                                  structure_grid[chunk_world_position].structure_gen_for_mesh_chunk_world_pos.TryGetValue(chunk_world_position, out var chunk_structure_data);
 
-                          var objects_data = objects_generator.GenerateObjectsData(chunk_size, ground_mesh_gen, biome_data, chunk_world_position, biomes, structure_grid, water_grid);
+                                  var biome_data = biome_generator.GenerateMaps(terrain_aspects_solver, new Vector2(chunk_world_position.X, chunk_world_position.Y), chunk_size + 1, biomes);
+                                  var mesh_data = ground_mesh_gen.GenerateChunk(chunk_world_position, ground_mesh_resolution, chunk_size, chunk_water_data);
 
-                          completed_chunks.Enqueue(new(mesh_data, biome_data, chunk_world_position, objects_data, chunk_structure_data));
+                                  var objects_data = objects_generator.GenerateObjectsData(chunk_size, ground_mesh_gen, biome_data, chunk_world_position, biomes, structure_grid, water_grid);
+
+                                  completed_chunks.Enqueue(new(mesh_data, biome_data, chunk_world_position, objects_data, chunk_structure_data));
+                          }
+                          catch (Exception e)
+                          {
+                                  GD.PrintErr($"RunTerrainGeneration- parallel loop failed: {e}");
+                          }
                   });
                 stopwatch.Stop();
         }
@@ -367,7 +359,7 @@ public partial class TerrainGen : Node3D
 
                 AddChild(chunk);
 
-
+                water_gen.river_gen.InstantiateRiver(chunk_data.mesh.river_data, chunk);
                 ground_mesh_gen.ApplyData(chunk_data.mesh, chunk.mesh_instance, chunk.collider);
 
                 int map_index = free_data_maps.Dequeue();

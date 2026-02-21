@@ -1,7 +1,9 @@
+using System;
 using Godot;
 [Tool]
 public partial class ThreadSafeGroundMeshGen : Node
 {
+        [Export] private RiverGen river_gen;
         [Export] private TerrainAspectsSolver terrain_aspects_solver;
         [Export] private NoiseComponent high_frequency_noise;
         [Export] private NoiseComponent medium_frequency_noise;
@@ -28,11 +30,12 @@ public partial class ThreadSafeGroundMeshGen : Node
                 arrays[(int)Mesh.ArrayType.TexUV] = data.uvs;
                 arrays[(int)Mesh.ArrayType.Tangent] = data.tangents;
 
-                HeightMapShape3D height_map = new();
-
-                height_map.MapWidth = triangles_per_dimension;
-                height_map.MapDepth = triangles_per_dimension;
-                height_map.MapData = data.height_map;
+                HeightMapShape3D height_map = new()
+                {
+                        MapWidth = triangles_per_dimension,
+                        MapDepth = triangles_per_dimension,
+                        MapData = data.height_map
+                };
                 collider.Shape = height_map;
                 collider.Scale = new Vector3(triangle_size, 1, triangle_size);
                 collider.Position = data.chunk_base_pos;
@@ -43,50 +46,53 @@ public partial class ThreadSafeGroundMeshGen : Node
 
                 mesh_instance.Mesh = mesh;
         }
-        public struct OutputData
-        {
-                public Vector3 chunk_base_pos;
-                public Vector3[] vertices;
-                public int[] indices;
-                public Vector3[] normals;
-                public Vector2[] uvs;
-                public float[] tangents;
-                public float[] height_map;
+        public struct OutputData(
+                Vector3[] vertices,
+                int[] indices,
+                Vector3[] normals,
+                Vector2[] uvs,
+                float[] tangents,
+                float[] height_map,
+                Vector3 chunk_base_pos,
+RiverGen.MeshChunkRiverData river_data,
 #nullable enable
-                public WaterGen.LakeSpawningData? lake_spawning_data;
-                public OutputData(
-                        Vector3[] vertices,
-                        int[] indices,
-                        Vector3[] normals,
-                        Vector2[] uvs,
-                        float[] tangents,
-                        float[] height_map,
-                        Vector3 chunk_base_pos,
-#nullable enable
-                        WaterGen.LakeSpawningData? lake_spawning_data
+                LakeGen.LakeSpawningData? lake_spawning_data
                 )
-                {
-
-                        this.lake_spawning_data = lake_spawning_data;
-                        this.vertices = vertices;
-                        this.indices = indices;
-                        this.normals = normals;
-                        this.uvs = uvs;
-                        this.tangents = tangents;
-                        this.height_map = height_map;
-                        this.chunk_base_pos = chunk_base_pos;
-                }
+        {
+                public Vector3 chunk_base_pos = chunk_base_pos;
+                public Vector3[] vertices = vertices;
+                public int[] indices = indices;
+                public Vector3[] normals = normals;
+                public Vector2[] uvs = uvs;
+                public float[] tangents = tangents;
+                public float[] height_map = height_map;
+                public LakeGen.LakeSpawningData? lake_spawning_data = lake_spawning_data;
+                public RiverGen.MeshChunkRiverData? river_data = river_data;
         }
-        public OutputData GenerateChunk(Vector2I base_world_position, int resolution, int size, WaterGen.OutputData river_data)
+        public OutputData GenerateChunk(Vector2I base_world_position, int resolution, int size, WaterGen.OutputData water_data)
         {
                 triangles_per_dimension = resolution + 1;
                 triangle_size = size / (float)resolution;
 
-                Vector3[] verticesPadded;
-                Vector3[] vertices;
-                Vector2[] uvs;
-                float[] height_map;
-                GenerateUvAndVertex(base_world_position, river_data, size, out verticesPadded, out vertices, out uvs, out height_map, out var lake_spawning_data);
+                GenerateUvAndVertex(base_world_position, water_data, out var verticesPadded, out var vertices, out var uvs, out var height_map, out var lake_spawning_data);
+                var river_data = water_data.river_grid.AccessDataWithWorldPos(base_world_position, size);
+
+                if (river_data.next_mesh_chunk_pos != null || lake_spawning_data != null)
+                {
+
+                        try
+                        {
+
+                                var mesh_river_data_grid = river_gen.GenerateMeshChunkData(base_world_position, river_data, size, resolution, height_map, lake_spawning_data == null ? null : lake_spawning_data.water_height);
+
+                                ApplyRiverInfluence(mesh_river_data_grid, ref height_map, ref vertices);
+                        }
+                        catch (Exception e)
+                        {
+                                GD.PushError($"Encountered exception while generating river data: {e}");
+                        }
+                }
+
                 lake_spawning_data?.FinishCalculation();
 
                 int[] indices = GenerateIndices();
@@ -95,20 +101,41 @@ public partial class ThreadSafeGroundMeshGen : Node
 
 
                 return new OutputData(vertices, indices, normals, uvs, tangents, height_map,
-                        new Vector3(base_world_position.X + size / 2f, 0, base_world_position.Y + size / 2f),
+                        new Vector3(base_world_position.X + size / 2f, 0, base_world_position.Y + size / 2f), river_data,
                         lake_spawning_data);
         }
-        private void GenerateUvAndVertex(Vector2I base_world_position, WaterGen.OutputData river_data, float chunk_size,
+        private void ApplyRiverInfluence(RiverGen.MeshChunkDataGrid river_grid, ref float[] height_map, ref Vector3[] vertices)
+        {
+                try
+                {
+                        for (int x = 0; x < triangles_per_dimension; x++)
+                        {
+                                for (int y = 0; y < triangles_per_dimension; y++)
+                                {
+                                        int i = x + y * triangles_per_dimension;
+                                        //This has to be wrong or some reason
+                                        // Test the influence at the start and end points
+                                        var delta = river_grid.GetRiverEffectOnMeshVertex(new(x, y));
+                                        height_map[i] += delta;
+                                        vertices[i].Y += delta;
+                                }
+                        }
+
+                }
+                catch { GD.PrintErr("ERROR WHILE CALCULATING RIVER INFLUENCE!"); }
+        }
+        private void GenerateUvAndVertex(Vector2I base_world_position, WaterGen.OutputData water_data,
             out Vector3[] verticesPadded, out Vector3[] vertices, out Vector2[] uvs, out float[] height_map,
-#nullable enable
-            out WaterGen.LakeSpawningData? lake_spawning_data)
+            out LakeGen.LakeSpawningData? lake_spawning_data)
         {
 
                 lake_spawning_data = null;
-                if (river_data.world_pos_lakes.TryGetValue(base_world_position, out var lake_data))
+                if (water_data.world_pos_lakes.TryGetValue(base_world_position, out var lake_data))
                 {
-                        lake_spawning_data = new(lake_data.water_height, water_mesh_margin);
-                        lake_spawning_data.test_points2 = lake_data.test_points;
+                        lake_spawning_data = new(lake_data.water_height, water_mesh_margin)
+                        {
+                                test_points2 = lake_data.test_points
+                        };
                 }
 
                 int paddedWidth = triangles_per_dimension + 2;
@@ -123,16 +150,16 @@ public partial class ThreadSafeGroundMeshGen : Node
                 {
                         for (int z = -1; z < triangles_per_dimension + 1; z++)
                         {
-                                Vector2 worldPos = new Vector2(x, z) * triangle_size + base_world_position;
-                                float height =
-                                    height = CalculateHeight(worldPos);
+                                var relative_pos = new Vector2I(x, z);
+                                Vector2 worldPos = (Vector2)relative_pos * triangle_size + base_world_position;
+                                float height = CalculateHeight(worldPos);
 
                                 if (lake_data != null)
                                         lake_spawning_data!.HandleNewVertex(new(worldPos.X, height, worldPos.Y));
 
                                 Vector3 vertex_pos = new(worldPos.X, height, worldPos.Y);
 
-                                verticesPadded[(x + 1) + (z + 1) * paddedWidth] = vertex_pos;
+                                verticesPadded[x + 1 + (z + 1) * paddedWidth] = vertex_pos;
 
                                 if (x < 0 || z < 0 || x >= triangles_per_dimension || z >= triangles_per_dimension)
                                         continue;
@@ -150,14 +177,15 @@ public partial class ThreadSafeGroundMeshGen : Node
 
         }
 
-        private Vector2 CalculateVertexWorldPosition(int relative_x, int relative_z, Vector2 base_world_position)
+        private Vector2 CalculateVertexWorldPosition(int relative_x, int relative_z, Vector2 base_world_pos)
         {
-                return new Vector2(relative_x, relative_z) * triangle_size + base_world_position;
+                return new Vector2(relative_x, relative_z) * triangle_size + base_world_pos;
         }
 
-        public float CalculateHeight(Vector2 world_position)
+        public float CalculateHeight(Vector2 world_pos)
         {
-                var terrain_aspects = terrain_aspects_solver.SolveForPos(world_position);
+                var terrain_aspects = terrain_aspects_solver.SolveForPos(world_pos);
+
 
                 TerrainAspectEffectOnMesh.OutputData noise_amplitude_data = new();
                 moisture_effect.AddEffectToOutput(terrain_aspects.moisture, ref noise_amplitude_data);
@@ -166,10 +194,10 @@ public partial class ThreadSafeGroundMeshGen : Node
                 roughness_effect.AddEffectToOutput(terrain_aspects.roughness, ref noise_amplitude_data);
 
                 float output_height
-                     = high_frequency_noise.Sample(world_position) * noise_amplitude_data.high_freq_noise_amplitude
-                     + medium_frequency_noise.Sample(world_position) * noise_amplitude_data.medium_freq_noise_amplitude
-                     + low_frequency_noise.Sample(world_position) * noise_amplitude_data.low_freq_noise_amplitude
-                     + noise_amplitude_data.base_height;
+                        = high_frequency_noise.Sample(world_pos) * noise_amplitude_data.high_freq_noise_amplitude
+                        + medium_frequency_noise.Sample(world_pos) * noise_amplitude_data.medium_freq_noise_amplitude
+                        + low_frequency_noise.Sample(world_pos) * noise_amplitude_data.low_freq_noise_amplitude
+                        + noise_amplitude_data.base_height;
 
 
                 return output_height;
@@ -206,11 +234,10 @@ public partial class ThreadSafeGroundMeshGen : Node
                         for (int z = 0; z < triangles_per_dimension; z++)
                         {
                                 // padded indices
-                                int center = (x + 1) + (z + 1) * paddedWidth;
-                                int left = (x + 0) + (z + 1) * paddedWidth;
-                                int right = (x + 2) + (z + 1) * paddedWidth;
-                                int down = (x + 1) + (z + 0) * paddedWidth;
-                                int up = (x + 1) + (z + 2) * paddedWidth;
+                                int left = x + (z + 1) * paddedWidth;
+                                int right = x + 2 + (z + 1) * paddedWidth;
+                                int down = x + 1 + (z + 0) * paddedWidth;
+                                int up = x + 1 + (z + 2) * paddedWidth;
 
                                 // central difference for normal
                                 Vector3 n = new Vector3(

@@ -97,7 +97,6 @@ public partial class StructureGen : Node3D
                         this.mesh_chunk_size = mesh_chunk_size;
 
                         current_player_grid_pos = new Vector2I((int)player_world_pos.X / grid_cell_size, (int)player_world_pos.Y / grid_cell_size);
-                        GD.Print($"struct min grid pos_x: {(current_player_grid_pos.X - 1) * grid_cell_size} player grid pos: {current_player_grid_pos} grid_cell_size{grid_cell_size} ");
                         grid = new StructureChunk[grid_width * grid_width];
                         for (int x = 0; x < grid_width; x++)
                         {
@@ -143,10 +142,6 @@ public partial class StructureGen : Node3D
                                                 continue;
                                         structure_instance.base_height = mesh_gen.CalculateHeight(structure_world_pos);
 
-
-                                        GD.Print($"structure instance: structure_world_pos{structure_world_pos} base_chunk_world_pos{base_chunk_world_pos}  mesh_chunk_x{mesh_chunk_x} mesh_chunk_y {mesh_chunk_y}");
-
-                                        GD.Print($"1:{structure_type.min_distance_from_grid_border_in_mesh_chunks} 2: {structure_gen.mesh_chunks_per_structure_grid_cell - structure_type.min_distance_from_grid_border_in_mesh_chunks} ");
                                         if (water_grid.IsObjectUnderTheWater(new(structure_world_pos.X, structure_instance.base_height, structure_world_pos.Y)))
                                         {
                                                 continue;
@@ -155,9 +150,6 @@ public partial class StructureGen : Node3D
                                         bool there_already_was_struct_on_one_of_the_chunks = false;
 
                                         var all_chunks = structure_instance.MeshChunksThisStructureSitsOnWorldPos(mesh_chunk_size);
-
-
-
 
                                         foreach (var chunk_world_pos in all_chunks)
                                         {

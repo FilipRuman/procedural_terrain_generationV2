@@ -11,7 +11,6 @@ public class StructureInstanceData
 
         public void Instantiate(Node3D parent)
         {
-                GD.Print("Instantiate Structure");
                 var node = (Node3D)structure_type.model.Instantiate();
                 parent.AddChild(node);
                 node.Scale = Vector3.One * scale;

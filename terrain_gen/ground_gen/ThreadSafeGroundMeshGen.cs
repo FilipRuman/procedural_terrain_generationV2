@@ -15,7 +15,7 @@ public partial class ThreadSafeGroundMeshGen : Node
         [Export] private Curve lake_height_change_curve;
         [Export] float water_mesh_margin;
 
-        private int triangles_per_dimension;
+        public int triangles_per_dimension;
         private float triangle_size;
 
 

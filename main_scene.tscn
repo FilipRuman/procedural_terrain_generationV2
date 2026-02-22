@@ -295,7 +295,7 @@ terrain_aspects_solver = NodePath("../terrain aspects solver")
 objects_generator = NodePath("../objects gen")
 water_gen = NodePath("../water gen")
 structure_gen = NodePath("../structure gen")
-player_pos = Vector2(23684.445, 7317.048)
+player_pos = Vector2(24195.885, 7317.048)
 view_distance = 13
 chunk_size = 160
 biomes = [ExtResource("5_ghshe"), ExtResource("4_ghshe"), ExtResource("5_fv2he"), ExtResource("4_vimvf"), ExtResource("3_ak604"), ExtResource("8_5smuj"), ExtResource("9_y5ved")]
@@ -342,7 +342,7 @@ biome_map_resolution = 20
 biome_transitions_smoothness = 0.1
 
 [node name="Player2" type="CharacterBody3D" parent="." unique_id=1077830235 node_paths=PackedStringArray("camera")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23684.445, 723.1982, 7317.048)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24195.885, 723.1982, 7317.048)
 floor_stop_on_slope = false
 floor_constant_speed = true
 floor_block_on_wall = false
@@ -393,12 +393,13 @@ lake_water_level_offset = 1.0
 script = ExtResource("26_o7u2a")
 river_effect_curve = SubResource("Curve_ijoax")
 max_river_width = 10
+additional_chunk_border_margin_for_rivers = 2
 water_gen = NodePath("..")
 test_material_1 = SubResource("StandardMaterial3D_o7u2a")
 test_material_2 = SubResource("StandardMaterial3D_ijoax")
 test_material_3 = SubResource("StandardMaterial3D_j8kkg")
 test_point_size = 1.0
-river_start_height = 300.0
+river_start_height = 400.0
 height_points_modifier = 1.0
 distance_points_modifier = 500.0
 

@@ -210,7 +210,7 @@ public partial class TerrainGen : Node3D
                                 GD.Print("'WaterGen.mesh_chunks_per_water_chunk' has to be greater than the 'StructureGen.mesh_chunks_per_structure_grid_cell'");
                         }
 
-                        var water_data = new WaterGen.WaterDataGrid(water_gen, ground_mesh_gen, chunk_size, player_pos);
+                        var water_data = new WaterGen.WaterDataGrid(water_gen, ground_mesh_gen, mesh_triangles_per_dimension: ground_mesh_resolution + 1, chunk_size, player_pos);
                         var structure_grid = new StructureGen.StructureGrid(structure_gen, ground_mesh_gen, chunk_size, player_pos, water_data);
                         var last_player_chunk_grid_pos = WorldToGridPos(player_pos);
                         // Initial terrain generation

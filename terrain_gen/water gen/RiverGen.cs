@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Godot;
 [Tool]
@@ -6,7 +5,8 @@ public partial class RiverGen : Node
 {
         [Export] Curve river_effect_curve;
         [Export] int max_river_width;
-        int Margin => max_river_width + 12;
+        [Export] int additional_chunk_border_margin_for_rivers;
+        public int Margin => max_river_width + 1 + additional_chunk_border_margin_for_rivers;
         [Export] WaterGen water_gen;
         [Export] Material test_material_1;
         [Export] Material test_material_2;
@@ -191,7 +191,6 @@ public partial class RiverGen : Node
                         for (int y = Margin; y < mesh_triangles_count - Margin; y++)
                         {
                                 var i = x + y * mesh_triangles_count;
-                                // TODO: Use Mesh Triangles instead of resolution for this
                                 if (base_vertex_height_map[i] <= lake_height)
                                 {
                                         return new(x, y);
@@ -223,7 +222,7 @@ public partial class RiverGen : Node
                 return best_vertex;
         }
         //TEMP
-        private float GivePointsToVertex(Vector2I vertex, Vector2I relative_end_pos, float height) => -vertex.DistanceTo(relative_end_pos) * distance_points_modifier /* - height_points_modifier * height */;
+        private float GivePointsToVertex(Vector2I vertex, Vector2I relative_end_pos, float height) => -vertex.DistanceTo(relative_end_pos) * distance_points_modifier - height_points_modifier * height;
 
 
         private List<Vector2I> GetNeighbourVertexes(Vector2I pos, Vector2I end_pos, Vector2I start_pos, int mesh_triangles_count, Vector2I end_margin_override_direction, Vector2I? start_override_direction)
@@ -293,8 +292,8 @@ public partial class RiverGen : Node
 
                 if (river_data.previous_mesh_chunk_pos.Count == 0)
                 {
-                        //TODO: Implement getting highest point
-                        start_points = [new(new(mesh_triangles_count / 2, mesh_triangles_count / 2), null)];
+                        var start_vertex = GetBestRiverStartPointVertex(mesh_triangles_count, base_vertex_height_map);
+                        start_points = [new StartPoint(start_vertex, null)];
                 }
                 else
                 {
@@ -316,6 +315,24 @@ public partial class RiverGen : Node
                         relative_end_pos = null;
                 }
 
+        }
+        public Vector2I GetBestRiverStartPointVertex(int mesh_triangles_count, float[] base_vertex_height_map)
+        {
+                var max_height = float.MinValue;
+                var max_height_pos = Vector2I.Zero;
+                for (int x = Margin; x < mesh_triangles_count - Margin; x++)
+                {
+                        for (int y = Margin; y < mesh_triangles_count - Margin; y++)
+                        {
+                                var height = base_vertex_height_map[x + y * mesh_triangles_count];
+                                if (height > max_height)
+                                {
+                                        max_height = height;
+                                        max_height_pos = new(x, y);
+                                }
+                        }
+                }
+                return max_height_pos;
         }
 
         /// margin_override_direction ->  x or y  equal to: {-1,1} and the other axis to 0, tells at what direction the next chunk will be.
@@ -456,7 +473,6 @@ public partial class RiverGen : Node
                 }
                 public MeshChunkRiverData AccessDataWithWorldPos(Vector2I world_pos, int mesh_chunk_size)
                 {
-                        //TODO: REVIVE THIS CODE
                         var grid_pos = world_pos / mesh_chunk_size;
                         return this[grid_pos % mesh_chunks_per_water_chunk];
                 }

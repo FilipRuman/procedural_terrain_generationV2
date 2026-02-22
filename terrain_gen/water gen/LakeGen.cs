@@ -189,7 +189,8 @@ public partial class LakeGen : Node
                         if (chunk_min_height == null)
                         {
                                 var chunk_world_pos = world_base_pos + chunk * mesh_chunk_size;
-                                water_gen.GetChunkHeightStats(mesh_chunk_size, chunk_world_pos, mesh_gen, out _, out var min_height);
+                                // river_margin_size- whatever
+                                water_gen.GetChunkHeightStats(river_margin_size: 1, mesh_chunk_size, chunk_world_pos, mesh_gen, out _, out var min_height, out float _);
                                 chunk_min_height = min_height;
 
                         }

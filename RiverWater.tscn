@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://dudmlm0g6ghiu"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_obej8"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_syemg"]
+albedo_color = Color(0, 0.54004896, 1, 1)
+
+[node name="RiverWater" type="MeshInstance3D" unique_id=200816761]
+mesh = SubResource("BoxMesh_obej8")
+surface_material_override/0 = SubResource("StandardMaterial3D_syemg")

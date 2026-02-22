@@ -14,6 +14,7 @@ public partial class WaterGen : Node3D
         public void HandleSpawningForChunk(Vector2I mesh_chunk_world_pos, LakeGen.LakeSpawningData lake_spawning_data, Node3D parent_node)
         {
                 lake_gen.SpawnLake(parent_node, lake_spawning_data);
+
         }
         public struct ChunkHeightGrid
         {

@@ -28,6 +28,7 @@
 [ext_resource type="Resource" uid="uid://c35matxsgkavl" path="res://structures/test.tres" id="21_ak604"]
 [ext_resource type="Script" uid="uid://oq0wec2tfbqj" path="res://terrain_gen/water gen/LakeGen.cs" id="24_kv3aw"]
 [ext_resource type="Script" uid="uid://cdcvq8kfwnjh8" path="res://terrain_gen/water gen/RiverGen.cs" id="26_o7u2a"]
+[ext_resource type="PackedScene" uid="uid://dudmlm0g6ghiu" path="res://RiverWater.tscn" id="27_ijoax"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_kv3aw"]
 panorama = ExtResource("1_y5ved")
@@ -248,15 +249,6 @@ _limits = [-1.0, 0.0, 0.0, 10.0]
 _data = [Vector2(0, -1), 0.0, 0.016375115, 0, 0, Vector2(10, 0), 0.28904054, 0.0, 0, 0]
 point_count = 2
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o7u2a"]
-albedo_color = Color(0, 0, 0, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ijoax"]
-albedo_color = Color(0, 1, 1, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_j8kkg"]
-albedo_color = Color(1, 0, 1, 1)
-
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_6jybn"]
 radius = 16.841
 height = 33.682
@@ -395,10 +387,8 @@ river_effect_curve = SubResource("Curve_ijoax")
 max_river_width = 10
 additional_chunk_border_margin_for_rivers = 2
 water_gen = NodePath("..")
-test_material_1 = SubResource("StandardMaterial3D_o7u2a")
-test_material_2 = SubResource("StandardMaterial3D_ijoax")
-test_material_3 = SubResource("StandardMaterial3D_j8kkg")
 test_point_size = 1.0
+water_scene = ExtResource("27_ijoax")
 river_start_height = 400.0
 height_points_modifier = 1.0
 distance_points_modifier = 500.0

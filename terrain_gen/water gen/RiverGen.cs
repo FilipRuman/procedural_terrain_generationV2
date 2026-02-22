@@ -5,102 +5,202 @@ public partial class RiverGen : Node
 {
         [Export] Curve river_effect_curve;
         [Export] int max_river_width;
+        [Export] float river_water_margin;
         [Export] int additional_chunk_border_margin_for_rivers;
+        [Export] float base_water_height;
         public int Margin => max_river_width + 1 + additional_chunk_border_margin_for_rivers;
         [Export] WaterGen water_gen;
-        [Export] Material test_material_1;
-        [Export] Material test_material_2;
-        [Export] Material test_material_3;
-        [Export] Material test_material_4;
 
         [Export] float test_point_size;
+        [Export] PackedScene water_scene;
         public void InstantiateRiver(MeshChunkRiverData river_data, Node3D parent_node)
         {
-                foreach (var point in river_data.test_points_1)
+                if (river_data.river_water_mesh_data != null)
                 {
-                        var mesh_inst = new MeshInstance3D();
-                        mesh_inst.Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y);
-                        mesh_inst.Scale = Vector3.One * test_point_size;
-                        var mesh = new SphereMesh()
                         {
-                                Rings = 5,
-                                Radius = 5,
-                                Height = 5
-                        };
-                        mesh_inst.Mesh = mesh;
-                        mesh_inst.MaterialOverride = test_material_1;
-                        parent_node.AddChild(mesh_inst);
-                }
-                foreach (var point in river_data.test_points_2)
-                {
-                        var mesh_inst = new MeshInstance3D();
-                        mesh_inst.Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y);
-                        mesh_inst.Scale = Vector3.One * test_point_size;
-                        var mesh = new SphereMesh()
-                        {
-                                Rings = 8,
-                                Radius = 8,
-                                Height = 8,
-                        };
-                        mesh_inst.Mesh = mesh;
-                        mesh_inst.MaterialOverride = test_material_2;
-                        parent_node.AddChild(mesh_inst);
-                }
-                foreach (var point in river_data.test_points_3)
-                {
-                        var mesh_inst = new MeshInstance3D
-                        {
-                                Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y),
-                                Scale = Vector3.One * test_point_size
-                        };
-                        var mesh = new SphereMesh()
-                        {
-                                Rings = 8,
-                                Radius = 8,
-                                Height = 8,
-                        };
-                        mesh_inst.Mesh = mesh;
-                        mesh_inst.MaterialOverride = test_material_3;
-                        parent_node.AddChild(mesh_inst);
-                }
+                                var mesh_instance = (MeshInstance3D)water_scene.Instantiate();
+                                parent_node.AddChild(mesh_instance);
 
+                                var arrays = new Godot.Collections.Array();
+                                arrays.Resize((int)Mesh.ArrayType.Max);
 
-                foreach (var point in river_data.test_points_5)
-                {
-                        var mesh_inst = new MeshInstance3D
+                                arrays[(int)Mesh.ArrayType.Vertex] = river_data.river_water_mesh_data.vertexes.ToArray();
+                                arrays[(int)Mesh.ArrayType.Index] = river_data.river_water_mesh_data.indexes.ToArray();
+                                // arrays[(int)Mesh.ArrayType.Normal] = data.normals;
+
+                                var mesh = new ArrayMesh();
+                                mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
+                                mesh_instance.Mesh = mesh;
+                        }
+
+                        if (river_data.test_points_2.Count != 0)
                         {
-                                Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y),
-                                Scale = Vector3.One * test_point_size
-                        };
-                        var mesh = new SphereMesh()
-                        {
-                                Rings = 8,
-                                Radius = 8,
-                                Height = 8,
-                        };
-                        mesh_inst.Mesh = mesh;
-                        mesh_inst.MaterialOverride = test_material_4;
-                        parent_node.AddChild(mesh_inst);
+
+                                foreach (var vert in river_data.river_water_mesh_data.vertexes)
+                                {
+
+                                        var mesh_inst = new MeshInstance3D();
+                                        mesh_inst.Position = vert;
+                                        mesh_inst.Scale = Vector3.One * test_point_size;
+                                        var mesh = new SphereMesh()
+                                        {
+                                                Rings = 5,
+                                                Radius = 5,
+                                                Height = 5
+                                        };
+                                        mesh_inst.Mesh = mesh;
+                                        parent_node.AddChild(mesh_inst);
+
+                                }
+                        }
                 }
-                foreach (var point in river_data.test_points_4)
-                {
-                        var mesh_inst = new MeshInstance3D
-                        {
-                                Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y),
-                                Scale = Vector3.One * test_point_size
-                        };
-                        var mesh = new SphereMesh()
-                        {
-                                Rings = 8,
-                                Radius = 8,
-                                Height = 8,
-                        };
-                        mesh_inst.Mesh = mesh;
-                        mesh_inst.MaterialOverride = test_material_1;
-                        parent_node.AddChild(mesh_inst);
-                }
+                // foreach (var point in river_data.test_points_1)
+                // {
+                //         var mesh_inst = new MeshInstance3D();
+                //         mesh_inst.Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y);
+                //         mesh_inst.Scale = Vector3.One * test_point_size;
+                //         var mesh = new SphereMesh()
+                //         {
+                //                 Rings = 5,
+                //                 Radius = 5,
+                //                 Height = 5
+                //         };
+                //         mesh_inst.Mesh = mesh;
+                //         mesh_inst.MaterialOverride = test_material_1;
+                //         parent_node.AddChild(mesh_inst);
+                // }
+                // foreach (var point in river_data.test_points_2)
+                // {
+                //         var mesh_inst = new MeshInstance3D();
+                //         mesh_inst.Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y);
+                //         mesh_inst.Scale = Vector3.One * test_point_size;
+                //         var mesh = new SphereMesh()
+                //         {
+                //                 Rings = 8,
+                //                 Radius = 8,
+                //                 Height = 8,
+                //         };
+                //         mesh_inst.Mesh = mesh;
+                //         mesh_inst.MaterialOverride = test_material_2;
+                //         parent_node.AddChild(mesh_inst);
+                // }
+                // foreach (var point in river_data.test_points_3)
+                // {
+                //         var mesh_inst = new MeshInstance3D
+                //         {
+                //                 Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y),
+                //                 Scale = Vector3.One * test_point_size
+                //         };
+                //         var mesh = new SphereMesh()
+                //         {
+                //                 Rings = 8,
+                //                 Radius = 8,
+                //                 Height = 8,
+                //         };
+                //         mesh_inst.Mesh = mesh;
+                //         mesh_inst.MaterialOverride = test_material_3;
+                //         parent_node.AddChild(mesh_inst);
+                // }
+                //
+                //
+                // foreach (var point in river_data.test_points_5)
+                // {
+                //         var mesh_inst = new MeshInstance3D
+                //         {
+                //                 Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y),
+                //                 Scale = Vector3.One * test_point_size
+                //         };
+                //         var mesh = new SphereMesh()
+                //         {
+                //                 Rings = 8,
+                //                 Radius = 8,
+                //                 Height = 8,
+                //         };
+                //         mesh_inst.Mesh = mesh;
+                //         mesh_inst.MaterialOverride = test_material_4;
+                //         parent_node.AddChild(mesh_inst);
+                // }
+                // foreach (var point in river_data.test_points_4)
+                // {
+                //         var mesh_inst = new MeshInstance3D
+                //         {
+                //                 Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y),
+                //                 Scale = Vector3.One * test_point_size
+                //         };
+                //         var mesh = new SphereMesh()
+                //         {
+                //                 Rings = 8,
+                //                 Radius = 8,
+                //                 Height = 8,
+                //         };
+                //         mesh_inst.Mesh = mesh;
+                //         mesh_inst.MaterialOverride = test_material_1;
+                //         parent_node.AddChild(mesh_inst);
+                // }
+
         }
 
+        public class RiverWaterMeshData(int river_width, float river_water_margin, float river_water_height, Vector2I base_chunk_position, float space_between_vertexes)
+        {
+                public List<Vector3> vertexes = [];
+                public List<int> indexes = [];
+                readonly int river_width = river_width;
+                readonly float river_water_margin = river_water_margin;
+                readonly float river_water_height = river_water_height;
+                Vector3? previous_center_vertex = null;
+                Vector3? previous_previous_center_vertex = null;
+                readonly Vector2I base_chunk_position = base_chunk_position;
+                readonly float space_between_vertexes = space_between_vertexes;
+                public void HandleTheSecondVertex(Vector3 current_center_vertex)
+                {
+                        var tangent = (current_center_vertex - previous_previous_center_vertex.Value).Normalized();
+                        var right_vector = tangent.Cross(Vector3.Up).Normalized();
+
+                        var vertex_right = previous_previous_center_vertex.Value + right_vector * (river_width + river_water_margin);
+                        var vertex_left = previous_previous_center_vertex.Value + right_vector * -(river_width + river_water_margin);
+
+                        vertexes.Add(vertex_left);
+                        vertexes.Add(vertex_right);
+
+                        previous_center_vertex = current_center_vertex;
+                }
+                public void AddNewRiverVertex(Vector2I current_relative_pos_center_vertex, float base_height)
+                {
+                        var current_center_vertex_2D = base_chunk_position + (Vector2)current_relative_pos_center_vertex * space_between_vertexes;
+                        var current_center_vertex = new Vector3(current_center_vertex_2D.X, base_height + river_water_height, current_center_vertex_2D.Y);
+                        if (previous_previous_center_vertex == null)
+                        {
+                                previous_previous_center_vertex = current_center_vertex;
+                                return;
+                        }
+                        if (previous_center_vertex == null)
+                        {
+                                HandleTheSecondVertex(current_center_vertex);
+                                return;
+                        }
+
+                        var tangent = (current_center_vertex - previous_previous_center_vertex.Value).Normalized();
+                        var right_vector = tangent.Cross(Vector3.Up).Normalized();
+
+                        var vertex_right = current_center_vertex + right_vector * (river_width + river_water_margin);
+                        var vertex_left = current_center_vertex + right_vector * -(river_width + river_water_margin);
+
+                        vertexes.Add(vertex_left);
+                        vertexes.Add(vertex_right);
+
+                        var i = vertexes.Count - 1;
+                        indexes.Add(i);
+                        indexes.Add(i - 3);
+                        indexes.Add(i - 2);
+
+                        indexes.Add(i);
+                        indexes.Add(i - 1);
+                        indexes.Add(i - 3);
+
+                        previous_previous_center_vertex = previous_center_vertex;
+                        previous_center_vertex = current_center_vertex;
+                }
+        }
         Vector2I base_chunk_world_pos; //TEST
         public MeshChunkDataGrid GenerateMeshChunkData(Vector2I base_chunk_world_pos, MeshChunkRiverData river_data, int mesh_chunk_size, int mesh_triangles_count, float[] base_vertex_height_map, float? lake_height)
         {
@@ -109,6 +209,8 @@ public partial class RiverGen : Node
                 var relative_mesh_pos = base_chunk_world_pos / mesh_chunk_size % (int)water_gen.mesh_chunks_per_water_chunk;
                 var output = new MeshChunkDataGrid(mesh_triangles_count, max_river_width, river_effect_curve);
                 GetEndAndStartMeshPossitions(river_data, mesh_triangles_count, relative_mesh_pos, base_vertex_height_map, out var relative_start_pos, out var relative_end_pos_option, out var margin_override_direction);
+                RiverWaterMeshData water_mesh_data = new(max_river_width, river_water_margin, base_water_height, base_chunk_world_pos, space_between_vertexes: mesh_chunk_size / mesh_triangles_count);
+
                 Vector2I relative_end_pos;
                 if (relative_end_pos_option == null)
                 {
@@ -130,7 +232,7 @@ public partial class RiverGen : Node
 
                         var current_vertex = current_start_pos.vertex_pos;
                         output.AddNewRiverVertex(current_vertex, out _);
-
+                        water_mesh_data.AddNewRiverVertex(current_vertex * 2, base_vertex_height_map[current_vertex.X + current_vertex.Y * mesh_triangles_count]);
                         while (true)
                         {
 
@@ -141,6 +243,7 @@ public partial class RiverGen : Node
                                 var next_vertex = NextVertex(current_vertex, relative_end_pos, current_start_pos.vertex_pos, mesh_triangles_count, base_vertex_height_map, margin_override_direction, current_start_pos.margin_override_direction);
 
 
+                                water_mesh_data.AddNewRiverVertex(next_vertex * 2, base_vertex_height_map[next_vertex.X + next_vertex.Y * mesh_triangles_count]);
                                 output.AddNewRiverVertex(next_vertex, out var already_contains_a_river);
 
                                 if (current_vertex == relative_end_pos || already_contains_a_river)
@@ -178,6 +281,7 @@ public partial class RiverGen : Node
                         }
 
                 }
+                river_data.river_water_mesh_data = water_mesh_data;
 
 
                 return output;
@@ -500,6 +604,7 @@ public partial class RiverGen : Node
                 public List<Vector3I> test_points_5 = [];
                 public List<Vector3I> test_points_3 = [];
                 public List<Vector3I> test_points_4 = [];
+                public RiverWaterMeshData river_water_mesh_data;
         }
         public bool DoesChunkContainRiverStart(float average_height)
         {

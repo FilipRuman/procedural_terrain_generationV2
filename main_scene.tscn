@@ -249,6 +249,9 @@ _limits = [-1.0, 0.0, 0.0, 10.0]
 _data = [Vector2(0, -1), 0.0, 0.016375115, 0, 0, Vector2(10, 0), 0.28904054, 0.0, 0, 0]
 point_count = 2
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ijoax"]
+albedo_color = Color(1, 0, 1, 1)
+
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_6jybn"]
 radius = 16.841
 height = 33.682
@@ -385,9 +388,12 @@ lake_water_level_offset = 1.0
 script = ExtResource("26_o7u2a")
 river_effect_curve = SubResource("Curve_ijoax")
 max_river_width = 10
+river_water_margin = 2.0
 additional_chunk_border_margin_for_rivers = 2
+base_water_height = 2.0
 water_gen = NodePath("..")
-test_point_size = 1.0
+test_point_size = 0.5
+test_material = SubResource("StandardMaterial3D_ijoax")
 water_scene = ExtResource("27_ijoax")
 river_start_height = 400.0
 height_points_modifier = 1.0
@@ -407,8 +413,8 @@ mesh_chunks_per_structure_grid_cell = 20
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2505, 306.99597, -1978)
 
 [node name="Node3D2" type="Node3D" parent="." unique_id=506169734]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23026.914, 0, 6876.2446)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22534.62, 522.80505, 7179.8096)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D2" unique_id=1881576066]
-transform = Transform3D(4.975, 0, 0, 0, 4.975, 0, 0, 0, 4.975, 0, 0, 0)
+transform = Transform3D(4.975, 0, 0, 0, 4.975, 0, 0, 0, 4.975, 0, 12.681541, 0)
 mesh = SubResource("SphereMesh_y5ved")

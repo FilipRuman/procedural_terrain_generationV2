@@ -199,7 +199,6 @@ public partial class WaterGen : Node3D
                                 if (min_height_with_river_margins_grid[lake.chunk_grid_pos] >= lake.water_height)
                                         continue;
 
-                                GD.Print($"lake.water_height - {lake.water_height}");
                                 var distance = river_start_point.DistanceSquaredTo(lake.chunk_grid_pos);
                                 if (distance < min_distance)
                                 {

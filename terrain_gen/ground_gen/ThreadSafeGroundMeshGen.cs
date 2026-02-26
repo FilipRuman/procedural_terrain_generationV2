@@ -82,8 +82,7 @@ RiverGen.MeshChunkRiverData river_data,
 
                         try
                         {
-
-                                var mesh_river_data_grid = river_gen.GenerateMeshChunkData(base_world_position, river_data, size, triangles_per_dimension, height_map, lake_spawning_data?.water_height);
+                                var mesh_river_data_grid = river_gen.GenerateMeshChunkData(base_world_position, river_data, size, triangles_per_dimension, height_map, lake_spawning_data == null ? null : lake_spawning_data.water_height);
 
                                 ApplyRiverInfluence(mesh_river_data_grid, ref height_map, ref vertices);
                         }

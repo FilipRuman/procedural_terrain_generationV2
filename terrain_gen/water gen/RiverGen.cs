@@ -72,112 +72,13 @@ public partial class RiverGen : Node
                                         parent_node.AddChild(mesh_inst);
 
                                 }
-
-                                // foreach (var vert in river_data.river_water_mesh_data.vertexes)
-                                // {
-                                //
-                                //         var mesh_inst = new MeshInstance3D();
-                                //         mesh_inst.Position = vert;
-                                //         mesh_inst.Scale = Vector3.One * test_point_size;
-                                //         var mesh = new SphereMesh()
-                                //         {
-                                //                 Rings = 5,
-                                //                 Radius = 5,
-                                //                 Height = 5
-                                //         };
-                                //         mesh_inst.Mesh = mesh;
-                                //         parent_node.AddChild(mesh_inst);
-                                //
-                                // }
                         }
                 }
-                // foreach (var point in river_data.test_points_1)
-                // {
-                //         var mesh_inst = new MeshInstance3D();
-                //         mesh_inst.Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y);
-                //         mesh_inst.Scale = Vector3.One * test_point_size;
-                //         var mesh = new SphereMesh()
-                //         {
-                //                 Rings = 5,
-                //                 Radius = 5,
-                //                 Height = 5
-                //         };
-                //         mesh_inst.Mesh = mesh;
-                //         mesh_inst.MaterialOverride = test_material_1;
-                //         parent_node.AddChild(mesh_inst);
-                // }
-                // foreach (var point in river_data.test_points_2)
-                // {
-                //         var mesh_inst = new MeshInstance3D();
-                //         mesh_inst.Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y);
-                //         mesh_inst.Scale = Vector3.One * test_point_size;
-                //         var mesh = new SphereMesh()
-                //         {
-                //                 Rings = 8,
-                //                 Radius = 8,
-                //                 Height = 8,
-                //         };
-                //         mesh_inst.Mesh = mesh;
-                //         mesh_inst.MaterialOverride = test_material_2;
-                //         parent_node.AddChild(mesh_inst);
-                // }
-                // foreach (var point in river_data.test_points_3)
-                // {
-                //         var mesh_inst = new MeshInstance3D
-                //         {
-                //                 Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y),
-                //                 Scale = Vector3.One * test_point_size
-                //         };
-                //         var mesh = new SphereMesh()
-                //         {
-                //                 Rings = 8,
-                //                 Radius = 8,
-                //                 Height = 8,
-                //         };
-                //         mesh_inst.Mesh = mesh;
-                //         mesh_inst.MaterialOverride = test_material_3;
-                //         parent_node.AddChild(mesh_inst);
-                // }
-                //
-                //
-                // foreach (var point in river_data.test_points_5)
-                // {
-                //         var mesh_inst = new MeshInstance3D
-                //         {
-                //                 Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y),
-                //                 Scale = Vector3.One * test_point_size
-                //         };
-                //         var mesh = new SphereMesh()
-                //         {
-                //                 Rings = 8,
-                //                 Radius = 8,
-                //                 Height = 8,
-                //         };
-                //         mesh_inst.Mesh = mesh;
-                //         mesh_inst.MaterialOverride = test_material_4;
-                //         parent_node.AddChild(mesh_inst);
-                // }
-                // foreach (var point in river_data.test_points_4)
-                // {
-                //         var mesh_inst = new MeshInstance3D
-                //         {
-                //                 Position = new Vector3I(point.X * 2, point.Y, point.Z * 2) + new Vector3I(river_data.base_world_pos.X, 0, river_data.base_world_pos.Y),
-                //                 Scale = Vector3.One * test_point_size
-                //         };
-                //         var mesh = new SphereMesh()
-                //         {
-                //                 Rings = 8,
-                //                 Radius = 8,
-                //                 Height = 8,
-                //         };
-                //         mesh_inst.Mesh = mesh;
-                //         mesh_inst.MaterialOverride = test_material_1;
-                //         parent_node.AddChild(mesh_inst);
-                // }
 
         }
 
-        public class RiverWaterMeshData(bool river_beginning, int river_width, float river_water_margin, float river_water_height, Vector2I base_chunk_position, float space_between_vertexes, int mesh_triangles_count)
+        public class RiverWaterMeshData(bool river_beginning, int river_width, float river_water_margin, float river_water_height, Vector2I base_chunk_position, float space_between_vertexes,
+                                        int mesh_triangles_count, float[] base_vertex_height_map, float? lake_height)
         {
                 public List<Vector3> vertexes = [];
                 public List<Vector3> test_points = [];
@@ -193,6 +94,8 @@ public partial class RiverGen : Node
                 Vector3 last_right_vector;
                 Vector3 last_tangent;
                 readonly bool river_beginning = river_beginning;
+                readonly float[] base_vertex_height_map = base_vertex_height_map;
+                readonly float? lake_height = lake_height;
 
                 public void SetupTheFirstVertex(float[] base_vertex_height_map)
                 {
@@ -213,8 +116,23 @@ public partial class RiverGen : Node
                         vertexes.Add(vertex_right);
                 }
 
-                bool first_vertex_isnt_setup = true;
-                public void AddNewRiverVertex(Vector2I current_relative_pos_center_vertex, float[] base_vertex_height_map)
+                bool first_vertex_is_not_setup = true;
+                private float CalculateVertexHeight(Vector2 vertex_local)
+                {
+                        vertex_local = vertex_local.Clamp(0, mesh_triangles_count - 1);
+                        // Maybe remove later
+                        var safe_pos = new Vector2I(Mathf.FloorToInt(vertex_local.X), Mathf.FloorToInt(vertex_local.Y));
+                        var base_height = base_vertex_height_map[safe_pos.X + safe_pos.Y * mesh_triangles_count];
+
+                        // Avoid seams between the water when river goes thru a lake
+                        if (lake_height != null && Mathf.Abs(lake_height.Value - base_height) < river_water_margin)
+                        {
+                                // To avoid Z fighting
+                                return lake_height.Value - 0.003f;
+                        }
+                        return base_height - river_water_height;
+                }
+                public void AddNewRiverVertex(Vector2I current_relative_pos_center_vertex)
                 {
                         var current_center_vertex_2D = base_chunk_position + (Vector2)current_relative_pos_center_vertex * 2f * space_between_vertexes;
                         var current_center_vertex = new Vector3(current_center_vertex_2D.X, 0, current_center_vertex_2D.Y);
@@ -232,21 +150,20 @@ public partial class RiverGen : Node
                         if (last_right_vector != Vector3.Zero && last_right_vector.Dot(right_vector) < 0)
                                 right_vector = -right_vector;
                         last_right_vector = right_vector;
-                        if (first_vertex_isnt_setup)
+                        if (first_vertex_is_not_setup)
                         {
-                                first_vertex_isnt_setup = false;
+                                first_vertex_is_not_setup = false;
                                 SetupTheFirstVertex(base_vertex_height_map);
                         }
 
 
-
                         var vertex_right = current_center_vertex + right_vector * (river_width + river_water_margin);
                         var vertex_right_local = (new Vector2(vertex_right.X, vertex_right.Z) - base_chunk_position) / (2f * space_between_vertexes);
+                        vertex_right.Y += CalculateVertexHeight(vertex_right_local);
 
-                        vertex_right.Y = base_vertex_height_map[Mathf.FloorToInt(Mathf.Clamp(vertex_right_local.X, 0, mesh_triangles_count - 1)) + Mathf.FloorToInt(Mathf.Clamp(vertex_right_local.Y, 0, mesh_triangles_count - 1)) * mesh_triangles_count] - river_water_height;
                         var vertex_left = current_center_vertex + right_vector * -(river_width + river_water_margin);
                         var vertex_left_local = (new Vector2(vertex_left.X, vertex_left.Z) - base_chunk_position) / (2f * space_between_vertexes);
-                        vertex_left.Y = base_vertex_height_map[Mathf.FloorToInt(Mathf.Clamp(vertex_left_local.X, 0, mesh_triangles_count - 1)) + Mathf.FloorToInt(Mathf.Clamp(vertex_left_local.Y, 0, mesh_triangles_count - 1)) * mesh_triangles_count] - river_water_height;
+                        vertex_left.Y = CalculateVertexHeight(vertex_left_local);
 
                         if (vertex_right_local.X > mesh_triangles_count - 1 || vertex_right_local.Y > mesh_triangles_count - 1 || vertex_right_local.X < 0 || vertex_right_local.Y < 0)
                         {
@@ -293,7 +210,8 @@ public partial class RiverGen : Node
                 var relative_mesh_pos = base_chunk_world_pos / mesh_chunk_size % (int)water_gen.mesh_chunks_per_water_chunk;
                 var output = new MeshChunkDataGrid(mesh_triangles_count, max_river_width, river_effect_curve);
                 GetEndAndStartMeshPossitions(river_data, mesh_triangles_count, relative_mesh_pos, base_vertex_height_map, out var relative_start_pos, out var relative_end_pos_option, out var margin_override_direction, out bool river_beginning);
-                RiverWaterMeshData water_mesh_data = new(river_beginning, max_river_width, river_water_margin, base_water_height, base_chunk_world_pos, space_between_vertexes: mesh_chunk_size / mesh_triangles_count, mesh_triangles_count);
+                RiverWaterMeshData water_mesh_data = new(river_beginning, max_river_width, river_water_margin, base_water_height, base_chunk_world_pos,
+                                                        space_between_vertexes: mesh_chunk_size / mesh_triangles_count, mesh_triangles_count, base_vertex_height_map, lake_height);
 
                 Vector2I relative_end_pos;
                 if (relative_end_pos_option == null)
@@ -328,7 +246,7 @@ public partial class RiverGen : Node
                         output.AddNewRiverVertex(current_vertex, out _);
                         if (test_i == 0)
                         {
-                                water_mesh_data.AddNewRiverVertex(current_vertex, base_vertex_height_map);
+                                water_mesh_data.AddNewRiverVertex(current_vertex);
                         }
 
 
@@ -356,7 +274,7 @@ public partial class RiverGen : Node
 
                                 if (test_i == 0)
                                 {
-                                        water_mesh_data.AddNewRiverVertex(next_vertex, base_vertex_height_map);
+                                        water_mesh_data.AddNewRiverVertex(next_vertex);
                                         if (river_data.test_points_2.Count != 0)
                                         {
                                                 river_data.test_points_1.Add(new(current_vertex.X, (int)base_vertex_height_map[current_vertex.X + current_vertex.Y * mesh_triangles_count], current_vertex.Y));

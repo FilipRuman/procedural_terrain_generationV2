@@ -3,7 +3,7 @@ using Godot;
 [Tool]
 public partial class ThreadSafeGroundMeshGen : Node
 {
-        [Export] private RiverGen river_gen;
+        [Export] private MeshChunksRiverGen mesh_chunks_river_gen;
         [Export] private TerrainAspectsSolver terrain_aspects_solver;
         [Export] private NoiseComponent high_frequency_noise;
         [Export] private NoiseComponent medium_frequency_noise;
@@ -54,7 +54,7 @@ public partial class ThreadSafeGroundMeshGen : Node
                 float[] tangents,
                 float[] height_map,
                 Vector3 chunk_base_pos,
-RiverGen.MeshChunkRiverData river_data,
+WaterGridRiverGen.MeshChunkRiverData river_data,
 #nullable enable
                 LakeGen.LakeSpawningData? lake_spawning_data
                 )
@@ -67,7 +67,7 @@ RiverGen.MeshChunkRiverData river_data,
                 public float[] tangents = tangents;
                 public float[] height_map = height_map;
                 public LakeGen.LakeSpawningData? lake_spawning_data = lake_spawning_data;
-                public RiverGen.MeshChunkRiverData? river_data = river_data;
+                public WaterGridRiverGen.MeshChunkRiverData? river_data = river_data;
         }
         public OutputData GenerateChunk(Vector2I base_world_position, int resolution, int size, WaterGen.OutputData water_data)
         {
@@ -77,14 +77,14 @@ RiverGen.MeshChunkRiverData river_data,
                 GenerateUvAndVertex(base_world_position, water_data, out var verticesPadded, out var vertices, out var uvs, out var height_map, out var lake_spawning_data);
                 var river_data = water_data.river_grid.AccessDataWithWorldPos(base_world_position, size);
 
-                if (river_data.next_mesh_chunk_pos != null || lake_spawning_data != null)
+                if (river_data.contains_river)
                 {
 
                         try
                         {
-                                var mesh_river_data_grid = river_gen.GenerateMeshChunkData(base_world_position, river_data, size, triangles_per_dimension, height_map, lake_spawning_data == null ? null : lake_spawning_data.water_height);
-
-                                ApplyRiverInfluence(mesh_river_data_grid, ref height_map, ref vertices);
+                                var mesh_chunk_river_data_grid = mesh_chunks_river_gen.GenerateMeshChunkData(base_world_position, river_data, size, triangles_per_dimension, height_map, lake_spawning_data?.water_height);
+                                river_data.mesh_chunk_data_grid = mesh_chunk_river_data_grid;
+                                ApplyRiverInfluence(mesh_chunk_river_data_grid, ref height_map, ref vertices);
                         }
                         catch (Exception e)
                         {
@@ -103,7 +103,7 @@ RiverGen.MeshChunkRiverData river_data,
                         new Vector3(base_world_position.X + size / 2f, 0, base_world_position.Y + size / 2f), river_data,
                         lake_spawning_data);
         }
-        private void ApplyRiverInfluence(RiverGen.MeshChunkDataGrid river_grid, ref float[] height_map, ref Vector3[] vertices)
+        private void ApplyRiverInfluence(WaterGridRiverGen.MeshChunkDataGrid river_grid, ref float[] height_map, ref Vector3[] vertices)
         {
                 try
                 {
@@ -114,9 +114,9 @@ RiverGen.MeshChunkRiverData river_data,
                                         int i = x + y * triangles_per_dimension;
                                         //This has to be wrong or some reason
                                         // Test the influence at the start and end points
-                                        var delta = river_grid.GetRiverEffectOnMeshVertex(new(x, y));
-                                        height_map[i] += delta;
-                                        vertices[i].Y += delta;
+                                        var new_height = river_grid.GetMeshHeightAfterRiver(new(x, y));
+                                        height_map[i] = new_height;
+                                        vertices[i].Y = new_height;
                                 }
                         }
 

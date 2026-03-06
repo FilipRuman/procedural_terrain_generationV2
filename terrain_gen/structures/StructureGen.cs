@@ -162,6 +162,12 @@ public partial class StructureGen : Node3D
                                         if (there_already_was_struct_on_one_of_the_chunks)
                                                 continue;
 
+                                        if (water_grid.IsStructureCollidingWithARiver(structure_instance))
+                                        {
+                                                GD.Print("colliding with a river");
+                                                continue;
+                                        }
+
                                         foreach (var chunk_world_pos in all_chunks)
                                         {
                                                 structures_for_mesh_chunk_world_pos.Add(chunk_world_pos, structure_instance);

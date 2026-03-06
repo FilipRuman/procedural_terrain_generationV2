@@ -359,7 +359,7 @@ public partial class TerrainGen : Node3D
 
                 AddChild(chunk);
 
-                water_gen.river_gen.InstantiateRiver(chunk_data.mesh.river_data, chunk);
+                water_gen.mesh_chunks_river_gen.InstantiateRiver(chunk_data.mesh.river_data, chunk);
                 ground_mesh_gen.ApplyData(chunk_data.mesh, chunk.mesh_instance, chunk.collider);
 
                 int map_index = free_data_maps.Dequeue();

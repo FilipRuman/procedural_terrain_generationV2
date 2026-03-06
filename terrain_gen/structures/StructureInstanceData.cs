@@ -34,7 +34,7 @@ public class StructureInstanceData
                         foreach (var point in ((IStructureShape)shape).GetSampleWorldPosPointsInsideTheShape(this))
                         {
 
-                                Vector2I chunk = new(Mathf.FloorToInt(point.X / mesh_chunk_size), Mathf.FloorToInt(point.Y / mesh_chunk_size));
+                                Vector2I chunk = new Vector2I(Mathf.FloorToInt(point.X / mesh_chunk_size), Mathf.FloorToInt(point.Y / mesh_chunk_size));
                                 Vector2I chunk_world_pos = chunk * mesh_chunk_size;
                                 chunks.Add(chunk_world_pos);
                         }
@@ -49,6 +49,16 @@ public class StructureInstanceData
                                 return true;
                 }
                 return false;
+        }
+        public List<Vector2> GetSampleWorldPosPointsInsideThisStructure()
+        {
+                List<Vector2> output = [];
+                foreach (var shape in structure_type.shapes)
+                {
+                        output.AddRange(((IStructureShape)shape).GetSampleWorldPosPointsInsideTheShape(this));
+                }
+
+                return output;
         }
 
         public bool IsValid(ThreadSafeGroundMeshGen mesh_gen)

@@ -27,8 +27,10 @@
 [ext_resource type="Script" uid="uid://b7vnabd1g6tr8" path="res://terrain_gen/structures/StructureGen.cs" id="20_84odl"]
 [ext_resource type="Resource" uid="uid://c35matxsgkavl" path="res://structures/test.tres" id="21_ak604"]
 [ext_resource type="Script" uid="uid://oq0wec2tfbqj" path="res://terrain_gen/water gen/LakeGen.cs" id="24_kv3aw"]
-[ext_resource type="Script" uid="uid://cdcvq8kfwnjh8" path="res://terrain_gen/water gen/RiverGen.cs" id="26_o7u2a"]
-[ext_resource type="PackedScene" uid="uid://dudmlm0g6ghiu" path="res://RiverWater.tscn" id="27_ijoax"]
+[ext_resource type="Script" uid="uid://byw1vg05281eb" path="res://terrain_gen/water gen/MeshChunksRiverGen.cs" id="26_o7u2a"]
+[ext_resource type="PackedScene" uid="uid://dq80erig3w6ds" path="res://river_path.tscn" id="28_yh4yk"]
+[ext_resource type="Script" uid="uid://cccdm6o6evnve" path="res://terrain_gen/water gen/WaterGridRiverGen.cs" id="29_yh4yk"]
+[ext_resource type="Script" uid="uid://gvv7fyhf5a0c" path="res://DebugSpheresController.cs" id="30_j8kkg"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_kv3aw"]
 panorama = ExtResource("1_y5ved")
@@ -245,8 +247,8 @@ point_count = 2
 albedo_color = Color(1, 0, 0, 1)
 
 [sub_resource type="Curve" id="Curve_ijoax"]
-_limits = [-1.0, 0.0, 0.0, 10.0]
-_data = [Vector2(0, -1), 0.0, 0.016375115, 0, 0, Vector2(10, 0), 0.28904054, 0.0, 0, 0]
+_limits = [0.0, 1.0, 0.0, 10.0]
+_data = [Vector2(0, 1), 0.0, 0.016375115, 0, 0, Vector2(10, 0), -0.010133768, 0.0, 0, 0]
 point_count = 2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ijoax"]
@@ -280,6 +282,7 @@ directional_shadow_pancake_size = 0.0
 environment = SubResource("Environment_ijoax")
 
 [node name="terrain gen" type="Node3D" parent="." unique_id=1284310374 node_paths=PackedStringArray("player", "biome_generator", "ground_mesh_gen", "terrain_aspects_solver", "objects_generator", "water_gen", "structure_gen")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 13.105782)
 script = ExtResource("1_6jybn")
 max_chunks_processed_per_frame = 5
 player = NodePath("../Player2")
@@ -290,7 +293,7 @@ terrain_aspects_solver = NodePath("../terrain aspects solver")
 objects_generator = NodePath("../objects gen")
 water_gen = NodePath("../water gen")
 structure_gen = NodePath("../structure gen")
-player_pos = Vector2(24195.885, 7317.048)
+player_pos = Vector2(18986.75, 6066.212)
 view_distance = 13
 chunk_size = 160
 biomes = [ExtResource("5_ghshe"), ExtResource("4_ghshe"), ExtResource("5_fv2he"), ExtResource("4_vimvf"), ExtResource("3_ak604"), ExtResource("8_5smuj"), ExtResource("9_y5ved")]
@@ -317,9 +320,9 @@ moisture_roughness_effect = -0.1
 elevation_roughness_effect = 1.0
 ruggedness_roughness_effect = -0.3
 
-[node name="mesh gen" type="Node" parent="." unique_id=348213127 node_paths=PackedStringArray("river_gen", "terrain_aspects_solver")]
+[node name="mesh gen" type="Node" parent="." unique_id=348213127 node_paths=PackedStringArray("mesh_chunks_river_gen", "terrain_aspects_solver")]
 script = ExtResource("13_yh4yk")
-river_gen = NodePath("../water gen/river gen")
+mesh_chunks_river_gen = NodePath("../water gen/mesh river gen")
 terrain_aspects_solver = NodePath("../terrain aspects solver")
 high_frequency_noise = SubResource("Resource_50xq3")
 medium_frequency_noise = SubResource("Resource_0u6gv")
@@ -337,7 +340,7 @@ biome_map_resolution = 20
 biome_transitions_smoothness = 0.1
 
 [node name="Player2" type="CharacterBody3D" parent="." unique_id=1077830235 node_paths=PackedStringArray("camera")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24195.885, 723.1982, 7317.048)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18986.75, 723.1982, 6066.212)
 floor_stop_on_slope = false
 floor_constant_speed = true
 floor_block_on_wall = false
@@ -368,9 +371,13 @@ base_tree_spawn_chance = 0.731
 rock_spawn_attempts_per_mesh_chunk = 3
 grass_spawn_attempts_per_mesh_chunk = 80
 
-[node name="water gen" type="Node3D" parent="." unique_id=1012030323 node_paths=PackedStringArray("river_gen", "lake_gen")]
+[node name="debug spheres" type="Node3D" parent="." unique_id=1688108362]
+script = ExtResource("30_j8kkg")
+
+[node name="water gen" type="Node3D" parent="." unique_id=1012030323 node_paths=PackedStringArray("water_grid_river_gen", "mesh_chunks_river_gen", "lake_gen")]
 script = ExtResource("18_opjno")
-river_gen = NodePath("river gen")
+water_grid_river_gen = NodePath("water chunks river gen")
+mesh_chunks_river_gen = NodePath("mesh river gen")
 lake_gen = NodePath("lake gen")
 test_material = SubResource("StandardMaterial3D_6jybn")
 mesh_chunks_per_water_chunk = 20
@@ -384,20 +391,23 @@ LakeWater1x1 = ExtResource("19_meb7l")
 lake_height = 180.0
 lake_water_level_offset = 1.0
 
-[node name="river gen" type="Node3D" parent="water gen" unique_id=1584759493 node_paths=PackedStringArray("water_gen")]
+[node name="mesh river gen" type="Node3D" parent="water gen" unique_id=1584759493 node_paths=PackedStringArray("water_gen")]
 script = ExtResource("26_o7u2a")
 river_effect_curve = SubResource("Curve_ijoax")
 max_river_width = 10
-river_water_margin = 2.0
 additional_chunk_border_margin_for_rivers = 2
-base_water_height = 2.0
+river_water_height = 20
 water_gen = NodePath("..")
 test_point_size = 0.5
 test_material = SubResource("StandardMaterial3D_ijoax")
-water_scene = ExtResource("27_ijoax")
-river_start_height = 400.0
 height_points_modifier = 1.0
 distance_points_modifier = 500.0
+RiverPath = ExtResource("28_yh4yk")
+
+[node name="water chunks river gen" type="Node3D" parent="water gen" unique_id=793177795]
+script = ExtResource("29_yh4yk")
+river_start_height = 300.0
+distance_points_modifier = 1.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1063337869]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 961.6639, 161.8749, 2080)

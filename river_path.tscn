@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://dq80erig3w6ds"]
+
+[sub_resource type="Curve3D" id="Curve3D_yh4yk"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 50.281254, 0, -32.843548, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21.041908, -16.089058, 47.21317, 0, 0, 0, 0, 0, 0, 81.60386, 7.4989414, 41.424706, 0, 0, 0, 0, 0, 0, 38.82443, 2.264185, 14.197103),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+}
+point_count = 5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p8s74"]
+albedo_color = Color(0, 0.41551143, 0.5793735, 1)
+
+[node name="Path3D" type="Path3D" unique_id=906236871]
+curve = SubResource("Curve3D_yh4yk")
+
+[node name="CSGPolygon3D" type="CSGPolygon3D" parent="." unique_id=1932577976]
+polygon = PackedVector2Array(0, 0, 0, 1, 8.868675, 0.8971214, 8.510741, -0.33934474)
+mode = 2
+path_node = NodePath("..")
+path_interval_type = 0
+path_interval = 1.0
+path_simplify_angle = 0.0
+path_rotation = 2
+path_rotation_accurate = false
+path_local = false
+path_continuous_u = true
+path_u_distance = 1.0
+path_joined = false
+material = SubResource("StandardMaterial3D_p8s74")

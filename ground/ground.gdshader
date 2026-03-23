@@ -1,3 +1,4 @@
+
 shader_type spatial;
 
 struct NormalAlbedoRoughness{
@@ -54,8 +55,8 @@ NormalAlbedoRoughness triple_stochastic_sample(sampler2D normal_texture,sampler2
 
 const int BIOMES_COUNT = 8;
 
-uniform float global_brightness;
-uniform float global_saturation;
+uniform float global_color_gain;
+uniform float global_color_offset;
 
 uniform float rock_saturation;
 uniform float rock_scale;
@@ -67,11 +68,11 @@ uniform sampler2D rock_roughness;
 const int chunk_data_maps_count = 517;
 instance uniform int chunk_data_map_index;
 // repeat is disabled, so that the data from one end of the chunk doesn't influence data form the other end of the chunk
-uniform sampler2D[chunk_data_maps_count] map_1:repeat_disable;
-uniform sampler2D[chunk_data_maps_count] map_2:repeat_disable;
+uniform sampler2D[chunk_data_maps_count] chunk_data_map_1:repeat_disable;
+uniform sampler2D[chunk_data_maps_count]chunk_data_map_2:repeat_disable;
 
 uniform vec3[BIOMES_COUNT] texture_tint;
-uniform float[BIOMES_COUNT] texture_saturation;
+uniform float[BIOMES_COUNT] texture_color_gain;
 uniform float[BIOMES_COUNT] texture_scale;
 uniform sampler2D[BIOMES_COUNT] biome_albedo_textures;
 uniform sampler2D[BIOMES_COUNT] biome_normal_textures;
@@ -79,10 +80,9 @@ uniform sampler2D[BIOMES_COUNT] biome_roughness_textures;
 
 uniform int biome_texture_resolution;
 
-uniform sampler2D other_noise;
+uniform sampler2D post_processing_noise;
 uniform float metallic;
 uniform float spectacular;
-uniform float other_noise_scale;
 
 
 NormalAlbedoRoughness triple_stochastic_triplanar (vec3 position, vec3 worldNormal, vec3 adjusted_normal, float biome_scale,
@@ -124,7 +124,7 @@ void handle_biome(int biome, float influence, vec3 position, vec3 worldNormal, v
 
 	NormalAlbedoRoughness output = triple_stochastic_triplanar(position, worldNormal, adjusted_normal, texture_scale[biome],biome_normal_textures[biome], biome_albedo_textures[biome],biome_roughness_textures[biome]);
 
-	output_color += (output.albedo + texture_tint[biome] - vec3(1) * texture_saturation[biome]) * influence;
+	output_color += (output.albedo + texture_tint[biome] - vec3(1) * texture_color_gain[biome]) * influence;
 	output_normal += output.normal * influence;
 	output_roughness += output.roughness * influence;
 }
@@ -149,11 +149,11 @@ NormalAlbedoRoughness collect_biome_data(vec4 biome_data_1, vec4 biome_data_2,ve
 void fragment(){
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 world_normal = normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
-	vec3 adjusted_normal = pow(abs(world_normal), vec3(8.0));
+	vec3 adjusted_normal = pow(world_normal, vec3(8.0));
 
 
-	vec4 biome_data_1 =texture(map_1[chunk_data_map_index],UV);
-	vec4 biome_data_2 =texture(map_2[chunk_data_map_index],UV);
+	vec4 biome_data_1 =texture(chunk_data_map_1[chunk_data_map_index],UV);
+	vec4 biome_data_2 =texture(chunk_data_map_2[chunk_data_map_index],UV);
 	NormalAlbedoRoughness output = collect_biome_data(biome_data_1, biome_data_2, world_pos, world_normal, adjusted_normal);
 	ALBEDO = output.albedo;
 	NORMAL_MAP = output.normal;
@@ -162,10 +162,9 @@ void fragment(){
 
 	//apply processing
 
-	ALBEDO *= global_brightness;
-
-	ALBEDO *= mix(0.8, 1.2, texture(other_noise, world_pos.xz*other_noise_scale).r);
-	ALBEDO -= vec3(1) * global_saturation;
-	METALLIC = texture(other_noise, world_pos.xz*other_noise_scale).r * metallic;
-	SPECULAR = texture(other_noise, world_pos.xz*other_noise_scale).r* spectacular;
+	ALBEDO *= global_color_gain;
+	ALBEDO *= mix(0.8, 1.2, texture(post_processing_noise, world_pos.xz).r);
+	ALBEDO -= vec3(1) * global_color_offset;
+	METALLIC = texture(post_processing_noise, world_pos.xz + vec2(1230,3210)).r * metallic;
+	SPECULAR = texture(post_processing_noise, world_pos.xz + vec2(4560,6540)).r* spectacular;
 }

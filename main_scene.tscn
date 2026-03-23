@@ -3,15 +3,6 @@
 [ext_resource type="Script" uid="uid://bx5dm3v24ouvl" path="res://ground/GroundMeshGen.cs" id="1_2c62f"]
 [ext_resource type="Shader" uid="uid://yqsnaqryv7jh" path="res://ground/ground.gdshader" id="1_hq1ik"]
 [ext_resource type="Script" uid="uid://ckougtl1epv7n" path="res://GenerationController.cs" id="2_2c62f"]
-[ext_resource type="Texture2D" uid="uid://070x5fvdh5e7" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_BaseColor.jpg" id="2_671wp"]
-[ext_resource type="Texture2D" uid="uid://bdjw77uwu2tji" path="res://ground textures/forest_path_ugsnfawlw_1k/Forest_Path_ugsnfawlw_1K_BaseColor.jpg" id="2_mo76n"]
-[ext_resource type="Texture2D" uid="uid://qy8avu837ct5" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Normal.jpg" id="2_nfk4m"]
-[ext_resource type="Texture2D" uid="uid://cap62wxor08qv" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Roughness.jpg" id="3_66tet"]
-[ext_resource type="Texture2D" uid="uid://datjc43rk68k1" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_BaseColor.jpg" id="4_7ycvg"]
-[ext_resource type="Texture2D" uid="uid://dn40j8kyl8kwr" path="res://ground textures/forest_path_ugsnfawlw_1k/Forest_Path_ugsnfawlw_1K_Normal.jpg" id="4_42l1d"]
-[ext_resource type="Texture2D" uid="uid://hwx7vg81eeg7" path="res://ground textures/rippled_sand_xd0mda1_1k/Rippled_Sand_xd0mda1_1K_Normal.jpg" id="5_2jcla"]
-[ext_resource type="Texture2D" uid="uid://cxy84u5th2m6h" path="res://ground textures/forest_path_ugsnfawlw_1k/Forest_Path_ugsnfawlw_1K_Roughness.jpg" id="6_m35m6"]
-[ext_resource type="Texture2D" uid="uid://oqskrlja41cw" path="res://ground textures/rippled_sand_xd0mda1_1k/Rippled_Sand_xd0mda1_1K_Roughness.jpg" id="7_u0ygc"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_7th4q"]
 _surfaces = [{
@@ -26,47 +17,9 @@ _surfaces = [{
 "vertex_data": PackedByteArray("AAAAAAAAAAAAAAAAAAAgQQAAAAAAAAAAAACgQQAAAIAAAAAAAADwQQAAAAAAAAAAAAAgQgAAAIAAAAAAAABIQgAAAAAAAAAAAABwQgAAAAAAAAAAAACMQgAAAIAAAAAAAACgQgAAAAAAAAAAAAC0QgAAAAAAAAAAAADIQgAAAIAAAAAAAAAAAAAAAIAAACBBAAAgQQAAAAAAACBBAACgQQAAAAAAACBBAADwQQAAAAAAACBBAAAgQgAAAIAAACBBAABIQgAAAAAAACBBAABwQgAAAIAAACBBAACMQgAAAIAAACBBAACgQgAAAIAAACBBAAC0QgAAAAAAACBBAADIQgAAAAAAACBBAAAAAAAAAAAAAKBBAAAgQQAAAIAAAKBBAACgQQAAAAAAAKBBAADwQQAAAAAAAKBBAAAgQgAAAIAAAKBBAABIQgAAAAAAAKBBAABwQgAAAIAAAKBBAACMQgAAAAAAAKBBAACgQgAAAAAAAKBBAAC0QgAAAAAAAKBBAADIQgAAAIAAAKBBAAAAAAAAAAAAAPBBAAAgQQAAAAAAAPBBAACgQQAAAAAAAPBBAADwQQAAAAAAAPBBAAAgQgAAAAAAAPBBAABIQgAAAAAAAPBBAABwQgAAAAAAAPBBAACMQgAAAAAAAPBBAACgQgAAAAAAAPBBAAC0QgAAAIAAAPBBAADIQgAAAIAAAPBBAAAAAAAAAIAAACBCAAAgQQAAAAAAACBCAACgQQAAAIAAACBCAADwQQAAAIAAACBCAAAgQgAAAIAAACBCAABIQgAAAIAAACBCAABwQgAAAAAAACBCAACMQgAAAAAAACBCAACgQgAAAAAAACBCAAC0QgAAAAAAACBCAADIQgAAAAAAACBCAAAAAAAAAIAAAEhCAAAgQQAAAAAAAEhCAACgQQAAAIAAAEhCAADwQQAAAAAAAEhCAAAgQgAAAAAAAEhCAABIQgAAAIAAAEhCAABwQgAAAIAAAEhCAACMQgAAAAAAAEhCAACgQgAAAAAAAEhCAAC0QgAAAAAAAEhCAADIQgAAAIAAAEhCAAAAAAAAAAAAAHBCAAAgQQAAAIAAAHBCAACgQQAAAAAAAHBCAADwQQAAAIAAAHBCAAAgQgAAAIAAAHBCAABIQgAAAIAAAHBCAABwQgAAAAAAAHBCAACMQgAAAAAAAHBCAACgQgAAAAAAAHBCAAC0QgAAAAAAAHBCAADIQgAAAIAAAHBCAAAAAAAAAAAAAIxCAAAgQQAAAIAAAIxCAACgQQAAAIAAAIxCAADwQQAAAIAAAIxCAAAgQgAAAAAAAIxCAABIQgAAAIAAAIxCAABwQgAAAIAAAIxCAACMQgAAAIAAAIxCAACgQgAAAAAAAIxCAAC0QgAAAAAAAIxCAADIQgAAAAAAAIxCAAAAAAAAAIAAAKBCAAAgQQAAAIAAAKBCAACgQQAAAIAAAKBCAADwQQAAAIAAAKBCAAAgQgAAAIAAAKBCAABIQgAAAIAAAKBCAABwQgAAAIAAAKBCAACMQgAAAAAAAKBCAACgQgAAAIAAAKBCAAC0QgAAAAAAAKBCAADIQgAAAAAAAKBCAAAAAAAAAAAAALRCAAAgQQAAAAAAALRCAACgQQAAAAAAALRCAADwQQAAAAAAALRCAAAgQgAAAIAAALRCAABIQgAAAIAAALRCAABwQgAAAIAAALRCAACMQgAAAAAAALRCAACgQgAAAIAAALRCAAC0QgAAAIAAALRCAADIQgAAAIAAALRCAAAAAAAAAAAAAMhCAAAgQQAAAAAAAMhCAACgQQAAAIAAAMhCAADwQQAAAAAAAMhCAAAgQgAAAAAAAMhCAABIQgAAAIAAAMhCAABwQgAAAAAAAMhCAACMQgAAAIAAAMhCAACgQgAAAAAAAMhCAAC0QgAAAAAAAMhCAADIQgAAAIAAAMhC/3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z8=")
 }]
 
-[sub_resource type="Gradient" id="Gradient_wr18j"]
-offsets = PackedFloat32Array(0, 0.20253165)
-colors = PackedColorArray(0, 1, 0, 0, 1, 0, 0, 0)
-metadata/_snap_enabled = true
-metadata/_snap_count = 79
-
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_qwutr"]
-gradient = SubResource("Gradient_wr18j")
-width = 1061
-
-[sub_resource type="Gradient" id="Gradient_42l1d"]
-offsets = PackedFloat32Array(0, 0.14887218, 0.24285714, 0.36842105, 0.9721804, 0.98345864)
-colors = PackedColorArray(0, 1, 0, 0, 1, 0, 0, 0, 0.031446397, 0.9685536, 0, 0, 0.8387095, 0.16129053, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_2jcla"]
-gradient = SubResource("Gradient_42l1d")
-fill_from = Vector2(0, 0.68091166)
-fill_to = Vector2(1, 0.34188035)
-
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_671wp"]
 render_priority = 0
 shader = ExtResource("1_hq1ik")
-shader_parameter/global_brightness = 0.13
-shader_parameter/global_saturation = 0.04
-shader_parameter/rock_saturation = 0.9
-shader_parameter/rock_scale = 1.355
-shader_parameter/rock_texture = ExtResource("4_7ycvg")
-shader_parameter/rock_normal_map = ExtResource("2_nfk4m")
-shader_parameter/rock_roughness = ExtResource("3_66tet")
-shader_parameter/map_1 = Array[Texture2D]([SubResource("GradientTexture1D_qwutr"), SubResource("GradientTexture2D_2jcla")])
-shader_parameter/map_2 = Array[Texture2D]([])
-shader_parameter/texture_tint = PackedVector3Array(1.59, -0.175, -0.315, 1.1, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-shader_parameter/texture_saturation = PackedFloat32Array(3.255, -0.9, 0, 0, 0, 0, 0, 0)
-shader_parameter/texture_scale = PackedFloat32Array(0.045, -0.01, 0, 0, 0, 0, 0, 0)
-shader_parameter/biome_albedo_textures = Array[Texture2D]([ExtResource("2_mo76n"), ExtResource("2_671wp")])
-shader_parameter/biome_normal_textures = Array[Texture2D]([ExtResource("4_42l1d"), ExtResource("5_2jcla")])
-shader_parameter/biome_roughness_textures = Array[Texture2D]([ExtResource("6_m35m6"), ExtResource("7_u0ygc")])
-shader_parameter/biome_texture_resolution = 0
-shader_parameter/metallic = 0.0
-shader_parameter/spectacular = 0.0
-shader_parameter/other_noise_scale = 0.0
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_2c62f"]
 frequency = 0.3251
@@ -82,7 +35,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -64.205, 0)
 [node name="Chunk" type="StaticBody3D" parent="." unique_id=2114801692]
 
 [node name="Ground mesh gen" type="MeshInstance3D" parent="Chunk" unique_id=1474945019 node_paths=PackedStringArray("collider")]
-instance_shader_parameters/chunk_data_map_index = 52
+transform = Transform3D(-0.037424855, 0.022009583, -0.999057, 0.14461252, 0.98935276, 0.016378693, 0.98878044, -0.14386329, -0.040209252, -0.5786457, 0.3270645, 0)
 mesh = SubResource("ArrayMesh_7th4q")
 surface_material_override/0 = SubResource("ShaderMaterial_671wp")
 script = ExtResource("1_2c62f")

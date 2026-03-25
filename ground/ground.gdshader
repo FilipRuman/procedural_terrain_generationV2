@@ -1,4 +1,3 @@
-
 shader_type spatial;
 
 struct NormalAlbedoRoughness{
@@ -65,11 +64,11 @@ uniform sampler2D rock_normal_map;
 uniform sampler2D rock_roughness;
 
 //WARN: this value HAS TO BE THE SAME as the one in the TerrianGen.cs !!!
-const int chunk_data_maps_count = 517;
-instance uniform int chunk_data_map_index;
+const int biome_textures_count = 517;
+instance uniform int biome_texture_index;
 // repeat is disabled, so that the data from one end of the chunk doesn't influence data form the other end of the chunk
-uniform sampler2D[chunk_data_maps_count] chunk_data_map_1:repeat_disable;
-uniform sampler2D[chunk_data_maps_count]chunk_data_map_2:repeat_disable;
+uniform sampler2D[biome_textures_count] biome_textures_1 : repeat_disable;
+uniform sampler2D[biome_textures_count] biome_textures_2 : repeat_disable;
 
 uniform vec3[BIOMES_COUNT] texture_tint;
 uniform float[BIOMES_COUNT] texture_color_gain;
@@ -152,8 +151,8 @@ void fragment(){
 	vec3 adjusted_normal = pow(world_normal, vec3(8.0));
 
 
-	vec4 biome_data_1 =texture(chunk_data_map_1[chunk_data_map_index],UV);
-	vec4 biome_data_2 =texture(chunk_data_map_2[chunk_data_map_index],UV);
+	vec4 biome_data_1 =texture(biome_textures_1[biome_texture_index],UV);
+	vec4 biome_data_2 =texture(biome_textures_2[biome_texture_index],UV);
 	NormalAlbedoRoughness output = collect_biome_data(biome_data_1, biome_data_2, world_pos, world_normal, adjusted_normal);
 	ALBEDO = output.albedo;
 	NORMAL_MAP = output.normal;

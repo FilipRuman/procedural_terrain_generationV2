@@ -1,4 +1,3 @@
-
 shader_type spatial;
 
 struct NormalAlbedoRoughness{
@@ -65,14 +64,14 @@ uniform sampler2D rock_normal_map;
 uniform sampler2D rock_roughness;
 
 //WARN: this value HAS TO BE THE SAME as the one in the TerrianGen.cs !!!
-const int chunk_data_maps_count = 517;
-instance uniform int chunk_data_map_index;
+const int biome_textures_count = 517;
+instance uniform int biome_texture_index;
 // repeat is disabled, so that the data from one end of the chunk doesn't influence data form the other end of the chunk
-uniform sampler2D[chunk_data_maps_count] chunk_data_map_1:repeat_disable;
-uniform sampler2D[chunk_data_maps_count]chunk_data_map_2:repeat_disable;
+uniform sampler2D[biome_textures_count] biome_textures_1 : repeat_disable;
+uniform sampler2D[biome_textures_count] biome_textures_2 : repeat_disable;
 
 uniform vec3[BIOMES_COUNT] texture_tint;
-uniform float[BIOMES_COUNT] texture_color_gain;
+uniform float[BIOMES_COUNT] texture_color_offset;
 uniform float[BIOMES_COUNT] texture_scale;
 uniform sampler2D[BIOMES_COUNT] biome_albedo_textures;
 uniform sampler2D[BIOMES_COUNT] biome_normal_textures;
@@ -104,7 +103,7 @@ NormalAlbedoRoughness triple_stochastic_triplanar (vec3 position, vec3 worldNorm
 	if (weights.y > 0.01){
 		partial = triple_stochastic_sample(biome_normal_map, biome_texture, biome_roughness, uv_y * biome_scale);
 		output.normal += partial.normal * weights.y;
-		output.albedo += partial.albedo * rock_saturation * weights.y;
+		output.albedo += partial.albedo * weights.y;
 		output.roughness += partial.roughness * weights.y;
 	}
 	if (weights.z > 0.01){
@@ -113,7 +112,6 @@ NormalAlbedoRoughness triple_stochastic_triplanar (vec3 position, vec3 worldNorm
 		output.albedo += partial.albedo * rock_saturation * weights.z;
 		output.roughness += partial.roughness * weights.z;
 	}
-
 	return output;
 }
 
@@ -123,8 +121,7 @@ void handle_biome(int biome, float influence, vec3 position, vec3 worldNormal, v
 	}
 
 	NormalAlbedoRoughness output = triple_stochastic_triplanar(position, worldNormal, adjusted_normal, texture_scale[biome],biome_normal_textures[biome], biome_albedo_textures[biome],biome_roughness_textures[biome]);
-
-	output_color += (output.albedo + texture_tint[biome] - vec3(1) * texture_color_gain[biome]) * influence;
+	output_color += (output.albedo + texture_tint[biome] - vec3(1) * texture_color_offset[biome]) * influence;
 	output_normal += output.normal * influence;
 	output_roughness += output.roughness * influence;
 }
@@ -133,7 +130,6 @@ NormalAlbedoRoughness collect_biome_data(vec4 biome_data_1, vec4 biome_data_2,ve
 	vec3 output_color = vec3(0, 0, 0);
 	vec3 output_normal = vec3(0, 0, 0);
 	vec3 output_roughness = vec3(0, 0, 0);
-
 	handle_biome(0, biome_data_1.r, world_pos, world_normal, adjusted_normal, output_color, output_normal, output_roughness);
 	handle_biome(1, biome_data_1.g, world_pos, world_normal, adjusted_normal, output_color, output_normal, output_roughness);
 	handle_biome(2, biome_data_1.b, world_pos, world_normal, adjusted_normal, output_color, output_normal, output_roughness);
@@ -149,11 +145,11 @@ NormalAlbedoRoughness collect_biome_data(vec4 biome_data_1, vec4 biome_data_2,ve
 void fragment(){
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 world_normal = normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
-	vec3 adjusted_normal = pow(world_normal, vec3(8.0));
+	vec3 adjusted_normal = pow(world_normal, vec3(1.0));
 
 
-	vec4 biome_data_1 =texture(chunk_data_map_1[chunk_data_map_index],UV);
-	vec4 biome_data_2 =texture(chunk_data_map_2[chunk_data_map_index],UV);
+	vec4 biome_data_1 =texture(biome_textures_1[biome_texture_index],UV);
+	vec4 biome_data_2 =texture(biome_textures_2[biome_texture_index],UV);
 	NormalAlbedoRoughness output = collect_biome_data(biome_data_1, biome_data_2, world_pos, world_normal, adjusted_normal);
 	ALBEDO = output.albedo;
 	NORMAL_MAP = output.normal;

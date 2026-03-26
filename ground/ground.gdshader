@@ -71,7 +71,7 @@ uniform sampler2D[biome_textures_count] biome_textures_1 : repeat_disable;
 uniform sampler2D[biome_textures_count] biome_textures_2 : repeat_disable;
 
 uniform vec3[BIOMES_COUNT] texture_tint;
-uniform float[BIOMES_COUNT] texture_color_gain;
+uniform float[BIOMES_COUNT] texture_color_offset;
 uniform float[BIOMES_COUNT] texture_scale;
 uniform sampler2D[BIOMES_COUNT] biome_albedo_textures;
 uniform sampler2D[BIOMES_COUNT] biome_normal_textures;
@@ -123,7 +123,7 @@ void handle_biome(int biome, float influence, vec3 position, vec3 worldNormal, v
 
 	NormalAlbedoRoughness output = triple_stochastic_triplanar(position, worldNormal, adjusted_normal, texture_scale[biome],biome_normal_textures[biome], biome_albedo_textures[biome],biome_roughness_textures[biome]);
 
-	output_color += (output.albedo + texture_tint[biome] - vec3(1) * texture_color_gain[biome]) * influence;
+	output_color += (output.albedo + texture_tint[biome] - vec3(1) * texture_color_offset[biome]) * influence;
 	output_normal += output.normal * influence;
 	output_roughness += output.roughness * influence;
 }

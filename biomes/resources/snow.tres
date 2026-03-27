@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="Biome" format=3 uid="uid://dpmmjjeg0xibs"]
+
+[ext_resource type="Texture2D" uid="uid://b2k6c88vjl8pt" path="res://ground textures/fresh_windswept_snow_ugspafgdy_1k/Fresh_Windswept_Snow_ugspafgdy_1K_BaseColor.jpg" id="1_uopth"]
+[ext_resource type="Texture2D" uid="uid://2oh52cjspouj" path="res://ground textures/fresh_windswept_snow_ugspafgdy_1k/Fresh_Windswept_Snow_ugspafgdy_1K_Normal.jpg" id="2_pc6qf"]
+[ext_resource type="Script" uid="uid://bm8kbrvv7ojmi" path="res://util/FloatRange.cs" id="7_05luw"]
+[ext_resource type="Texture2D" uid="uid://sa2rdm3wb2tm" path="res://ground textures/fresh_windswept_snow_ugspafgdy_1k/Fresh_Windswept_Snow_ugspafgdy_1K_Roughness.jpg" id="8_0p6ml"]
+[ext_resource type="Script" uid="uid://bqpjjupyok60s" path="res://biomes/Biome.cs" id="9_cekha"]
+
+[sub_resource type="Resource" id="Resource_6ru70"]
+script = ExtResource("7_05luw")
+max = 0.6
+
+[sub_resource type="Resource" id="Resource_ki50r"]
+script = ExtResource("7_05luw")
+max = 1.0
+
+[sub_resource type="Resource" id="Resource_tbcr6"]
+script = ExtResource("7_05luw")
+max = 0.3
+
+[resource]
+script = ExtResource("9_cekha")
+preferred_moisture = SubResource("Resource_ki50r")
+preferred_elevation = SubResource("Resource_6ru70")
+preferred_temperature = SubResource("Resource_tbcr6")
+albedo = ExtResource("1_uopth")
+normal = ExtResource("2_pc6qf")
+roughness = ExtResource("8_0p6ml")
+scale = 0.05
+metadata/_custom_type_script = "uid://bqpjjupyok60s"

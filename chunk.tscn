@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://bp4nr0hn2m0dt"]
+
+[ext_resource type="Material" uid="uid://difr1umt0wq45" path="res://ground_material.tres" id="1_eat54"]
+[ext_resource type="Script" uid="uid://bx5dm3v24ouvl" path="res://ground/GroundMeshGen.cs" id="2_a0kup"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_eat54"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_2c62f"]
+frequency = 0.3251
+
+[sub_resource type="HeightMapShape3D" id="HeightMapShape3D_6jybn"]
+map_width = 11
+map_depth = 11
+map_data = PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+[node name="Chunk" type="StaticBody3D" unique_id=1920990326]
+
+[node name="Ground mesh gen" type="MeshInstance3D" parent="." unique_id=645994041 node_paths=PackedStringArray("collider")]
+transform = Transform3D(14.859398, 3.2015762e-06, 0.054063074, 0, 1.0510149, -0.05406316, -0.025934568, 0.0018343662, 30.975828, 0, 0, 0)
+mesh = SubResource("BoxMesh_eat54")
+surface_material_override/0 = ExtResource("1_eat54")
+script = ExtResource("2_a0kup")
+noise = SubResource("FastNoiseLite_2c62f")
+collider = NodePath("../CollisionShape3D")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=465102913]
+transform = Transform3D(10, 0, 0, 0, 1, 0, 0, 0, 10, 50, 0, 50)
+visible = false
+shape = SubResource("HeightMapShape3D_6jybn")

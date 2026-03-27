@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="Biome" format=3 uid="uid://c7tligpk7bhuq"]
+
+[ext_resource type="Texture2D" uid="uid://070x5fvdh5e7" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_BaseColor.jpg" id="1_t5jjv"]
+[ext_resource type="Texture2D" uid="uid://bk5ufqeoaqypt" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_Normal.jpg" id="2_s8l2d"]
+[ext_resource type="Script" uid="uid://bm8kbrvv7ojmi" path="res://util/FloatRange.cs" id="3_aapk7"]
+[ext_resource type="Texture2D" uid="uid://c4vgvt145u3xh" path="res://ground textures/uncut_grass_oeeb70_1k/Uncut_Grass_oeeb70_1K_Roughness.jpg" id="6_lwxx2"]
+[ext_resource type="Script" uid="uid://bqpjjupyok60s" path="res://biomes/Biome.cs" id="7_n46fe"]
+
+[sub_resource type="Resource" id="Resource_8idw5"]
+script = ExtResource("3_aapk7")
+max = 0.6
+metadata/_custom_type_script = "uid://bm8kbrvv7ojmi"
+
+[sub_resource type="Resource" id="Resource_xa2ue"]
+script = ExtResource("3_aapk7")
+min = 0.4
+max = 0.6
+metadata/_custom_type_script = "uid://bm8kbrvv7ojmi"
+
+[sub_resource type="Resource" id="Resource_8qyf7"]
+script = ExtResource("3_aapk7")
+min = 0.4
+max = 0.6
+metadata/_custom_type_script = "uid://bm8kbrvv7ojmi"
+
+[resource]
+script = ExtResource("7_n46fe")
+preferred_moisture = SubResource("Resource_xa2ue")
+preferred_elevation = SubResource("Resource_8idw5")
+preferred_temperature = SubResource("Resource_8qyf7")
+albedo = ExtResource("1_t5jjv")
+normal = ExtResource("2_s8l2d")
+roughness = ExtResource("6_lwxx2")
+scale = 0.05
+metadata/_custom_type_script = "uid://bqpjjupyok60s"

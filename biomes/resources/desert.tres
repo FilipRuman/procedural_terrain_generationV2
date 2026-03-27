@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="Biome" format=3 uid="uid://ciu68hetij58k"]
+
+[ext_resource type="Texture2D" uid="uid://rj6a6u47sfua" path="res://ground textures/rippled_sand_xd0mda1_1k/Rippled_Sand_xd0mda1_1K_BaseColor.jpg" id="1_exehw"]
+[ext_resource type="Texture2D" uid="uid://hwx7vg81eeg7" path="res://ground textures/rippled_sand_xd0mda1_1k/Rippled_Sand_xd0mda1_1K_Normal.jpg" id="2_kvwqf"]
+[ext_resource type="Script" uid="uid://bm8kbrvv7ojmi" path="res://util/FloatRange.cs" id="4_4wpcj"]
+[ext_resource type="Texture2D" uid="uid://oqskrlja41cw" path="res://ground textures/rippled_sand_xd0mda1_1k/Rippled_Sand_xd0mda1_1K_Roughness.jpg" id="5_64o33"]
+[ext_resource type="Script" uid="uid://bqpjjupyok60s" path="res://biomes/Biome.cs" id="6_wfmk1"]
+
+[sub_resource type="Resource" id="Resource_exehw"]
+script = ExtResource("4_4wpcj")
+max = 0.8
+
+[sub_resource type="Resource" id="Resource_kvwqf"]
+script = ExtResource("4_4wpcj")
+max = 0.3
+
+[sub_resource type="Resource" id="Resource_8syi6"]
+script = ExtResource("4_4wpcj")
+min = 0.7
+max = 1.0
+
+[resource]
+script = ExtResource("6_wfmk1")
+preferred_moisture = SubResource("Resource_kvwqf")
+preferred_elevation = SubResource("Resource_exehw")
+preferred_temperature = SubResource("Resource_8syi6")
+albedo = ExtResource("1_exehw")
+normal = ExtResource("2_kvwqf")
+roughness = ExtResource("5_64o33")
+color_offset = 1.0
+scale = 0.05
+metadata/_custom_type_script = "uid://bqpjjupyok60s"

@@ -1,33 +1,100 @@
 [gd_scene format=4 uid="uid://bghar211r8846"]
 
 [ext_resource type="Script" uid="uid://bx5dm3v24ouvl" path="res://ground/GroundMeshGen.cs" id="1_2c62f"]
-[ext_resource type="Shader" uid="uid://yqsnaqryv7jh" path="res://ground/ground.gdshader" id="1_hq1ik"]
+[ext_resource type="Material" uid="uid://difr1umt0wq45" path="res://ground_material.tres" id="1_7ycvg"]
 [ext_resource type="Script" uid="uid://ckougtl1epv7n" path="res://GenerationController.cs" id="2_2c62f"]
+[ext_resource type="Resource" uid="uid://ciu68hetij58k" path="res://biomes/resources/desert.tres" id="4_7th4q"]
+[ext_resource type="Script" uid="uid://ie6lidlhojfd" path="res://biomes/BiomeGenerator.cs" id="4_wr18j"]
+[ext_resource type="Resource" uid="uid://bmstcmmc38flq" path="res://biomes/resources/dry_grass.tres" id="5_6jybn"]
+[ext_resource type="Script" uid="uid://duqibi8br3aen" path="res://biomes/terrain_aspect/TerrainAspectsSolver.cs" id="5_qwutr"]
+[ext_resource type="Resource" uid="uid://bjntftk3kutwh" path="res://biomes/resources/high_mountain_green.tres" id="6_84odl"]
+[ext_resource type="Script" uid="uid://bmptihf7ojyyf" path="res://ground/GroundShaderController.cs" id="6_671wp"]
+[ext_resource type="Resource" uid="uid://bwyc1o1fgbmuv" path="res://biomes/resources/high_mountain_snow.tres" id="7_ak604"]
+[ext_resource type="Texture2D" uid="uid://datjc43rk68k1" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_BaseColor.jpg" id="7_mo76n"]
+[ext_resource type="Texture2D" uid="uid://qy8avu837ct5" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Normal.jpg" id="8_42l1d"]
+[ext_resource type="Resource" uid="uid://c7tligpk7bhuq" path="res://biomes/resources/plains.tres" id="8_vimvf"]
+[ext_resource type="Texture2D" uid="uid://cap62wxor08qv" path="res://ground textures/rock_cliff_xccibbi_1k/Rock_Cliff_xccibbi_1K_Roughness.jpg" id="9_2jcla"]
+[ext_resource type="Resource" uid="uid://dpmmjjeg0xibs" path="res://biomes/resources/snow.tres" id="9_ghshe"]
+[ext_resource type="Resource" uid="uid://dalilcqe722id" path="res://biomes/resources/swamp.tres" id="10_fv2he"]
+[ext_resource type="Script" uid="uid://cyylqtwxb5xm2" path="res://util/NoisePart.cs" id="13_5smuj"]
+[ext_resource type="Script" uid="uid://cyc8wghcqqnc5" path="res://util/NoiseComponent.cs" id="14_y5ved"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_7th4q"]
 _surfaces = [{
-"aabb": AABB(0, 0, 0, 100, 1e-05, 100),
-"attribute_data": PackedByteArray("AAAAAAAAAACMLro9AAAAAIwuOj4AAAAA6aKLPgAAAACMLro+AAAAAC+66D4AAAAA6aILPwAAAAC66CI/AAAAAIwuOj8AAAAAXXRRPwAAAAAvumg/AAAAAAAAAACMLro9jC66PYwuuj2MLjo+jC66Pemiiz6MLro9jC66Powuuj0vuug+jC66PemiCz+MLro9uugiP4wuuj2MLjo/jC66PV10UT+MLro9L7poP4wuuj0AAAAAjC46Powuuj2MLjo+jC46PowuOj7poos+jC46Powuuj6MLjo+L7roPowuOj7pogs/jC46PrroIj+MLjo+jC46P4wuOj5ddFE/jC46Pi+6aD+MLjo+AAAAAOmiiz6MLro96aKLPowuOj7poos+6aKLPumiiz6MLro+6aKLPi+66D7poos+6aILP+miiz666CI/6aKLPowuOj/poos+XXRRP+miiz4vumg/6aKLPgAAAACMLro+jC66PYwuuj6MLjo+jC66Pumiiz6MLro+jC66Powuuj4vuug+jC66PumiCz+MLro+uugiP4wuuj6MLjo/jC66Pl10UT+MLro+L7poP4wuuj4AAAAAL7roPowuuj0vuug+jC46Pi+66D7poos+L7roPowuuj4vuug+L7roPi+66D7pogs/L7roPrroIj8vuug+jC46Py+66D5ddFE/L7roPi+6aD8vuug+AAAAAOmiCz+MLro96aILP4wuOj7pogs/6aKLPumiCz+MLro+6aILPy+66D7pogs/6aILP+miCz+66CI/6aILP4wuOj/pogs/XXRRP+miCz8vumg/6aILPwAAAAC66CI/jC66PbroIj+MLjo+uugiP+miiz666CI/jC66PrroIj8vuug+uugiP+miCz+66CI/uugiP7roIj+MLjo/uugiP110UT+66CI/L7poP7roIj8AAAAAjC46P4wuuj2MLjo/jC46PowuOj/poos+jC46P4wuuj6MLjo/L7roPowuOj/pogs/jC46P7roIj+MLjo/jC46P4wuOj9ddFE/jC46Py+6aD+MLjo/AAAAAF10UT+MLro9XXRRP4wuOj5ddFE/6aKLPl10UT+MLro+XXRRPy+66D5ddFE/6aILP110UT+66CI/XXRRP4wuOj9ddFE/XXRRP110UT8vumg/XXRRPwAAAAAvumg/jC66PS+6aD+MLjo+L7poP+miiz4vumg/jC66Pi+6aD8vuug+L7poP+miCz8vumg/uugiPy+6aD+MLjo/L7poP110UT8vumg/L7poPy+6aD8="),
+"aabb": AABB(0, 0, 0, 500, 1e-05, 500),
+"attribute_data": PackedByteArray("AAAAAAAAAAAAAAA/AAAAAAAAAAAAAAA/AAAAPwAAAD8="),
 "format": 34359742487,
-"index_count": 600,
-"index_data": PackedByteArray("AAABAAsADAALAAEAAQACAAwADQAMAAIAAgADAA0ADgANAAMAAwAEAA4ADwAOAAQABAAFAA8AEAAPAAUABQAGABAAEQAQAAYABgAHABEAEgARAAcABwAIABIAEwASAAgACAAJABMAFAATAAkACQAKABQAFQAUAAoACwAMABYAFwAWAAwADAANABcAGAAXAA0ADQAOABgAGQAYAA4ADgAPABkAGgAZAA8ADwAQABoAGwAaABAAEAARABsAHAAbABEAEQASABwAHQAcABIAEgATAB0AHgAdABMAEwAUAB4AHwAeABQAFAAVAB8AIAAfABUAFgAXACEAIgAhABcAFwAYACIAIwAiABgAGAAZACMAJAAjABkAGQAaACQAJQAkABoAGgAbACUAJgAlABsAGwAcACYAJwAmABwAHAAdACcAKAAnAB0AHQAeACgAKQAoAB4AHgAfACkAKgApAB8AHwAgACoAKwAqACAAIQAiACwALQAsACIAIgAjAC0ALgAtACMAIwAkAC4ALwAuACQAJAAlAC8AMAAvACUAJQAmADAAMQAwACYAJgAnADEAMgAxACcAJwAoADIAMwAyACgAKAApADMANAAzACkAKQAqADQANQA0ACoAKgArADUANgA1ACsALAAtADcAOAA3AC0ALQAuADgAOQA4AC4ALgAvADkAOgA5AC8ALwAwADoAOwA6ADAAMAAxADsAPAA7ADEAMQAyADwAPQA8ADIAMgAzAD0APgA9ADMAMwA0AD4APwA+ADQANAA1AD8AQAA/ADUANQA2AEAAQQBAADYANwA4AEIAQwBCADgAOAA5AEMARABDADkAOQA6AEQARQBEADoAOgA7AEUARgBFADsAOwA8AEYARwBGADwAPAA9AEcASABHAD0APQA+AEgASQBIAD4APgA/AEkASgBJAD8APwBAAEoASwBKAEAAQABBAEsATABLAEEAQgBDAE0ATgBNAEMAQwBEAE4ATwBOAEQARABFAE8AUABPAEUARQBGAFAAUQBQAEYARgBHAFEAUgBRAEcARwBIAFIAUwBSAEgASABJAFMAVABTAEkASQBKAFQAVQBUAEoASgBLAFUAVgBVAEsASwBMAFYAVwBWAEwATQBOAFgAWQBYAE4ATgBPAFkAWgBZAE8ATwBQAFoAWwBaAFAAUABRAFsAXABbAFEAUQBSAFwAXQBcAFIAUgBTAF0AXgBdAFMAUwBUAF4AXwBeAFQAVABVAF8AYABfAFUAVQBWAGAAYQBgAFYAVgBXAGEAYgBhAFcAWABZAGMAZABjAFkAWQBaAGQAZQBkAFoAWgBbAGUAZgBlAFsAWwBcAGYAZwBmAFwAXABdAGcAaABnAF0AXQBeAGgAaQBoAF4AXgBfAGkAagBpAF8AXwBgAGoAawBqAGAAYABhAGsAbABrAGEAYQBiAGwAbQBsAGIAYwBkAG4AbwBuAGQAZABlAG8AcABvAGUAZQBmAHAAcQBwAGYAZgBnAHEAcgBxAGcAZwBoAHIAcwByAGgAaABpAHMAdABzAGkAaQBqAHQAdQB0AGoAagBrAHUAdgB1AGsAawBsAHYAdwB2AGwAbABtAHcAeAB3AG0A"),
+"index_count": 6,
+"index_data": PackedByteArray("AAABAAIAAwACAAEA"),
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
-"vertex_count": 121,
-"vertex_data": PackedByteArray("AAAAAAAAAAAAAAAAAAAgQQAAAAAAAAAAAACgQQAAAIAAAAAAAADwQQAAAAAAAAAAAAAgQgAAAIAAAAAAAABIQgAAAAAAAAAAAABwQgAAAAAAAAAAAACMQgAAAIAAAAAAAACgQgAAAAAAAAAAAAC0QgAAAAAAAAAAAADIQgAAAIAAAAAAAAAAAAAAAIAAACBBAAAgQQAAAAAAACBBAACgQQAAAAAAACBBAADwQQAAAAAAACBBAAAgQgAAAIAAACBBAABIQgAAAAAAACBBAABwQgAAAIAAACBBAACMQgAAAIAAACBBAACgQgAAAIAAACBBAAC0QgAAAAAAACBBAADIQgAAAAAAACBBAAAAAAAAAAAAAKBBAAAgQQAAAIAAAKBBAACgQQAAAAAAAKBBAADwQQAAAAAAAKBBAAAgQgAAAIAAAKBBAABIQgAAAAAAAKBBAABwQgAAAIAAAKBBAACMQgAAAAAAAKBBAACgQgAAAAAAAKBBAAC0QgAAAAAAAKBBAADIQgAAAIAAAKBBAAAAAAAAAAAAAPBBAAAgQQAAAAAAAPBBAACgQQAAAAAAAPBBAADwQQAAAAAAAPBBAAAgQgAAAAAAAPBBAABIQgAAAAAAAPBBAABwQgAAAAAAAPBBAACMQgAAAAAAAPBBAACgQgAAAAAAAPBBAAC0QgAAAIAAAPBBAADIQgAAAIAAAPBBAAAAAAAAAIAAACBCAAAgQQAAAAAAACBCAACgQQAAAIAAACBCAADwQQAAAIAAACBCAAAgQgAAAIAAACBCAABIQgAAAIAAACBCAABwQgAAAAAAACBCAACMQgAAAAAAACBCAACgQgAAAAAAACBCAAC0QgAAAAAAACBCAADIQgAAAAAAACBCAAAAAAAAAIAAAEhCAAAgQQAAAAAAAEhCAACgQQAAAIAAAEhCAADwQQAAAAAAAEhCAAAgQgAAAAAAAEhCAABIQgAAAIAAAEhCAABwQgAAAIAAAEhCAACMQgAAAAAAAEhCAACgQgAAAAAAAEhCAAC0QgAAAAAAAEhCAADIQgAAAIAAAEhCAAAAAAAAAAAAAHBCAAAgQQAAAIAAAHBCAACgQQAAAAAAAHBCAADwQQAAAIAAAHBCAAAgQgAAAIAAAHBCAABIQgAAAIAAAHBCAABwQgAAAAAAAHBCAACMQgAAAAAAAHBCAACgQgAAAAAAAHBCAAC0QgAAAAAAAHBCAADIQgAAAIAAAHBCAAAAAAAAAAAAAIxCAAAgQQAAAIAAAIxCAACgQQAAAIAAAIxCAADwQQAAAIAAAIxCAAAgQgAAAAAAAIxCAABIQgAAAIAAAIxCAABwQgAAAIAAAIxCAACMQgAAAIAAAIxCAACgQgAAAAAAAIxCAAC0QgAAAAAAAIxCAADIQgAAAAAAAIxCAAAAAAAAAIAAAKBCAAAgQQAAAIAAAKBCAACgQQAAAIAAAKBCAADwQQAAAIAAAKBCAAAgQgAAAIAAAKBCAABIQgAAAIAAAKBCAABwQgAAAIAAAKBCAACMQgAAAAAAAKBCAACgQgAAAIAAAKBCAAC0QgAAAAAAAKBCAADIQgAAAAAAAKBCAAAAAAAAAAAAALRCAAAgQQAAAAAAALRCAACgQQAAAAAAALRCAADwQQAAAAAAALRCAAAgQgAAAIAAALRCAABIQgAAAIAAALRCAABwQgAAAIAAALRCAACMQgAAAAAAALRCAACgQgAAAIAAALRCAAC0QgAAAIAAALRCAADIQgAAAIAAALRCAAAAAAAAAAAAAMhCAAAgQQAAAAAAAMhCAACgQQAAAIAAAMhCAADwQQAAAAAAAMhCAAAgQgAAAAAAAMhCAABIQgAAAIAAAMhCAABwQgAAAAAAAMhCAACMQgAAAIAAAMhCAACgQgAAAAAAAMhCAAC0QgAAAAAAAMhCAADIQgAAAIAAAMhC/3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z//f///////P/9///////8//3///////z8=")
+"vertex_count": 4,
+"vertex_data": PackedByteArray("AAAAAAAAAAAAAAAAAAD6QwAAAIAAAAAAAAAAAAAAAIAAAPpDAAD6QwAAAIAAAPpD/3///////z//f///////P/9///////8//3///////z8=")
 }]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_671wp"]
-render_priority = 0
-shader = ExtResource("1_hq1ik")
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_2c62f"]
 frequency = 0.3251
 
 [sub_resource type="HeightMapShape3D" id="HeightMapShape3D_6jybn"]
-map_width = 11
-map_depth = 11
-map_data = PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+map_data = PackedFloat32Array(0, 0, 0, 0)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_kv3aw"]
+seed = -599
+frequency = 0.0757
+
+[sub_resource type="Resource" id="Resource_o7u2a"]
+script = ExtResource("13_5smuj")
+noise = SubResource("FastNoiseLite_kv3aw")
+amplitude = 1.0
+frequency = 100.0
+metadata/_custom_type_script = "uid://cyylqtwxb5xm2"
+
+[sub_resource type="Resource" id="Resource_ijoax"]
+script = ExtResource("14_y5ved")
+noises = [SubResource("Resource_o7u2a")]
+metadata/_custom_type_script = "uid://cyc8wghcqqnc5"
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_j8kkg"]
+seed = 1540
+frequency = 0.1501
+
+[sub_resource type="Resource" id="Resource_yh4yk"]
+script = ExtResource("13_5smuj")
+noise = SubResource("FastNoiseLite_j8kkg")
+amplitude = 1.0
+frequency = 100.0
+metadata/_custom_type_script = "uid://cyylqtwxb5xm2"
+
+[sub_resource type="Resource" id="Resource_p8s74"]
+script = ExtResource("14_y5ved")
+noises = [SubResource("Resource_yh4yk")]
+metadata/_custom_type_script = "uid://cyc8wghcqqnc5"
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_o4fqm"]
+seed = 107
+frequency = 0.0057
+
+[sub_resource type="Resource" id="Resource_gfmxp"]
+script = ExtResource("13_5smuj")
+noise = SubResource("FastNoiseLite_o4fqm")
+amplitude = 1.0
+frequency = 100.0
+metadata/_custom_type_script = "uid://cyylqtwxb5xm2"
+
+[sub_resource type="Resource" id="Resource_1n88h"]
+script = ExtResource("14_y5ved")
+noises = [SubResource("Resource_gfmxp")]
+metadata/_custom_type_script = "uid://cyc8wghcqqnc5"
+
+[sub_resource type="Gradient" id="Gradient_84odl"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_m35m6"]
+frequency = 0.0059
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_u0ygc"]
+noise = SubResource("FastNoiseLite_m35m6")
+color_ramp = SubResource("Gradient_84odl")
+seamless = true
 
 [node name="Main scene" type="Node3D" unique_id=325302715]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -64.205, 0)
@@ -35,26 +102,60 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -64.205, 0)
 [node name="Chunk" type="StaticBody3D" parent="." unique_id=2114801692]
 
 [node name="Ground mesh gen" type="MeshInstance3D" parent="Chunk" unique_id=1474945019 node_paths=PackedStringArray("collider")]
-transform = Transform3D(-0.037424855, 0.022009583, -0.999057, 0.14461252, 0.98935276, 0.016378693, 0.98878044, -0.14386329, -0.040209252, -0.5786457, 0.3270645, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 0, 0.32699966, 0)
 mesh = SubResource("ArrayMesh_7th4q")
-surface_material_override/0 = SubResource("ShaderMaterial_671wp")
+surface_material_override/0 = ExtResource("1_7ycvg")
 script = ExtResource("1_2c62f")
 noise = SubResource("FastNoiseLite_2c62f")
 collider = NodePath("../CollisionShape3D")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Chunk" unique_id=1032092663]
-transform = Transform3D(10, 0, 0, 0, 1, 0, 0, 0, 10, 50, 0, 50)
+transform = Transform3D(500, 0, 0, 0, 1, 0, 0, 0, 500, 250, 0, 250)
 visible = false
 shape = SubResource("HeightMapShape3D_6jybn")
 
-[node name="Generation controller" type="Node" parent="." unique_id=976734548 node_paths=PackedStringArray("ground_mesh_gen")]
+[node name="Generation controller" type="Node" parent="." unique_id=976734548 node_paths=PackedStringArray("ground_mesh_gen", "biome_generator", "ground_shader_controller")]
 script = ExtResource("2_2c62f")
-terrain_chunk_size = 100
+terrain_chunk_size = 500
 ground_mesh_gen = NodePath("../Chunk/Ground mesh gen")
-ground_mesh_resolution = 10
+biome_generator = NodePath("biome generator")
+ground_mesh_resolution = 1
+biomes = [ExtResource("4_7th4q"), ExtResource("5_6jybn"), ExtResource("6_84odl"), ExtResource("7_ak604"), ExtResource("8_vimvf"), ExtResource("9_ghshe"), ExtResource("10_fv2he")]
+ground_shader_controller = NodePath("ground shader controller")
+
+[node name="biome generator" type="Node" parent="Generation controller" unique_id=1876212071 node_paths=PackedStringArray("terrain_aspects_solver")]
+script = ExtResource("4_wr18j")
+biome_map_resolution = 30
+terrain_aspects_solver = NodePath("terrain aspects solver")
+biome_transitions_smoothness = 0.1
+
+[node name="terrain aspects solver" type="Node" parent="Generation controller/biome generator" unique_id=1425684243]
+script = ExtResource("5_qwutr")
+elevation_noise = SubResource("Resource_ijoax")
+temperature_noise = SubResource("Resource_p8s74")
+moisture_noise = SubResource("Resource_1n88h")
+slope_calculation_step_size = 1.0
+slope_roughness_effect = 1.0
+
+[node name="ground shader controller" type="Node" parent="Generation controller" unique_id=113452430]
+script = ExtResource("6_671wp")
+rock_texture = ExtResource("7_mo76n")
+rock_normal_map = ExtResource("8_42l1d")
+rock_roughness = ExtResource("9_2jcla")
+rock_scale = 1.0
+rock_color_gain = 1.0
+global_color_gain = 0.2
+global_color_offset = 0.1
+post_processing_noise = SubResource("NoiseTexture2D_u0ygc")
+post_processing_noise_scale = 0.055
+post_processing_albedo_influence = 0.2
+metallic = 0.375
+spectacular = 0.205
+ground_shader_material = ExtResource("1_7ycvg")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1002644790]
-light_energy = 0.0
-light_indirect_energy = 3.754
+transform = Transform3D(0.013090599, 0.94866246, 0.3160194, 0.05813368, -0.31623393, 0.9468984, 0.99822295, 0.0059759025, -0.059288926, 0, 0, 0)
+light_energy = 1.196
+light_indirect_energy = 0.894
 light_volumetric_fog_energy = 2.06
 light_angular_distance = 1.84

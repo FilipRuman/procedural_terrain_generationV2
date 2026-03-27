@@ -148,7 +148,7 @@ NormalAlbedoRoughness collect_biome_data(vec4 biome_data_1, vec4 biome_data_2,ve
 void fragment(){
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 world_normal = normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
-	vec3 adjusted_normal = pow(world_normal, vec3(8.0));
+	vec3 adjusted_normal = pow(abs(world_normal), vec3(8.0));
 
 
 	vec4 biome_data_1 =texture(biome_textures_1[biome_texture_index],UV);

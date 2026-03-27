@@ -1,6 +1,6 @@
 using Godot;
 [Tool]
-public partial class GroundMeshGen : MeshInstance3D
+public partial class GroundMeshGen : Node
 {
         private int triangles_per_dimension;
         private float triangle_size;
@@ -10,34 +10,35 @@ public partial class GroundMeshGen : MeshInstance3D
         [Export] private FastNoiseLite noise;
         [Export] private float noise_amplitude;
 
-        [Export] private CollisionShape3D collider;
 
 
-        private Vector3[] vertices;
-        private Vector3[] vertices_padded;
-        private int[] indices;
-        private Vector3[] normals;
-        private Vector2[] uvs;
-        private float[] height_map;
-        float[] tangents;
-
+        public class MeshData
+        {
+                public Vector3[] vertices;
+                public Vector3[] vertices_padded;
+                public int[] indices;
+                public Vector3[] normals;
+                public Vector2[] uvs;
+                public float[] height_map;
+                public float[] tangents;
+        }
         /// Needs to be called after the `GenerateChunkData()`
-        public void ApplyData()
+        public void ApplyData(MeshData data, MeshInstance3D mesh_instance, CollisionShape3D collider)
         {
                 var arrays = new Godot.Collections.Array();
                 arrays.Resize((int)Mesh.ArrayType.Max);
 
-                arrays[(int)Mesh.ArrayType.Vertex] = vertices;
-                arrays[(int)Mesh.ArrayType.Index] = indices;
-                arrays[(int)Mesh.ArrayType.Normal] = normals;
-                arrays[(int)Mesh.ArrayType.TexUV] = uvs;
-                arrays[(int)Mesh.ArrayType.Tangent] = tangents;
+                arrays[(int)Mesh.ArrayType.Vertex] = data.vertices;
+                arrays[(int)Mesh.ArrayType.Index] = data.indices;
+                arrays[(int)Mesh.ArrayType.Normal] = data.normals;
+                arrays[(int)Mesh.ArrayType.TexUV] = data.uvs;
+                arrays[(int)Mesh.ArrayType.Tangent] = data.tangents;
 
                 HeightMapShape3D shape = new()
                 {
                         MapWidth = triangles_per_dimension,
                         MapDepth = triangles_per_dimension,
-                        MapData = height_map
+                        MapData = data.height_map
                 };
                 collider.Shape = shape;
                 collider.Scale = new Vector3(triangle_size, 1, triangle_size);
@@ -48,29 +49,31 @@ public partial class GroundMeshGen : MeshInstance3D
                 var mesh = new ArrayMesh();
                 mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
 
-                Mesh = mesh;
+                mesh_instance.Mesh = mesh;
         }
-        public void GenerateChunkData(int resolution, int size, Vector2I base_world_pos)
+        public MeshData GenerateChunkData(int resolution, int size, Vector2I base_world_pos)
         {
+                var mesh_data = new MeshData();
                 this.size = size;
                 this.base_world_pos = base_world_pos;
                 triangles_per_dimension = resolution + 1;
                 triangle_size = size / (float)resolution;
 
-                GenerateUVsAndVertexes();
-                GenerateIndices();
-                GenerateNormals();
-                GenerateTangents();
+                GenerateUVsAndVertexes(mesh_data);
+                GenerateIndices(mesh_data);
+                GenerateNormals(mesh_data);
+                GenerateTangents(mesh_data);
+                return mesh_data;
         }
-        private void GenerateUVsAndVertexes()
+        private MeshData GenerateUVsAndVertexes(MeshData mesh_data)
         {
                 int paddedWidth = triangles_per_dimension + 2;
 
-                vertices_padded = new Vector3[paddedWidth * paddedWidth];
-                vertices = new Vector3[triangles_per_dimension * triangles_per_dimension];
-                height_map = new float[triangles_per_dimension * triangles_per_dimension];
+                mesh_data.vertices_padded = new Vector3[paddedWidth * paddedWidth];
+                mesh_data.vertices = new Vector3[triangles_per_dimension * triangles_per_dimension];
+                mesh_data.height_map = new float[triangles_per_dimension * triangles_per_dimension];
 
-                uvs = new Vector2[triangles_per_dimension * triangles_per_dimension];
+                mesh_data.uvs = new Vector2[triangles_per_dimension * triangles_per_dimension];
 
                 for (int x = -1; x < triangles_per_dimension + 1; x++)
                 {
@@ -82,45 +85,46 @@ public partial class GroundMeshGen : MeshInstance3D
 
                                 Vector3 vertex_pos = new(worldPos.X, height, worldPos.Y);
 
-                                vertices_padded[x + 1 + (z + 1) * paddedWidth] = vertex_pos;
+                                mesh_data.vertices_padded[x + 1 + (z + 1) * paddedWidth] = vertex_pos;
 
                                 if (x < 0 || z < 0 || x >= triangles_per_dimension || z >= triangles_per_dimension)
                                         continue;
 
                                 int i = x + z * triangles_per_dimension;
 
-                                height_map[i] = height;
-                                vertices[i] = vertex_pos;
-                                uvs[i] = new Vector2(
+                                mesh_data.height_map[i] = height;
+                                mesh_data.vertices[i] = vertex_pos;
+                                mesh_data.uvs[i] = new Vector2(
                                     x / (float)triangles_per_dimension,
                                     z / (float)triangles_per_dimension
                                 );
                         }
                 }
+                return mesh_data;
 
         }
 
-        public void GenerateTangents()
+        private static void GenerateTangents(MeshData mesh_data)
         {
-                int vertexCount = vertices.Length;
+                int vertexCount = mesh_data.vertices.Length;
 
                 var raw_tangents = new Vector3[vertexCount];
                 var raw_bitangents = new Vector3[vertexCount];
 
                 // Accumulate tangents per triangle
-                for (int i = 0; i < indices.Length; i += 3)
+                for (int i = 0; i < mesh_data.indices.Length; i += 3)
                 {
-                        int idx0 = indices[i];
-                        int idx1 = indices[i + 1];
-                        int idx2 = indices[i + 2];
+                        int idx0 = mesh_data.indices[i];
+                        int idx1 = mesh_data.indices[i + 1];
+                        int idx2 = mesh_data.indices[i + 2];
 
-                        Vector3 v0 = vertices[idx0];
-                        Vector3 v1 = vertices[idx1];
-                        Vector3 v2 = vertices[idx2];
+                        Vector3 v0 = mesh_data.vertices[idx0];
+                        Vector3 v1 = mesh_data.vertices[idx1];
+                        Vector3 v2 = mesh_data.vertices[idx2];
 
-                        Vector2 uv0 = uvs[idx0];
-                        Vector2 uv1 = uvs[idx1];
-                        Vector2 uv2 = uvs[idx2];
+                        Vector2 uv0 = mesh_data.uvs[idx0];
+                        Vector2 uv1 = mesh_data.uvs[idx1];
+                        Vector2 uv2 = mesh_data.uvs[idx2];
 
                         Vector3 edge_1 = v1 - v0;
                         Vector3 edge_2 = v2 - v0;
@@ -153,10 +157,10 @@ public partial class GroundMeshGen : MeshInstance3D
                 }
 
 
-                tangents = new float[vertexCount * 4];
+                mesh_data.tangents = new float[vertexCount * 4];
                 for (int i = 0; i < vertexCount; i++)
                 {
-                        Vector3 normal = normals[i];
+                        Vector3 normal = mesh_data.normals[i];
                         Vector3 raw_tangent = raw_tangents[i];
 
                         // Gram-Schmidt orthogonalization -> https://en.wikipedia.org/wiki/Gram%E2%80%93Schmidt_process
@@ -165,10 +169,10 @@ public partial class GroundMeshGen : MeshInstance3D
                         float handedness = (normal.Cross(raw_tangent).Dot(raw_bitangents[i]) < 0.0f) ? -1.0f : 1.0f;
 
                         int baseIndex = i * 4;
-                        tangents[baseIndex + 0] = normalized_tangent.X;
-                        tangents[baseIndex + 1] = normalized_tangent.Y;
-                        tangents[baseIndex + 2] = normalized_tangent.Z;
-                        tangents[baseIndex + 3] = handedness;
+                        mesh_data.tangents[baseIndex + 0] = normalized_tangent.X;
+                        mesh_data.tangents[baseIndex + 1] = normalized_tangent.Y;
+                        mesh_data.tangents[baseIndex + 2] = normalized_tangent.Z;
+                        mesh_data.tangents[baseIndex + 3] = handedness;
                 }
 
         }
@@ -183,10 +187,10 @@ public partial class GroundMeshGen : MeshInstance3D
 
 
         //  padding is needed for generating normals to avoid any seems between chunks.
-        private void GenerateNormals()
+        private void GenerateNormals(MeshData mesh_data)
         {
                 int paddedWidth = triangles_per_dimension + 2;
-                normals = new Vector3[triangles_per_dimension * triangles_per_dimension];
+                mesh_data.normals = new Vector3[triangles_per_dimension * triangles_per_dimension];
 
                 for (int x = 0; x < triangles_per_dimension; x++)
                 {
@@ -200,22 +204,22 @@ public partial class GroundMeshGen : MeshInstance3D
 
                                 // central difference for normal
                                 Vector3 normal = new Vector3(
-                                    vertices_padded[left].Y - vertices_padded[right].Y,
+                                    mesh_data.vertices_padded[left].Y - mesh_data.vertices_padded[right].Y,
                                     2.0f,
-                                    vertices_padded[down].Y - vertices_padded[up].Y
+                                    mesh_data.vertices_padded[down].Y - mesh_data.vertices_padded[up].Y
                                 ).Normalized();
 
-                                normals[x + z * triangles_per_dimension] = normal;
+                                mesh_data.normals[x + z * triangles_per_dimension] = normal;
                         }
                 }
 
         }
 
-        private void GenerateIndices()
+        private void GenerateIndices(MeshData mesh_data)
         {
 
                 int vertex_count = triangles_per_dimension - 1;
-                indices = new int[vertex_count * vertex_count * 6];
+                mesh_data.indices = new int[vertex_count * vertex_count * 6];
                 int array_index = 0;
 
                 for (int z = 0; z < vertex_count; z++)
@@ -224,13 +228,13 @@ public partial class GroundMeshGen : MeshInstance3D
                         {
                                 int vertex_idx = x + z * triangles_per_dimension;
                                 // counter-clockwise order. 
-                                indices[array_index++] = vertex_idx;
-                                indices[array_index++] = vertex_idx + 1;
-                                indices[array_index++] = vertex_idx + triangles_per_dimension;
+                                mesh_data.indices[array_index++] = vertex_idx;
+                                mesh_data.indices[array_index++] = vertex_idx + 1;
+                                mesh_data.indices[array_index++] = vertex_idx + triangles_per_dimension;
 
-                                indices[array_index++] = vertex_idx + triangles_per_dimension + 1;
-                                indices[array_index++] = vertex_idx + triangles_per_dimension;
-                                indices[array_index++] = vertex_idx + 1;
+                                mesh_data.indices[array_index++] = vertex_idx + triangles_per_dimension + 1;
+                                mesh_data.indices[array_index++] = vertex_idx + triangles_per_dimension;
+                                mesh_data.indices[array_index++] = vertex_idx + 1;
                         }
                 }
 

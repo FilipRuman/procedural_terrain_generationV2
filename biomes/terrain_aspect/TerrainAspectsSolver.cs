@@ -15,13 +15,13 @@ public partial class TerrainAspectsSolver : Node
 
 
 
-        public class TerrainAspects(float moisture, float temperature, float elevation, float ruggedness, float slope)
+        public class TerrainAspects(float moisture, float temperature, float elevation, float slope, float roughness)
         {
-                // all values should be in a 0..1 range
+                // all values should be within a 0..1 range
                 public float moisture = moisture;
                 public float temperature = temperature;
                 public float elevation = elevation;
-                public float ruggedness = ruggedness;
+                public float roughness = roughness;
                 public float slope = slope;
         }
         public TerrainAspects SolveForPos(Vector2 pos)

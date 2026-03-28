@@ -7,6 +7,7 @@ public partial class BiomeGenerator : Node
         private const int COLOR_CHANNELS = 4;
         [Export] int biome_map_resolution;
         [Export] TerrainAspectsSolver terrain_aspects_solver;
+        [Export] NoiseComponent test_noise;
 
         public class TextureData(int texture_resolution, byte[][] biome_maps, Biome[] biomes)
         {
@@ -47,7 +48,7 @@ public partial class BiomeGenerator : Node
                         if (texture_index >= biome_textures.Length)
                         {
                                 GD.PushWarning($"The requested biome texture index was outside of the array, returning blank texture\n " +
-                                                " requested-{texture_index} length- {biome_textures.Length}");
+                                                $" requested-{texture_index} length- {biome_textures.Length}");
                                 var image = Image.CreateEmpty(texture_resolution, texture_resolution, false, Image.Format.Rgba8);
                                 return ImageTexture.CreateFromImage(image);
                         }
@@ -90,11 +91,11 @@ public partial class BiomeGenerator : Node
                         sum_of_influences += influence;
                         output.Add(new(biome, influence));
                 }
+
+                // GD.Print($"moisture:{terrain_aspects.moisture} elevation:{terrain_aspects.elevation} temperature:{terrain_aspects.temperature}");
                 if (sum_of_influences == 0)
                 {
-                        GD.PushWarning($"There is no valid biome for this terrain, using the backup biome! terrain aspects:\n" +
-                                        "moisture:{MathF.Round(terrain_aspects.moisture, 2)}\n" + "elevation:{MathF.Round(terrain_aspects.elevation, 2)}\n" +
-                                        "temperature:{MathF.Round(terrain_aspects.temperature, 2)}");
+                        GD.Print($"There is no valid biome for this terrain, using the backup biome! terrain aspects:moisture:{terrain_aspects.moisture} elevation:{terrain_aspects.elevation} temperature:{terrain_aspects.temperature}");
                         return [new BiomeInfluence(biomes[backup_biome_index], influence: 1)];
                 }
                 var normalization_factor = 1f / sum_of_influences;
@@ -118,10 +119,10 @@ public partial class BiomeGenerator : Node
 
                 return biome_textures;
         }
-        public TextureData GenerateTextureData(Vector2 base_world_position, int terrain_chunk_size, Biome[] biomes)
+        [Export] public int test;
+        public TextureData GenerateTextureData(Vector2 base_world_position, int terrain_chunk_size, Biome[] biomes, int test_index)
         {
-
-                float pixel_size = terrain_chunk_size / biome_map_resolution;
+                float pixel_size = (float)terrain_chunk_size / (biome_map_resolution - 1);
 
                 var biome_textures_count = Mathf.CeilToInt((float)biomes.Length / COLOR_CHANNELS);
                 byte[][] biome_textures = InitializeBiomeTexturesArray(biome_textures_count, biome_map_resolution);
@@ -133,7 +134,6 @@ public partial class BiomeGenerator : Node
                                 Vector2 world_pos = new Vector2(x, y) * pixel_size + base_world_position;
                                 List<BiomeInfluence> biome_influences = GetBiomeInfluences(terrain_aspects_solver.SolveForPos(world_pos), biomes);
                                 int base_biome_texture_index = (x + y * biome_map_resolution) * COLOR_CHANNELS;
-
                                 foreach (var biome_influence in biome_influences)
                                 {
                                         var texture_index = biome_influence.biome.index_in_biomes_array / COLOR_CHANNELS;
@@ -143,6 +143,7 @@ public partial class BiomeGenerator : Node
                         }
                 }
 
+                GD.Print($"base_world_position:{base_world_position} terrain_chunk_size:{terrain_chunk_size} pixel_size:{pixel_size} biome_map_resolution:{biome_map_resolution}");
                 return new(biome_map_resolution, biome_textures, biomes);
         }
 

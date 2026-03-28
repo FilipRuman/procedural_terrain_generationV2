@@ -77,8 +77,6 @@ uniform sampler2D[BIOMES_COUNT] biome_albedo_textures;
 uniform sampler2D[BIOMES_COUNT] biome_normal_textures;
 uniform sampler2D[BIOMES_COUNT] biome_roughness_textures;
 
-uniform int biome_texture_resolution;
-
 uniform sampler2D post_processing_noise;
 uniform float post_processing_noise_scale;
 uniform float metallic;
@@ -150,7 +148,7 @@ NormalAlbedoRoughness collect_biome_data(vec4 biome_data_1, vec4 biome_data_2,ve
 
 	return NormalAlbedoRoughness(output_normal, output_color, output_roughness);
 }
-
+uniform float test;
 void fragment(){
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 world_normal = normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
@@ -159,18 +157,19 @@ void fragment(){
 
 	vec4 biome_data_1 =texture(biome_textures_1[biome_texture_index],UV);
 	vec4 biome_data_2 =texture(biome_textures_2[biome_texture_index],UV);
+	
+	
 	NormalAlbedoRoughness output = collect_biome_data(biome_data_1, biome_data_2, world_pos, world_normal, adjusted_normal);
 	ALBEDO = output.albedo;
 	NORMAL_MAP = output.normal;
 	ROUGHNESS  = output.roughness.r;
-
 
 	//apply processing
 
 	ALBEDO *= global_color_gain;
 	ALBEDO *= mix(1.0 - post_processing_albedo_influence, 1.0 + post_processing_albedo_influence, texture(post_processing_noise, world_pos.xz / 100.0 * post_processing_noise_scale).r);
 	ALBEDO -= vec3(1) * global_color_offset;
-	// added some offset so that I can use one noise and make the metallic and spectacular independent
+	 //added some offset so that I can use one noise and make the metallic and spectacular independent
 	METALLIC = texture(post_processing_noise, world_pos.xz / 100.0 * post_processing_noise_scale + vec2(1230,3210)).r * metallic;
 	SPECULAR = texture(post_processing_noise, world_pos.xz / 100.0 * post_processing_noise_scale + vec2(4560,6540)).r * spectacular;
 }

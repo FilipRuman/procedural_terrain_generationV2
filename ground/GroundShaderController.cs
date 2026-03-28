@@ -22,8 +22,13 @@ public partial class GroundShaderController : Node
         [Export] float spectacular;
         [Export] ShaderMaterial ground_shader_material;
 
+        public void UpdateTheBiomeTextures(ImageTexture[] biome_textures_1, ImageTexture[] biome_textures_2)
+        {
+                ground_shader_material.SetShaderParameter("biome_textures_1", biome_textures_1);
+                ground_shader_material.SetShaderParameter("biome_textures_2", biome_textures_2);
+        }
 
-        public void SetShaderConfiguration(Biome[] biomes, ImageTexture[] biome_textures_1, ImageTexture[] biome_textures_2)
+        public void SetShaderConfiguration(Biome[] biomes)
         {
 
                 var biome_albedo_textures = new Texture[biomes.Length];
@@ -70,8 +75,5 @@ public partial class GroundShaderController : Node
 
                 ground_shader_material.SetShaderParameter("global_color_offset", global_color_offset);
                 ground_shader_material.SetShaderParameter("global_color_gain", global_color_gain);
-
-                ground_shader_material.SetShaderParameter("biome_textures_1", biome_textures_1);
-                ground_shader_material.SetShaderParameter("biome_textures_2", biome_textures_2);
         }
 }

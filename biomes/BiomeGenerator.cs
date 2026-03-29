@@ -91,8 +91,6 @@ public partial class BiomeGenerator : Node
                         sum_of_influences += influence;
                         output.Add(new(biome, influence));
                 }
-
-                // GD.Print($"moisture:{terrain_aspects.moisture} elevation:{terrain_aspects.elevation} temperature:{terrain_aspects.temperature}");
                 if (sum_of_influences == 0)
                 {
                         GD.Print($"There is no valid biome for this terrain, using the backup biome! terrain aspects:moisture:{terrain_aspects.moisture} elevation:{terrain_aspects.elevation} temperature:{terrain_aspects.temperature}");
@@ -119,8 +117,7 @@ public partial class BiomeGenerator : Node
 
                 return biome_textures;
         }
-        [Export] public int test;
-        public TextureData GenerateTextureData(Vector2 base_world_position, int terrain_chunk_size, Biome[] biomes, int test_index)
+        public TextureData GenerateTextureData(Vector2 base_world_position, int terrain_chunk_size, Biome[] biomes)
         {
                 float pixel_size = (float)terrain_chunk_size / (biome_map_resolution - 1);
 
@@ -132,18 +129,18 @@ public partial class BiomeGenerator : Node
                         for (int y = 0; y < biome_map_resolution; y++)
                         {
                                 Vector2 world_pos = new Vector2(x, y) * pixel_size + base_world_position;
+
                                 List<BiomeInfluence> biome_influences = GetBiomeInfluences(terrain_aspects_solver.SolveForPos(world_pos), biomes);
-                                int base_biome_texture_index = (x + y * biome_map_resolution) * COLOR_CHANNELS;
+                                int pixel_index = (x + y * biome_map_resolution) * COLOR_CHANNELS;
                                 foreach (var biome_influence in biome_influences)
                                 {
                                         var texture_index = biome_influence.biome.index_in_biomes_array / COLOR_CHANNELS;
                                         int color_channel_index = biome_influence.biome.index_in_biomes_array % COLOR_CHANNELS;
-                                        biome_textures[texture_index][base_biome_texture_index + color_channel_index] = FloatConversions.FloatToByte(biome_influence.influence);
+                                        biome_textures[texture_index][pixel_index + color_channel_index] = FloatConversions.FloatToByte(biome_influence.influence);
                                 }
                         }
                 }
 
-                GD.Print($"base_world_position:{base_world_position} terrain_chunk_size:{terrain_chunk_size} pixel_size:{pixel_size} biome_map_resolution:{biome_map_resolution}");
                 return new(biome_map_resolution, biome_textures, biomes);
         }
 

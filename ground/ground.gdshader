@@ -148,7 +148,7 @@ NormalAlbedoRoughness collect_biome_data(vec4 biome_data_1, vec4 biome_data_2,ve
 
 	return NormalAlbedoRoughness(output_normal, output_color, output_roughness);
 }
-uniform float test;
+
 void fragment(){
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 world_normal = normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);

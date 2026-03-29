@@ -8,13 +8,10 @@ using Godot;
 public partial class GenerationController : Node
 {
         [ExportToolButton("Run")] private Callable RunButton => Callable.From(RunClean);
-        [Export] int chunk_size;
-
-        [Export] int ground_mesh_resolution;
+        [Export] int terrain_chunk_size;
         [Export] Biome[] biomes;
-
-        [Export] bool Halt;
-        [Export] int max_chunks_processed_per_frame;
+        [Export] bool stop_terrain_generation_task;
+        [Export] int max_main_thread_chunk_instantiation_per_frame;
 
         [ExportGroup("player")]
         [Export] Vector2 player_pos_offset;
@@ -41,42 +38,43 @@ public partial class GenerationController : Node
         public override void _Process(double delta)
         {
                 player_pos = new(player.Position.X, player.Position.Z);
-                HandleChunkGenerationQue();
+                MainThreadGenerationQue();
                 if (clear_all)
                 {
                         ClearAll();
                 }
-
         }
 
         private void RunClean()
         {
-                if (max_chunk_data_textures_count != GetAllChunksPositionsInsideACircleRelative(view_distance, chunk_size).Count)
+                if (max_chunk_data_textures_count != GetAllChunksPositionsInsideACircleRelative(view_distance, terrain_chunk_size).Count)
                 {
                         GD.PushWarning("The max amount of chunk data textures is not equal to the chunk data textures that are generated.\n" +
                                 "This is not optimal and could cause chunks biomes to stop working:\n" +
-                                $"current:{max_chunk_data_textures_count} optimal:{GetAllChunksPositionsInsideACircleRelative(view_distance, chunk_size).Count}");
-
+                                $"current:{max_chunk_data_textures_count} optimal:{GetAllChunksPositionsInsideACircleRelative(view_distance, terrain_chunk_size).Count}");
                 }
                 ClearAll();
-                Init();
+
+                ground_mesh_gen.Initialize(terrain_chunk_size);
+
+                Task.Run(ChunkDataGenerationLoop);
+                ground_shader_controller.SetShaderConfiguration(biomes);
         }
 
-        private ChunkChange CalculateChunkChangeForPosDelta(Vector2I delta)
+        private ChunkChange CalculateChunkChangeForPosChange(Vector2I delta)
         {
-                delta *= chunk_size;
-                var chunks = GetAllChunksPositionsInsideACircleRelative(view_distance, chunk_size);
+                delta *= terrain_chunk_size;
 
-                var oldSet = new HashSet<Vector2I>(chunks.Select(c => c));
-                var newSet = new HashSet<Vector2I>(oldSet.Select(p => p + delta));
+                HashSet<Vector2I> old_chunk_pos = [.. GetAllChunksPositionsInsideACircleRelative(view_distance, terrain_chunk_size)];
+                HashSet<Vector2I> new_chunk_pos = [.. old_chunk_pos.Select(pos => pos + delta)];
 
-                var to_destroy = oldSet.Except(newSet).ToArray();
+                var to_destroy = old_chunk_pos.Except(new_chunk_pos).ToArray();
 
                 List<Vector2I> to_generate = [];
-                foreach (var chunk in chunks)
+                foreach (var chunk in old_chunk_pos)
                 {
                         var new_pos = chunk + delta;
-                        if (!oldSet.Contains(new_pos))
+                        if (!old_chunk_pos.Contains(new_pos))
                         {
                                 to_generate.Add(chunk);
                         }
@@ -121,7 +119,7 @@ public partial class GenerationController : Node
         }
         Vector2I WorldToGridPos(Vector2 world_pos)
         {
-                return new Vector2I(Mathf.RoundToInt(world_pos.X / chunk_size), Mathf.RoundToInt(world_pos.Y / chunk_size));
+                return new Vector2I(Mathf.RoundToInt(world_pos.X / terrain_chunk_size), Mathf.RoundToInt(world_pos.Y / terrain_chunk_size));
         }
         Dictionary<Vector2I, Chunk> chunk_per_world_position;
         Dictionary<Vector2I, ChunkChange> chunk_change_for_position_delta = [];
@@ -132,10 +130,11 @@ public partial class GenerationController : Node
         // Run as a task on the main thread
         private void ChunkDataGenerationLoop()
         {
-                const int ChunksGenMillisecondsDelay = 2;
+                const int ChunksGenMSDelay = 2;
                 try
                 {
                         var last_player_chunk_grid_pos = WorldToGridPos(player_pos);
+
                         // Initial terrain generation
                         {
                                 ReGenerateTheWholeTerrain(last_player_chunk_grid_pos);
@@ -144,7 +143,7 @@ public partial class GenerationController : Node
 
                         while (true)
                         {
-                                if (Halt) return;
+                                if (stop_terrain_generation_task) return;
                                 if (!generated_all_chunks)
                                 {
                                         continue;
@@ -152,7 +151,7 @@ public partial class GenerationController : Node
                                 var current_player_chunk_grid_pos = WorldToGridPos(player_pos);
                                 if (last_player_chunk_grid_pos == current_player_chunk_grid_pos)
                                 {
-                                        Task.Delay(ChunksGenMillisecondsDelay);
+                                        Task.Delay(ChunksGenMSDelay);
                                         continue;
                                 }
                                 var grid_pos_delta = current_player_chunk_grid_pos - last_player_chunk_grid_pos;
@@ -167,7 +166,7 @@ public partial class GenerationController : Node
 
                                 foreach (var chunk_relative_pos in chunk_change.to_destroy_relative_pos)
                                 {
-                                        Vector2I chunk_world_position = chunk_relative_pos + last_player_chunk_grid_pos * chunk_size;
+                                        Vector2I chunk_world_position = chunk_relative_pos + last_player_chunk_grid_pos * terrain_chunk_size;
 
                                         if (!chunk_per_world_position.TryGetValue(chunk_world_position, out var chunk))
                                         {
@@ -176,14 +175,14 @@ public partial class GenerationController : Node
                                                 continue;
                                         }
 
-                                        free_data_maps.Enqueue(chunk.biome_map_index);
+                                        free_biome_texture_slots.Enqueue(chunk.biome_map_index);
                                         chunk.QueueFree();
                                         chunk_per_world_position.Remove(chunk_world_position);
 
                                 }
 
                                 last_player_chunk_grid_pos = current_player_chunk_grid_pos;
-                                RunTerrainGeneration(chunk_change.to_generate_relative_pos, current_player_chunk_grid_pos * chunk_size);
+                                RunTerrainGeneration(chunk_change.to_generate_relative_pos, current_player_chunk_grid_pos * terrain_chunk_size);
                                 load_at_once = false;
                                 generated_all_chunks = false;
                         }
@@ -199,16 +198,15 @@ public partial class GenerationController : Node
                         load_at_once = true;
                         while (clear_all)
                         {
-                                Task.Delay(ChunksGenMillisecondsDelay);
+                                Task.Delay(ChunksGenMSDelay);
                         }
                         {
-                                var chunks_to_generate = GetAllChunksPositionsInsideACircleRelative(view_distance, chunk_size);
-                                RunTerrainGeneration(chunks_to_generate.ToArray(), player_chunk_grid_pos * chunk_size);
+                                var chunks_to_generate = GetAllChunksPositionsInsideACircleRelative(view_distance, terrain_chunk_size);
+                                RunTerrainGeneration(chunks_to_generate.ToArray(), player_chunk_grid_pos * terrain_chunk_size);
                         }
                 }
         }
-        private void RunTerrainGeneration(Vector2I[] chunks_to_generate,
-    Vector2I player_pos_snapped_to_chunk)
+        private void RunTerrainGeneration(Vector2I[] chunks_to_generate, Vector2I player_pos_snapped_to_chunk)
         {
                 var stopwatch = System.Diagnostics.Stopwatch.StartNew();
                 Parallel.For(0, chunks_to_generate.Length, i =>
@@ -219,9 +217,9 @@ public partial class GenerationController : Node
                                   var chunk = chunks_to_generate[i];
                                   Vector2I chunk_world_position = chunk + player_pos_snapped_to_chunk;
 
-                                  var biome_data = biome_generator.GenerateTextureData(new Vector2(chunk_world_position.X, chunk_world_position.Y), chunk_size + 1, biomes, i);
+                                  var biome_data = biome_generator.GenerateTextureData(new Vector2(chunk_world_position.X, chunk_world_position.Y), terrain_chunk_size + 1, biomes);
                                   var mesh_data = ground_mesh_gen.GenerateChunkData(chunk_world_position);
-                                  completed_chunks.Enqueue(new(mesh_data, biome_data, chunk_world_position));
+                                  chunks_to_instantiate_on_main_thread.Enqueue(new(mesh_data, biome_data, chunk_world_position));
                           }
                           catch (Exception e)
                           {
@@ -230,33 +228,32 @@ public partial class GenerationController : Node
                   });
                 stopwatch.Stop();
         }
-        Task chunk_data_gen_task;
-        ConcurrentQueue<ChunkData> completed_chunks = new();
-
-        Queue<int> free_data_maps;
-        ImageTexture[] map_1;
-        ImageTexture[] map_2;
-        private void HandleChunkGenerationQue()
+        ConcurrentQueue<ChunkData> chunks_to_instantiate_on_main_thread = new();
+        private void MainThreadGenerationQue()
         {
-
                 int processed = 0;
-                bool refresh_biome_map_data = false;
-
-                while ((processed < max_chunks_processed_per_frame || load_at_once) &&
-                       completed_chunks.TryDequeue(out var chunk_data))
+                while ((processed < max_main_thread_chunk_instantiation_per_frame || load_at_once) &&
+                       chunks_to_instantiate_on_main_thread.TryDequeue(out var chunk_data))
                 {
-                        HandleGodotSideOfChunk(chunk_data);
-                        refresh_biome_map_data = true;
+                        MainThreadChunkInstantiation(chunk_data);
                         processed++;
                 }
-                if (refresh_biome_map_data)
+                // send updated biome textures only once processed all textures in a burst
+                if (processed != 0)
                 {
-                        ground_shader_controller.UpdateTheBiomeTextures(map_1, map_2);
+                        ground_shader_controller.UpdateTheBiomeTextures(biome_textures_channel_1, biome_textures_channel_2);
                 }
-                else { generated_all_chunks = true; }
+                else
+                {
+                        generated_all_chunks = true;
+                }
 
         }
-        private void HandleGodotSideOfChunk(ChunkData chunk_data)
+
+        Queue<int> free_biome_texture_slots;
+        ImageTexture[] biome_textures_channel_1;
+        ImageTexture[] biome_textures_channel_2;
+        private void MainThreadChunkInstantiation(ChunkData chunk_data)
         {
 
                 var chunk = (Chunk)chunk_prefab.Instantiate();
@@ -265,48 +262,40 @@ public partial class GenerationController : Node
                 AddChild(chunk);
                 ground_mesh_gen.ApplyData(chunk_data.mesh_data, chunk.mesh_instance, chunk.collider);
 
-                int map_index = free_data_maps.Dequeue();
+                int map_index = free_biome_texture_slots.Dequeue();
                 chunk.biome_map_index = map_index;
-                map_1[map_index] = chunk_data.biome.GetTexture(0);
-                map_2[map_index] = chunk_data.biome.GetTexture(1);
+                biome_textures_channel_1[map_index] = chunk_data.biome.GetTexture(0);
+                biome_textures_channel_2[map_index] = chunk_data.biome.GetTexture(1);
                 chunk.mesh_instance.SetInstanceShaderParameter("biome_texture_index", map_index);
         }
         private void ClearAll()
         {
-                free_data_maps = new(Enumerable.Range(0, max_chunk_data_textures_count));
-                map_1 = new ImageTexture[max_chunk_data_textures_count];
-                map_2 = new ImageTexture[max_chunk_data_textures_count];
+                free_biome_texture_slots = new(Enumerable.Range(0, max_chunk_data_textures_count));
+                biome_textures_channel_1 = new ImageTexture[max_chunk_data_textures_count];
+                biome_textures_channel_2 = new ImageTexture[max_chunk_data_textures_count];
                 chunk_change_for_position_delta = [];
                 chunk_per_world_position = [];
                 Vector2I delta = new(-1, 0);
-                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosDelta(delta));
+                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosChange(delta));
                 delta = new(-1, 1);
-                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosDelta(delta));
+                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosChange(delta));
                 delta = new(0, 1);
-                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosDelta(delta));
+                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosChange(delta));
                 delta = new(1, 1);
-                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosDelta(delta));
+                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosChange(delta));
                 delta = new(1, 0);
-                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosDelta(delta));
+                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosChange(delta));
                 delta = new(1, -1);
-                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosDelta(delta));
+                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosChange(delta));
                 delta = new(0, -1);
-                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosDelta(delta));
+                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosChange(delta));
                 delta = new(-1, -1);
-                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosDelta(delta));
+                chunk_change_for_position_delta.Add(delta, CalculateChunkChangeForPosChange(delta));
 
-                foreach (var item in GetChildren())
+                foreach (var child in GetChildren())
                 {
-                        item.QueueFree();
+                        child.QueueFree();
                 }
                 clear_all = false;
         }
-
-        private void Init()
-        {
-                ground_mesh_gen.Initialize(ground_mesh_resolution, chunk_size);
-                Task.Run(ChunkDataGenerationLoop);
-                ground_shader_controller.SetShaderConfiguration(biomes);
-        }
-
 }

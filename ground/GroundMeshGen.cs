@@ -2,13 +2,13 @@ using Godot;
 [Tool]
 public partial class GroundMeshGen : Node
 {
-        private int triangles_per_dimension;
-        private float triangle_size;
-        private int size;
-
+        [Export] int resolution;
         [Export] private FastNoiseLite noise;
         [Export] private float noise_amplitude;
 
+        private int triangles_per_dimension;
+        private float triangle_size;
+        private int size;
 
 
         public class MeshData
@@ -51,7 +51,8 @@ public partial class GroundMeshGen : Node
 
                 mesh_instance.Mesh = mesh;
         }
-        public void Initialize(int resolution, int size)
+
+        public void Initialize(int size)
         {
                 this.size = size;
                 triangles_per_dimension = resolution + 1;

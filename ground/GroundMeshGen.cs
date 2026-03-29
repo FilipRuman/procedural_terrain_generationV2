@@ -58,6 +58,7 @@ public partial class GroundMeshGen : Node
                 triangles_per_dimension = resolution + 1;
                 triangle_size = size / (float)resolution;
         }
+        /// The 'Initialize' function needs to be called first
         public MeshData GenerateChunkData(Vector2I base_world_pos)
         {
                 var mesh_data = new MeshData

@@ -22,7 +22,6 @@ public partial class GroundMeshGen : Node
                 public float[] tangents;
                 public Vector2I base_world_pos;
         }
-        /// Needs to be called after the `GenerateChunkData()`
         public void ApplyData(MeshData data, MeshInstance3D mesh_instance, CollisionShape3D collider)
         {
                 var arrays = new Godot.Collections.Array();

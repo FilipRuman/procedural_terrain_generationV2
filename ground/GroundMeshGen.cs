@@ -2,14 +2,13 @@ using Godot;
 [Tool]
 public partial class GroundMeshGen : Node
 {
-        private int triangles_per_dimension;
-        private float triangle_size;
-        private Vector2I base_world_pos;
-        private int size;
-
+        [Export] int resolution;
         [Export] private FastNoiseLite noise;
         [Export] private float noise_amplitude;
 
+        private int triangles_per_dimension;
+        private float triangle_size;
+        private int size;
 
 
         public class MeshData
@@ -21,6 +20,7 @@ public partial class GroundMeshGen : Node
                 public Vector2[] uvs;
                 public float[] height_map;
                 public float[] tangents;
+                public Vector2I base_world_pos;
         }
         /// Needs to be called after the `GenerateChunkData()`
         public void ApplyData(MeshData data, MeshInstance3D mesh_instance, CollisionShape3D collider)
@@ -43,7 +43,7 @@ public partial class GroundMeshGen : Node
                 collider.Shape = shape;
                 collider.Scale = new Vector3(triangle_size, 1, triangle_size);
                 // `- size/2f` is needed because otherwise this will be the center point for the collider, and for mesh this will be the bottom left corner. 
-                collider.Position = new(base_world_pos.X + size / 2f, 0, base_world_pos.Y + size / 2f);
+                collider.Position = new(data.base_world_pos.X + size / 2f, 0, data.base_world_pos.Y + size / 2f);
 
 
                 var mesh = new ArrayMesh();
@@ -51,13 +51,19 @@ public partial class GroundMeshGen : Node
 
                 mesh_instance.Mesh = mesh;
         }
-        public MeshData GenerateChunkData(int resolution, int size, Vector2I base_world_pos)
+
+        public void Initialize(int size)
         {
-                var mesh_data = new MeshData();
                 this.size = size;
-                this.base_world_pos = base_world_pos;
                 triangles_per_dimension = resolution + 1;
                 triangle_size = size / (float)resolution;
+        }
+        public MeshData GenerateChunkData(Vector2I base_world_pos)
+        {
+                var mesh_data = new MeshData
+                {
+                        base_world_pos = base_world_pos
+                };
 
                 GenerateUVsAndVertexes(mesh_data);
                 GenerateIndices(mesh_data);
@@ -80,7 +86,7 @@ public partial class GroundMeshGen : Node
                         for (int z = -1; z < triangles_per_dimension + 1; z++)
                         {
                                 var relative_pos = new Vector2I(x, z);
-                                Vector2 worldPos = (Vector2)relative_pos * triangle_size + base_world_pos;
+                                Vector2 worldPos = (Vector2)relative_pos * triangle_size + mesh_data.base_world_pos;
                                 float height = CalculateHeight(worldPos);
 
                                 Vector3 vertex_pos = new(worldPos.X, height, worldPos.Y);
@@ -95,8 +101,8 @@ public partial class GroundMeshGen : Node
                                 mesh_data.height_map[i] = height;
                                 mesh_data.vertices[i] = vertex_pos;
                                 mesh_data.uvs[i] = new Vector2(
-                                    x / (float)triangles_per_dimension,
-                                    z / (float)triangles_per_dimension
+                                    x / (float)(triangles_per_dimension - 1),
+                                    z / (float)(triangles_per_dimension - 1)
                                 );
                         }
                 }
@@ -177,14 +183,10 @@ public partial class GroundMeshGen : Node
 
         }
 
-        private Vector2 CalculateVertexWorldPosition(int relative_x, int relative_z) => new Vector2(relative_x, relative_z) * triangle_size + base_world_pos;
-
-
         private float CalculateHeight(Vector2 world_pos)
         {
                 return noise.GetNoise2D(world_pos.X, world_pos.Y) * noise_amplitude;
         }
-
 
         //  padding is needed for generating normals to avoid any seems between chunks.
         private void GenerateNormals(MeshData mesh_data)

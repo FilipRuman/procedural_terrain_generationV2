@@ -7,7 +7,6 @@ public partial class GenerationController : Node
 
         [Export] GroundMeshGen ground_mesh_gen;
         [Export] BiomeGenerator biome_generator;
-        [Export] int ground_mesh_resolution;
         [Export] MeshInstance3D mesh_instance;
         [Export] CollisionShape3D collider;
         [Export] Biome[] biomes;
@@ -16,7 +15,8 @@ public partial class GenerationController : Node
         {
 
                 Vector2I base_world_pos = new(0, 0);
-                var mesh_data = ground_mesh_gen.GenerateChunkData(ground_mesh_resolution, terrain_chunk_size, base_world_pos);
+                ground_mesh_gen.Initialize(terrain_chunk_size);
+                var mesh_data = ground_mesh_gen.GenerateChunkData(base_world_pos);
                 ground_mesh_gen.ApplyData(mesh_data, mesh_instance, collider);
                 var biome_data = biome_generator.GenerateTextureData(base_world_pos, terrain_chunk_size, biomes);
                 ground_shader_controller.SetShaderConfiguration(biomes,
@@ -27,4 +27,5 @@ public partial class GenerationController : Node
         }
 
 }
+
 

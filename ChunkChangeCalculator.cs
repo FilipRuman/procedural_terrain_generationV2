@@ -8,13 +8,11 @@ public static class ChunkChangeCalculator
                 public Vector2I[] to_destroy_relative_pos = chunks_to_destroy_relative_positions;
                 public Vector2I[] to_generate_relative_pos = chunks_to_instantiate;
         }
-        private static int view_distance_chunks;
-        private static int terrain_chunk_size;
         private static ChunkChange CalculateChunkChangeForPosChange(Vector2I delta)
         {
                 delta *= terrain_chunk_size;
 
-                HashSet<Vector2I> old_chunk_pos = [.. GetAllChunksPositionsInsideACircleRelative(view_distance_chunks)];
+                HashSet<Vector2I> old_chunk_pos = [.. GetAllChunksInViewDistance()];
                 HashSet<Vector2I> new_chunk_pos = [.. old_chunk_pos.Select(pos => pos + delta)];
 
                 var to_destroy = old_chunk_pos.Except(new_chunk_pos).ToArray();
@@ -32,16 +30,19 @@ public static class ChunkChangeCalculator
                 return new ChunkChange(to_destroy, [.. to_generate]);
         }
 
-        public static List<Vector2I> GetAllChunksPositionsInsideACircleRelative(int radius)
+        private static int view_distance_chunks;
+        private static int terrain_chunk_size;
+
+        public static List<Vector2I> GetAllChunksInViewDistance()
         {
                 List<Vector2I> output = [];
 
                 // could be pre-calculated once
-                for (int x = -radius; x <= radius; x++)
+                for (int x = -view_distance_chunks; x <= view_distance_chunks; x++)
                 {
-                        for (int y = -radius; y <= radius; y++)
+                        for (int y = -view_distance_chunks; y <= view_distance_chunks; y++)
                         {
-                                if (x * x + y * y >= radius * radius)
+                                if (x * x + y * y >= view_distance_chunks * view_distance_chunks)
                                         continue;
 
                                 output.Add(new Vector2I(x * terrain_chunk_size, y * terrain_chunk_size));

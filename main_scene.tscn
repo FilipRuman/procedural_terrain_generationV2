@@ -101,7 +101,7 @@ metadata/_custom_type_script = "uid://cyc8wghcqqnc5"
 [node name="Main scene" type="Node3D" unique_id=325302715]
 
 [node name="Player" type="Node3D" parent="." unique_id=1787461385]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8053, 0, -237)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8676, 0, -237)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Player" unique_id=919924789]
 transform = Transform3D(5.81162, 0, 0, 0, 9.797011, 0, 0, 0, 7.817965, 0, 0, 0)
@@ -109,7 +109,7 @@ mesh = SubResource("CapsuleMesh_7th4q")
 
 [node name="Generation controller" type="Node" parent="." unique_id=976734548 node_paths=PackedStringArray("player", "ground_mesh_gen", "biome_generator", "ground_shader_controller")]
 script = ExtResource("2_2c62f")
-terrain_chunk_size = 1000
+terrain_chunk_size = 100
 biomes = [ExtResource("4_7th4q"), ExtResource("5_6jybn"), ExtResource("6_84odl"), ExtResource("7_ak604"), ExtResource("8_vimvf"), ExtResource("9_ghshe"), ExtResource("10_fv2he")]
 max_main_thread_chunk_instantiation_per_frame = 5
 player = NodePath("../Player")

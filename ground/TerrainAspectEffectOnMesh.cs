@@ -4,11 +4,9 @@ public partial class TerrainAspectEffectOnMesh : Resource
 {
         [Export] Curve base_height;
 
-        // [Export] Curve very_low_freq_noise_amplitude;
         [Export] Curve low_freq_noise_amplitude;
         [Export] Curve medium_freq_noise_amplitude;
         [Export] Curve high_freq_noise_amplitude;
-        // [Export] Curve very_high_freq_noise_amplitude;
         public void AddEffectToOutput(float value, ref OutputData output)
         {
                 output.high_freq_noise_amplitude += high_freq_noise_amplitude.Sample(value);

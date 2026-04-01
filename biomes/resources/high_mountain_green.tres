@@ -29,5 +29,6 @@ preferred_temperature = SubResource("Resource_752uo")
 albedo = ExtResource("1_y2x1j")
 normal = ExtResource("2_lrfe6")
 roughness = ExtResource("8_s278w")
+color_offset = -0.1
 scale = 0.05
 metadata/_custom_type_script = "uid://bqpjjupyok60s"

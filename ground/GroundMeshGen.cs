@@ -2,14 +2,16 @@ using Godot;
 [Tool]
 public partial class GroundMeshGen : Node
 {
+        [Export] private TerrainAspectsSolver terrain_aspects_solver;
         [Export] int resolution;
-        [Export] private FastNoiseLite noise;
-        [Export] private float noise_amplitude;
 
-        private int triangles_per_dimension;
-        private float triangle_size;
-        private int size;
-
+        [Export] private NoiseComponent high_frequency_noise;
+        [Export] private NoiseComponent medium_frequency_noise;
+        [Export] private NoiseComponent low_frequency_noise;
+        [Export] private TerrainAspectEffectOnMesh moisture_effect;
+        [Export] private TerrainAspectEffectOnMesh elevation_effect;
+        [Export] private TerrainAspectEffectOnMesh temperature_effect;
+        [Export] private TerrainAspectEffectOnMesh roughness_effect;
 
         public class MeshData
         {
@@ -22,6 +24,12 @@ public partial class GroundMeshGen : Node
                 public float[] tangents;
                 public Vector2I base_world_pos;
         }
+
+
+        private int triangles_per_dimension;
+        private float triangle_size;
+        private int size;
+
         public void ApplyData(MeshData data, MeshInstance3D mesh_instance, CollisionShape3D collider)
         {
                 var arrays = new Godot.Collections.Array();
@@ -87,7 +95,7 @@ public partial class GroundMeshGen : Node
                         {
                                 var relative_pos = new Vector2I(x, z);
                                 Vector2 worldPos = (Vector2)relative_pos * triangle_size + mesh_data.base_world_pos;
-                                float height = CalculateHeight(worldPos);
+                                float height = CalculateHeight(worldPos, out _);
 
                                 Vector3 vertex_pos = new(worldPos.X, height, worldPos.Y);
 
@@ -183,9 +191,25 @@ public partial class GroundMeshGen : Node
 
         }
 
-        private float CalculateHeight(Vector2 world_pos)
+
+        public float CalculateHeight(Vector2 world_position, out TerrainAspectsSolver.TerrainAspects terrain_aspects)
         {
-                return noise.GetNoise2D(world_pos.X, world_pos.Y) * noise_amplitude;
+                terrain_aspects = terrain_aspects_solver.SolveForPos(world_position);
+
+                TerrainAspectEffectOnMesh.OutputData noise_amplitude_data = new();
+                moisture_effect.AddEffectToOutput(terrain_aspects.moisture, ref noise_amplitude_data);
+                elevation_effect.AddEffectToOutput(terrain_aspects.elevation, ref noise_amplitude_data);
+                temperature_effect.AddEffectToOutput(terrain_aspects.temperature, ref noise_amplitude_data);
+                roughness_effect.AddEffectToOutput(terrain_aspects.roughness, ref noise_amplitude_data);
+
+                float output_height
+                     = high_frequency_noise.Sample(world_position) * noise_amplitude_data.high_freq_noise_amplitude
+                     + medium_frequency_noise.Sample(world_position) * noise_amplitude_data.medium_freq_noise_amplitude
+                     + low_frequency_noise.Sample(world_position) * noise_amplitude_data.low_freq_noise_amplitude
+                     + noise_amplitude_data.base_height;
+
+
+                return output_height;
         }
 
         //  padding is needed for generating normals to avoid any seems between chunks.

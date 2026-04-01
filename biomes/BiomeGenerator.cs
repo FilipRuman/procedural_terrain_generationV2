@@ -7,7 +7,6 @@ public partial class BiomeGenerator : Node
         private const int COLOR_CHANNELS = 4;
         [Export] int biome_map_resolution;
         [Export] TerrainAspectsSolver terrain_aspects_solver;
-        [Export] NoiseComponent test_noise;
 
         public class TextureData(int texture_resolution, byte[][] biome_maps, Biome[] biomes)
         {

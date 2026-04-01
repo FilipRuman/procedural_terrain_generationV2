@@ -8,14 +8,15 @@
 
 [sub_resource type="Resource" id="Resource_exehw"]
 script = ExtResource("4_4wpcj")
-max = 1.0
+max = 0.4
 
 [sub_resource type="Resource" id="Resource_kvwqf"]
 script = ExtResource("4_4wpcj")
-max = 5.0
+max = 0.3
 
 [sub_resource type="Resource" id="Resource_8syi6"]
 script = ExtResource("4_4wpcj")
+min = 0.7
 max = 1.0
 
 [resource]
@@ -26,6 +27,5 @@ preferred_temperature = SubResource("Resource_8syi6")
 albedo = ExtResource("1_exehw")
 normal = ExtResource("2_kvwqf")
 roughness = ExtResource("5_64o33")
-color_offset = 1.0
 scale = 0.05
 metadata/_custom_type_script = "uid://bqpjjupyok60s"

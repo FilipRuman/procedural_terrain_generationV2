@@ -19,6 +19,7 @@
 [ext_resource type="Resource" uid="uid://dalilcqe722id" path="res://biomes/resources/swamp.tres" id="10_fv2he"]
 [ext_resource type="Script" uid="uid://cyylqtwxb5xm2" path="res://util/NoisePart.cs" id="13_5smuj"]
 [ext_resource type="Script" uid="uid://cyc8wghcqqnc5" path="res://util/NoiseComponent.cs" id="14_y5ved"]
+[ext_resource type="Script" uid="uid://duat4j40jft0v" path="res://ground/TerrainAspectEffectOnMesh.cs" id="20_84odl"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_7th4q"]
 
@@ -36,10 +37,9 @@ noises = [SubResource("Resource_84odl")]
 metadata/_custom_type_script = "uid://cyc8wghcqqnc5"
 
 [sub_resource type="Gradient" id="Gradient_84odl"]
-offsets = PackedFloat32Array(0, 0.0033112583)
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_m35m6"]
-frequency = 0.0059
+frequency = 0.0151
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_u0ygc"]
 noise = SubResource("FastNoiseLite_m35m6")
@@ -48,7 +48,9 @@ seamless = true
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_kv3aw"]
 seed = -599
-frequency = 1.0
+frequency = 0.3
+fractal_octaves = 2
+fractal_lacunarity = 1.965
 
 [sub_resource type="Resource" id="Resource_o7u2a"]
 script = ExtResource("13_5smuj")
@@ -64,7 +66,7 @@ metadata/_custom_type_script = "uid://cyc8wghcqqnc5"
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_j8kkg"]
 seed = 1540
-frequency = 1.0
+frequency = 0.3
 
 [sub_resource type="Resource" id="Resource_yh4yk"]
 script = ExtResource("13_5smuj")
@@ -80,7 +82,7 @@ metadata/_custom_type_script = "uid://cyc8wghcqqnc5"
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_o4fqm"]
 seed = 107
-frequency = 1.0
+frequency = 0.3
 
 [sub_resource type="Resource" id="Resource_gfmxp"]
 script = ExtResource("13_5smuj")
@@ -96,12 +98,125 @@ metadata/_custom_type_script = "uid://cyc8wghcqqnc5"
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_84odl"]
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_6jybn"]
+[sub_resource type="Resource" id="Resource_vimvf"]
+script = ExtResource("13_5smuj")
+noise = SubResource("FastNoiseLite_84odl")
+amplitude = 20.0
+frequency = 0.8
+metadata/_custom_type_script = "uid://cyylqtwxb5xm2"
+
+[sub_resource type="Resource" id="Resource_ghshe"]
+script = ExtResource("14_y5ved")
+noises = [SubResource("Resource_vimvf")]
+metadata/_custom_type_script = "uid://cyc8wghcqqnc5"
+
+[sub_resource type="Resource" id="Resource_fv2he"]
+script = ExtResource("13_5smuj")
+noise = SubResource("FastNoiseLite_84odl")
+amplitude = 100.0
+frequency = 0.1
+metadata/_custom_type_script = "uid://cyylqtwxb5xm2"
+
+[sub_resource type="Resource" id="Resource_5smuj"]
+script = ExtResource("14_y5ved")
+noises = [SubResource("Resource_fv2he")]
+metadata/_custom_type_script = "uid://cyc8wghcqqnc5"
+
+[sub_resource type="Resource" id="Resource_y5ved"]
+script = ExtResource("13_5smuj")
+noise = SubResource("FastNoiseLite_84odl")
+amplitude = 600.0
+frequency = 0.01
+metadata/_custom_type_script = "uid://cyylqtwxb5xm2"
+
+[sub_resource type="Resource" id="Resource_kv3aw"]
+script = ExtResource("14_y5ved")
+noises = [SubResource("Resource_y5ved")]
+metadata/_custom_type_script = "uid://cyc8wghcqqnc5"
+
+[sub_resource type="Curve" id="Curve_ak604"]
+_data = [Vector2(0.50207037, 0), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_vimvf"]
+
+[sub_resource type="Curve" id="Curve_ghshe"]
+
+[sub_resource type="Curve" id="Curve_fv2he"]
+
+[sub_resource type="Resource" id="Resource_j8kkg"]
+script = ExtResource("20_84odl")
+base_height = SubResource("Curve_ak604")
+low_freq_noise_amplitude = SubResource("Curve_ghshe")
+medium_freq_noise_amplitude = SubResource("Curve_fv2he")
+high_freq_noise_amplitude = SubResource("Curve_vimvf")
+metadata/_custom_type_script = "uid://duat4j40jft0v"
+
+[sub_resource type="Curve" id="Curve_yh4yk"]
+_limits = [0.0, 600.0, 0.0, 1.0]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.33540374, 0), 0.0, 0.0, 0, 0, Vector2(0.95962733, 600), 18.265919, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="Curve" id="Curve_p8s74"]
+_data = [Vector2(0, 0.077608764), 0.0, 0.0, 0, 0, Vector2(1, 0.70335156), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_o4fqm"]
+_data = [Vector2(0, 0.19348705), 0.0, 0.0, 0, 0]
+point_count = 1
+
+[sub_resource type="Curve" id="Curve_gfmxp"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.37681162, 0.2645591), 0.0, 0.0, 0, 0, Vector2(0.69875777, 0), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="Resource" id="Resource_opjno"]
+script = ExtResource("20_84odl")
+base_height = SubResource("Curve_yh4yk")
+low_freq_noise_amplitude = SubResource("Curve_o4fqm")
+medium_freq_noise_amplitude = SubResource("Curve_gfmxp")
+high_freq_noise_amplitude = SubResource("Curve_p8s74")
+metadata/_custom_type_script = "uid://duat4j40jft0v"
+
+[sub_resource type="Curve" id="Curve_meb7l"]
+_data = [Vector2(0.50207037, 0), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_w30ff"]
+
+[sub_resource type="Curve" id="Curve_xy6fp"]
+
+[sub_resource type="Curve" id="Curve_uws2o"]
+
+[sub_resource type="Resource" id="Resource_iylel"]
+script = ExtResource("20_84odl")
+base_height = SubResource("Curve_meb7l")
+low_freq_noise_amplitude = SubResource("Curve_xy6fp")
+medium_freq_noise_amplitude = SubResource("Curve_uws2o")
+high_freq_noise_amplitude = SubResource("Curve_w30ff")
+metadata/_custom_type_script = "uid://duat4j40jft0v"
+
+[sub_resource type="Curve" id="Curve_yj5sn"]
+_data = [Vector2(0.50207037, 0), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_jtbqm"]
+
+[sub_resource type="Curve" id="Curve_ek5vw"]
+
+[sub_resource type="Curve" id="Curve_jip8q"]
+
+[sub_resource type="Resource" id="Resource_euc68"]
+script = ExtResource("20_84odl")
+base_height = SubResource("Curve_yj5sn")
+low_freq_noise_amplitude = SubResource("Curve_ek5vw")
+medium_freq_noise_amplitude = SubResource("Curve_jip8q")
+high_freq_noise_amplitude = SubResource("Curve_jtbqm")
+metadata/_custom_type_script = "uid://duat4j40jft0v"
 
 [node name="Main scene" type="Node3D" unique_id=325302715]
 
 [node name="Player" type="Node3D" parent="." unique_id=1787461385]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8676, 0, -237)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7805, 0, -4832)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Player" unique_id=919924789]
 transform = Transform3D(5.81162, 0, 0, 0, 9.797011, 0, 0, 0, 7.817965, 0, 0, 0)
@@ -111,9 +226,9 @@ mesh = SubResource("CapsuleMesh_7th4q")
 script = ExtResource("2_2c62f")
 terrain_chunk_size = 100
 biomes = [ExtResource("4_7th4q"), ExtResource("5_6jybn"), ExtResource("6_84odl"), ExtResource("7_ak604"), ExtResource("8_vimvf"), ExtResource("9_ghshe"), ExtResource("10_fv2he")]
-max_main_thread_chunk_instantiation_per_frame = 5
+max_main_thread_chunk_instantiation_per_frame = 1
 player = NodePath("../Player")
-view_distance_chunks = 5
+view_distance_chunks = 10
 chunk_prefab = ExtResource("9_6jybn")
 ground_mesh_gen = NodePath("../ground mesh gen")
 biome_generator = NodePath("../biome generator")
@@ -128,7 +243,7 @@ light_angular_distance = 1.84
 
 [node name="biome generator" type="Node" parent="." unique_id=1876212071 node_paths=PackedStringArray("terrain_aspects_solver")]
 script = ExtResource("4_wr18j")
-biome_map_resolution = 500
+biome_map_resolution = 25
 terrain_aspects_solver = NodePath("../terrain aspects solver")
 test_noise = SubResource("Resource_ak604")
 biome_transitions_smoothness = 0.1
@@ -138,8 +253,8 @@ script = ExtResource("6_671wp")
 rock_texture = ExtResource("7_mo76n")
 rock_normal_map = ExtResource("8_42l1d")
 rock_roughness = ExtResource("9_2jcla")
-rock_scale = 1.0
-rock_color_gain = 1.0
+rock_scale = 0.2
+rock_color_gain = 1.1
 global_color_gain = 0.2
 global_color_offset = 0.1
 post_processing_noise = SubResource("NoiseTexture2D_u0ygc")
@@ -157,12 +272,14 @@ moisture_noise = SubResource("Resource_1n88h")
 slope_calculation_step_size = 1.0
 slope_roughness_effect = 1.0
 
-[node name="ground mesh gen" type="Node" parent="." unique_id=1234028555]
+[node name="ground mesh gen" type="Node" parent="." unique_id=1234028555 node_paths=PackedStringArray("terrain_aspects_solver")]
 script = ExtResource("1_2c62f")
-resolution = 5
-noise = SubResource("FastNoiseLite_84odl")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1495072024]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -815, 0, 0)
-material_override = ExtResource("1_7ycvg")
-mesh = SubResource("PlaneMesh_6jybn")
+terrain_aspects_solver = NodePath("../terrain aspects solver")
+resolution = 80
+high_frequency_noise = SubResource("Resource_ghshe")
+medium_frequency_noise = SubResource("Resource_5smuj")
+low_frequency_noise = SubResource("Resource_kv3aw")
+moisture_effect = SubResource("Resource_j8kkg")
+elevation_effect = SubResource("Resource_opjno")
+temperature_effect = SubResource("Resource_iylel")
+roughness_effect = SubResource("Resource_euc68")

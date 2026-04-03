@@ -152,7 +152,7 @@ public partial class GenerationController : Node
                                      Vector2I chunk_world_position = chunk + player_pos_snapped_to_chunk;
 
                                      var biome_data = biome_generator.GenerateTextureData(chunk_world_position, terrain_chunk_size + 1, biomes);
-                                     var objects_data = objects_generator.GenerateObjectsData(terrain_chunk_size, biome_data, chunk_world_position);
+                                     var objects_data = objects_generator.GenerateObjectSpawnDataForChunk(terrain_chunk_size, biome_data, chunk_world_position);
                                      var mesh_data = ground_mesh_gen.GenerateChunkData(chunk_world_position);
                                      chunk_instantiation_que.Enqueue(new(mesh_data, biome_data, chunk_world_position, objects_data));
                              }

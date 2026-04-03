@@ -53,7 +53,7 @@ public partial class ObjectsGenerator : Node
 
         }
 
-        public ObjectTypeSpawnData[] GenerateObjectsData(int chunk_size,
+        public ObjectTypeSpawnData[] GenerateObjectSpawnDataForChunk(int chunk_size,
                 BiomeGenerator.TextureData biome_data, Vector2 base_world_position)
         {
                 chunk_size -= 2;

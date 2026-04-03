@@ -22,7 +22,7 @@ public partial class GenerationController : Node
         [Export] GroundMeshGen ground_mesh_gen;
         [Export] BiomeGenerator biome_generator;
         [Export] GroundShaderController ground_shader_controller;
-
+        [Export] ObjectsGenerator objects_generator;
 
         public override void _Ready()
         {
@@ -35,7 +35,6 @@ public partial class GenerationController : Node
         public override void _Process(double delta)
         {
                 ChunkDataGeneration();
-
                 InstantiateChunksFromQue();
         }
         private void DestroyChunks(Vector2I[] chunks_to_destroy)
@@ -77,8 +76,9 @@ public partial class GenerationController : Node
                 GenerateDataForAllChunks();
         }
 
-        public struct ChunkData(GroundMeshGen.MeshData mesh_data, BiomeGenerator.TextureData biome, Vector2I world_pos)
+        public struct ChunkData(GroundMeshGen.MeshData mesh_data, BiomeGenerator.TextureData biome, Vector2I world_pos, ObjectsGenerator.ObjectTypeSpawnData[] objects_data)
         {
+                public ObjectsGenerator.ObjectTypeSpawnData[] objects_data = objects_data;
                 public GroundMeshGen.MeshData mesh_data = mesh_data;
                 public BiomeGenerator.TextureData biome = biome;
                 public Vector2I world_pos = world_pos;
@@ -151,9 +151,10 @@ public partial class GenerationController : Node
                                      var chunk = chunks_to_generate[i];
                                      Vector2I chunk_world_position = chunk + player_pos_snapped_to_chunk;
 
-                                     var biome_data = biome_generator.GenerateTextureData(new Vector2(chunk_world_position.X, chunk_world_position.Y), terrain_chunk_size + 1, biomes);
+                                     var biome_data = biome_generator.GenerateTextureData(chunk_world_position, terrain_chunk_size + 1, biomes);
+                                     var objects_data = objects_generator.GenerateObjectsData(terrain_chunk_size, biome_data, chunk_world_position);
                                      var mesh_data = ground_mesh_gen.GenerateChunkData(chunk_world_position);
-                                     chunk_instantiation_que.Enqueue(new(mesh_data, biome_data, chunk_world_position));
+                                     chunk_instantiation_que.Enqueue(new(mesh_data, biome_data, chunk_world_position, objects_data));
                              }
                              catch (Exception e)
                              {
@@ -182,6 +183,7 @@ public partial class GenerationController : Node
 
                 AddChild(chunk);
                 ground_mesh_gen.ApplyData(chunk_data.mesh_data, chunk.mesh_instance, chunk.collider);
+                ObjectsGenerator.SpawnObjects(chunk_data.objects_data, chunk);
 
                 int map_index = free_biome_texture_slots.Dequeue();
                 chunk.biome_map_index = map_index;

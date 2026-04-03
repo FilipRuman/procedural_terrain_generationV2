@@ -3,6 +3,7 @@ using Godot;
 public partial class Biome : Resource
 {
         public byte index_in_biomes_array;
+        [Export] public BiomeObjectsGenData objects_data;
 
         [ExportGroup("Preferred terrain aspects")]
         [Export] public FloatRange preferred_moisture;

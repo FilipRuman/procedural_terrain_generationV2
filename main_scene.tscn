@@ -20,21 +20,9 @@
 [ext_resource type="Script" uid="uid://cyylqtwxb5xm2" path="res://util/NoisePart.cs" id="13_5smuj"]
 [ext_resource type="Script" uid="uid://cyc8wghcqqnc5" path="res://util/NoiseComponent.cs" id="14_y5ved"]
 [ext_resource type="Script" uid="uid://duat4j40jft0v" path="res://ground/TerrainAspectEffectOnMesh.cs" id="20_84odl"]
+[ext_resource type="Script" uid="uid://bmni8uj46ikxf" path="res://objects/ObjestsGeneration/ObjectsGenerator.cs" id="21_ak604"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_7th4q"]
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_6jybn"]
-
-[sub_resource type="Resource" id="Resource_84odl"]
-script = ExtResource("13_5smuj")
-noise = SubResource("FastNoiseLite_6jybn")
-amplitude = 1.0
-metadata/_custom_type_script = "uid://cyylqtwxb5xm2"
-
-[sub_resource type="Resource" id="Resource_ak604"]
-script = ExtResource("14_y5ved")
-noises = [SubResource("Resource_84odl")]
-metadata/_custom_type_script = "uid://cyc8wghcqqnc5"
 
 [sub_resource type="Gradient" id="Gradient_84odl"]
 
@@ -213,7 +201,27 @@ medium_freq_noise_amplitude = SubResource("Curve_jip8q")
 high_freq_noise_amplitude = SubResource("Curve_jtbqm")
 metadata/_custom_type_script = "uid://duat4j40jft0v"
 
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_vimvf"]
+
+[sub_resource type="Sky" id="Sky_ghshe"]
+sky_material = SubResource("ProceduralSkyMaterial_vimvf")
+
+[sub_resource type="Environment" id="Environment_fv2he"]
+background_mode = 2
+sky = SubResource("Sky_ghshe")
+tonemap_mode = 2
+ssr_enabled = true
+ssao_enabled = true
+ssil_enabled = true
+sdfgi_enabled = true
+glow_enabled = true
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_ak604"]
+auto_exposure_enabled = true
+auto_exposure_scale = 0.55
+
 [node name="Main scene" type="Node3D" unique_id=325302715]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
 
 [node name="Player" type="Node3D" parent="." unique_id=1787461385]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7805, 0, -4832)
@@ -222,7 +230,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7805, 0, -4832)
 transform = Transform3D(5.81162, 0, 0, 0, 9.797011, 0, 0, 0, 7.817965, 0, 0, 0)
 mesh = SubResource("CapsuleMesh_7th4q")
 
-[node name="Generation controller" type="Node" parent="." unique_id=976734548 node_paths=PackedStringArray("player", "ground_mesh_gen", "biome_generator", "ground_shader_controller")]
+[node name="Generation controller" type="Node3D" parent="." unique_id=1772107324 node_paths=PackedStringArray("player", "ground_mesh_gen", "biome_generator", "ground_shader_controller", "objects_generator")]
 script = ExtResource("2_2c62f")
 terrain_chunk_size = 100
 biomes = [ExtResource("4_7th4q"), ExtResource("5_6jybn"), ExtResource("6_84odl"), ExtResource("7_ak604"), ExtResource("8_vimvf"), ExtResource("9_ghshe"), ExtResource("10_fv2he")]
@@ -233,19 +241,19 @@ chunk_prefab = ExtResource("9_6jybn")
 ground_mesh_gen = NodePath("../ground mesh gen")
 biome_generator = NodePath("../biome generator")
 ground_shader_controller = NodePath("../ground shader controller")
+objects_generator = NodePath("../objects generator")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1002644790]
-transform = Transform3D(0.0130906, 0.94866246, 0.3160194, 0.058133684, -0.31623393, 0.9468984, 0.998223, 0.005975902, -0.05928893, 0, 0, 0)
-light_energy = 1.196
+transform = Transform3D(0.5036318, 4.471945, 8.930178, 0.3185028, -8.944169, 4.4609895, 9.982231, 0.059759136, -0.5928894, 0, 0, 0)
+light_energy = 0.296
 light_indirect_energy = 0.894
 light_volumetric_fog_energy = 2.06
-light_angular_distance = 1.84
+shadow_enabled = true
 
 [node name="biome generator" type="Node" parent="." unique_id=1876212071 node_paths=PackedStringArray("terrain_aspects_solver")]
 script = ExtResource("4_wr18j")
 biome_map_resolution = 25
 terrain_aspects_solver = NodePath("../terrain aspects solver")
-test_noise = SubResource("Resource_ak604")
 biome_transitions_smoothness = 0.1
 
 [node name="ground shader controller" type="Node" parent="." unique_id=113452430]
@@ -283,3 +291,17 @@ moisture_effect = SubResource("Resource_j8kkg")
 elevation_effect = SubResource("Resource_opjno")
 temperature_effect = SubResource("Resource_iylel")
 roughness_effect = SubResource("Resource_euc68")
+
+[node name="objects generator" type="Node" parent="." unique_id=396190395 node_paths=PackedStringArray("ground_mesh_gen")]
+script = ExtResource("21_ak604")
+ground_mesh_gen = NodePath("../ground mesh gen")
+minimal_tree_spacing_sqrt = 10.0
+base_tree_spawn_chance = 0.571
+rock_spawn_attempts_per_mesh_chunk = 5
+grass_spawn_attempts_per_mesh_chunk = 10
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1132014786]
+environment = SubResource("Environment_fv2he")
+camera_attributes = SubResource("CameraAttributesPractical_ak604")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=218534836]

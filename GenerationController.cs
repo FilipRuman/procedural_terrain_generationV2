@@ -23,6 +23,8 @@ public partial class GenerationController : Node
         [Export] BiomeGenerator biome_generator;
         [Export] GroundShaderController ground_shader_controller;
         [Export] ObjectsGenerator objects_generator;
+        [Export] StructureGen structure_gen;
+        StructureGen.StructureGrid structure_grid;
 
         public override void _Ready()
         {
@@ -62,6 +64,9 @@ public partial class GenerationController : Node
         private void RunClean()
         {
                 ClearAll();
+
+                ChunkChangeCalculator.Init(view_distance_chunks, terrain_chunk_size);
+
                 if (max_chunk_data_textures_count != ChunkChangeCalculator.GetAllChunksInViewDistance().Count)
                 {
                         GD.PushWarning("The max amount of chunk data textures is not equal to the chunk data textures that are generated.\n" +
@@ -71,17 +76,18 @@ public partial class GenerationController : Node
 
                 ground_mesh_gen.Initialize(terrain_chunk_size);
                 ground_shader_controller.SetShaderConfiguration(biomes);
-                ChunkChangeCalculator.Init(view_distance_chunks, terrain_chunk_size);
+                structure_grid = new StructureGen.StructureGrid(structure_gen, ground_mesh_gen, terrain_chunk_size, new(player.Position.X, player.Position.Z));
 
                 GenerateDataForAllChunks();
         }
 
-        public struct ChunkData(GroundMeshGen.MeshData mesh_data, BiomeGenerator.TextureData biome, Vector2I world_pos, ObjectsGenerator.ObjectTypeSpawnData[] objects_data)
+        public struct ChunkData(GroundMeshGen.MeshData mesh_data, BiomeGenerator.TextureData biome, Vector2I world_pos, ObjectsGenerator.ObjectTypeSpawnData[] objects_data, StructureInstanceData? structure)
         {
                 public ObjectsGenerator.ObjectTypeSpawnData[] objects_data = objects_data;
                 public GroundMeshGen.MeshData mesh_data = mesh_data;
                 public BiomeGenerator.TextureData biome = biome;
                 public Vector2I world_pos = world_pos;
+                public StructureInstanceData? structure = structure;
         }
 
         Vector2I WorldToTerrainChunkGridPos(Vector2 world_pos)
@@ -130,6 +136,7 @@ public partial class GenerationController : Node
                 }
 
 
+                structure_grid.UpdatePlayerPos(player_pos);
                 DestroyChunks(chunk_change.to_destroy_relative_pos);
                 GenerateDataForChunks(chunk_change.to_generate_relative_pos, current_player_chunk_grid_pos * terrain_chunk_size);
                 last_player_chunk_grid_pos = current_player_chunk_grid_pos;
@@ -154,7 +161,9 @@ public partial class GenerationController : Node
                                      var biome_data = biome_generator.GenerateTextureData(chunk_world_position, terrain_chunk_size + 1, biomes);
                                      var objects_data = objects_generator.GenerateObjectsData(terrain_chunk_size, biome_data, chunk_world_position);
                                      var mesh_data = ground_mesh_gen.GenerateChunkData(chunk_world_position);
-                                     chunk_instantiation_que.Enqueue(new(mesh_data, biome_data, chunk_world_position, objects_data));
+                                     structure_grid[chunk_world_position].structure_gen_for_mesh_chunk_world_pos.TryGetValue(chunk_world_position, out var chunk_structure_data);
+
+                                     chunk_instantiation_que.Enqueue(new(mesh_data, biome_data, chunk_world_position, objects_data, chunk_structure_data));
                              }
                              catch (Exception e)
                              {
@@ -185,16 +194,19 @@ public partial class GenerationController : Node
                 ground_mesh_gen.ApplyData(chunk_data.mesh_data, chunk.mesh_instance, chunk.collider);
                 ObjectsGenerator.SpawnObjects(chunk_data.objects_data, chunk);
 
+
                 int map_index = free_biome_texture_slots.Dequeue();
                 chunk.biome_map_index = map_index;
                 biome_textures_channel_1[map_index] = chunk_data.biome.GetTexture(0);
                 biome_textures_channel_2[map_index] = chunk_data.biome.GetTexture(1);
                 chunk.mesh_instance.SetInstanceShaderParameter("biome_texture_index", map_index);
+                chunk_data.structure?.Instantiate(chunk);
         }
         private void ClearAll()
         {
                 free_biome_texture_slots = new(Enumerable.Range(0, max_chunk_data_textures_count));
                 biome_textures_channel_1 = new ImageTexture[max_chunk_data_textures_count];
+
                 biome_textures_channel_2 = new ImageTexture[max_chunk_data_textures_count];
 
                 chunk_per_world_position = [];

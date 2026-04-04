@@ -17,12 +17,34 @@
 [ext_resource type="PackedScene" uid="uid://bp4nr0hn2m0dt" path="res://chunk.tscn" id="9_6jybn"]
 [ext_resource type="Resource" uid="uid://dpmmjjeg0xibs" path="res://biomes/resources/snow.tres" id="9_ghshe"]
 [ext_resource type="Resource" uid="uid://dalilcqe722id" path="res://biomes/resources/swamp.tres" id="10_fv2he"]
+[ext_resource type="PackedScene" uid="uid://dwae3jwam7b45" path="res://structures/modles/test_structure_model.tscn" id="11_5smuj"]
+[ext_resource type="Script" uid="uid://w1egd0ivsh5v" path="res://structures/StructureType.cs" id="11_fv2he"]
+[ext_resource type="Script" uid="uid://dfcupjxxdf7pq" path="res://structures/structure_shapes/RectangleStructureShape.cs" id="12_5smuj"]
 [ext_resource type="Script" uid="uid://cyylqtwxb5xm2" path="res://util/NoisePart.cs" id="13_5smuj"]
 [ext_resource type="Script" uid="uid://cyc8wghcqqnc5" path="res://util/NoiseComponent.cs" id="14_y5ved"]
 [ext_resource type="Script" uid="uid://duat4j40jft0v" path="res://ground/TerrainAspectEffectOnMesh.cs" id="20_84odl"]
 [ext_resource type="Script" uid="uid://bmni8uj46ikxf" path="res://objects/ObjestsGeneration/ObjectsGenerator.cs" id="21_ak604"]
+[ext_resource type="Script" uid="uid://b7vnabd1g6tr8" path="res://structures/StructureGen.cs" id="22_vimvf"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_7th4q"]
+
+[sub_resource type="Resource" id="Resource_o4fqm"]
+script = ExtResource("12_5smuj")
+base_size = Vector2(100, 100)
+sample_points_spacing = 20.0
+metadata/_custom_type_script = "uid://dfcupjxxdf7pq"
+
+[sub_resource type="Resource" id="Resource_meb7l"]
+script = ExtResource("11_fv2he")
+shapes = [SubResource("Resource_o4fqm")]
+maximal_height_delta_inside_the_shapes = 50.0
+spawn_chance = 1.0
+model = ExtResource("11_5smuj")
+base_sale = 1.0
+scale_change_amplitude = 0.1
+min_distance_from_grid_border_in_mesh_chunks = 1
+generation_attempts_per_structure_chunk = 50
+metadata/_custom_type_script = "uid://w1egd0ivsh5v"
 
 [sub_resource type="Gradient" id="Gradient_84odl"]
 
@@ -210,6 +232,7 @@ sky_material = SubResource("ProceduralSkyMaterial_vimvf")
 background_mode = 2
 sky = SubResource("Sky_ghshe")
 tonemap_mode = 2
+tonemap_exposure = 0.65
 ssr_enabled = true
 ssao_enabled = true
 ssil_enabled = true
@@ -224,13 +247,13 @@ auto_exposure_scale = 0.55
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
 
 [node name="Player" type="Node3D" parent="." unique_id=1787461385]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7805, 0, -4832)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7785, 0, -6562)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Player" unique_id=919924789]
 transform = Transform3D(5.81162, 0, 0, 0, 9.797011, 0, 0, 0, 7.817965, 0, 0, 0)
 mesh = SubResource("CapsuleMesh_7th4q")
 
-[node name="Generation controller" type="Node3D" parent="." unique_id=1772107324 node_paths=PackedStringArray("player", "ground_mesh_gen", "biome_generator", "ground_shader_controller", "objects_generator")]
+[node name="Generation controller" type="Node3D" parent="." unique_id=1772107324 node_paths=PackedStringArray("player", "ground_mesh_gen", "biome_generator", "ground_shader_controller", "objects_generator", "structure_gen")]
 script = ExtResource("2_2c62f")
 terrain_chunk_size = 100
 biomes = [ExtResource("4_7th4q"), ExtResource("5_6jybn"), ExtResource("6_84odl"), ExtResource("7_ak604"), ExtResource("8_vimvf"), ExtResource("9_ghshe"), ExtResource("10_fv2he")]
@@ -242,6 +265,7 @@ ground_mesh_gen = NodePath("../ground mesh gen")
 biome_generator = NodePath("../biome generator")
 ground_shader_controller = NodePath("../ground shader controller")
 objects_generator = NodePath("../objects generator")
+structure_gen = NodePath("../structure gen")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1002644790]
 transform = Transform3D(0.5036318, 4.471945, 8.930178, 0.3185028, -8.944169, 4.4609895, 9.982231, 0.059759136, -0.5928894, 0, 0, 0)
@@ -249,6 +273,11 @@ light_energy = 0.296
 light_indirect_energy = 0.894
 light_volumetric_fog_energy = 2.06
 shadow_enabled = true
+
+[node name="structure gen" type="Node" parent="." unique_id=976059663]
+script = ExtResource("22_vimvf")
+structure_pool = [SubResource("Resource_meb7l")]
+mesh_chunks_per_structure_grid_cell = 20
 
 [node name="biome generator" type="Node" parent="." unique_id=1876212071 node_paths=PackedStringArray("terrain_aspects_solver")]
 script = ExtResource("4_wr18j")
@@ -295,7 +324,7 @@ roughness_effect = SubResource("Resource_euc68")
 [node name="objects generator" type="Node" parent="." unique_id=396190395 node_paths=PackedStringArray("ground_mesh_gen")]
 script = ExtResource("21_ak604")
 ground_mesh_gen = NodePath("../ground mesh gen")
-minimal_tree_spacing_sqrt = 10.0
+minimal_tree_spacing = 10.0
 base_tree_spawn_chance = 0.571
 rock_spawn_attempts_per_mesh_chunk = 5
 grass_spawn_attempts_per_mesh_chunk = 10

@@ -54,9 +54,10 @@ shadow_mesh = SubResource("ArrayMesh_ot63g")
 [resource]
 script = ExtResource("4_fcaqi")
 mesh = SubResource("ArrayMesh_4l5v3")
-mesh_y_offset = 1.0
-base_sale = 50.0
-scale_change_amplitude = 10.0
+mesh_y_offset = -1.0
+base_sale = 10.0
+scale_change_amplitude = 3.0
 rotation_amplitude = 30
 base_chance_to_spawn = 0.2
+max_slope = 1.0
 metadata/_custom_type_script = "uid://dettvmn8bgkhu"

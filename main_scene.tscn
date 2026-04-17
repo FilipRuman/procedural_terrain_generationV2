@@ -325,9 +325,9 @@ roughness_effect = SubResource("Resource_euc68")
 script = ExtResource("21_ak604")
 ground_mesh_gen = NodePath("../ground mesh gen")
 minimal_tree_spacing = 10.0
-base_tree_spawn_chance = 0.571
-rock_spawn_attempts_per_mesh_chunk = 5
-grass_spawn_attempts_per_mesh_chunk = 10
+base_tree_spawn_chance = 0.166
+rock_spawn_attempts_per_mesh_chunk = 2
+grass_spawn_attempts_per_mesh_chunk = 100
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1132014786]
 environment = SubResource("Environment_fv2he")

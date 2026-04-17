@@ -32,7 +32,7 @@ _surfaces = [{
 }]
 blend_shape_mode = 0
 
-[sub_resource type="ArrayMesh" id="ArrayMesh_fjp2o"]
+[sub_resource type="ArrayMesh" id="ArrayMesh_yjnun"]
 resource_name = "grass_medium_01_4k_Plane_037"
 _surfaces = [{
 "aabb": AABB(-0.07992804, -0.0024811276, -0.08258193, 0.18484011, 0.14042668, 0.16231304),
@@ -53,10 +53,11 @@ shadow_mesh = SubResource("ArrayMesh_8tldd")
 
 [resource]
 script = ExtResource("4_4do8m")
-mesh = SubResource("ArrayMesh_fjp2o")
-mesh_y_offset = 1.0
-base_sale = 50.0
-scale_change_amplitude = 10.0
+mesh = SubResource("ArrayMesh_yjnun")
+mesh_y_offset = -1.0
+base_sale = 10.0
+scale_change_amplitude = 3.0
 rotation_amplitude = 30
 base_chance_to_spawn = 0.2
+max_slope = 1.0
 metadata/_custom_type_script = "uid://dettvmn8bgkhu"

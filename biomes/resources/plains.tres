@@ -63,5 +63,5 @@ preferred_temperature = SubResource("Resource_8qyf7")
 albedo = ExtResource("1_t5jjv")
 normal = ExtResource("2_s8l2d")
 roughness = ExtResource("6_lwxx2")
-scale = 0.1
+scale = 2.5
 metadata/_custom_type_script = "uid://bqpjjupyok60s"

@@ -54,7 +54,7 @@ shadow_mesh = SubResource("ArrayMesh_8tldd")
 [resource]
 script = ExtResource("4_4do8m")
 mesh = SubResource("ArrayMesh_yjnun")
-mesh_y_offset = -1.0
+mesh_y_offset = -0.3
 base_sale = 10.0
 scale_change_amplitude = 3.0
 rotation_amplitude = 30

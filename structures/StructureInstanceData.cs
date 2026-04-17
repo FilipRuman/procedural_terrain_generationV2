@@ -52,6 +52,7 @@ public class StructureInstanceData(Vector2 base_world_pos, float scale, float ro
                 return output;
         }
 
+        // HERE: This makes it imposible to generate sturcutres
         public bool IsValid(GroundMeshGen mesh_gen)
         {
                 var min_height = float.MaxValue;
@@ -60,6 +61,8 @@ public class StructureInstanceData(Vector2 base_world_pos, float scale, float ro
                 {
                         var i_structure_shape = (IStructureShape)shape;
                         var test_points = i_structure_shape.GetSampleWorldPosPointsInsideTheShape(this);
+
+
                         foreach (var point in test_points)
                         {
                                 var height = mesh_gen.CalculateHeight(point, out _);

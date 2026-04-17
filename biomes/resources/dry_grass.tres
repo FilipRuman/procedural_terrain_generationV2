@@ -58,5 +58,5 @@ albedo = ExtResource("1_qblc2")
 normal = ExtResource("2_2614g")
 roughness = ExtResource("8_yuy5r")
 tint = Color(0, 0, 0, 1)
-scale = 0.1
+scale = 2.5
 metadata/_custom_type_script = "uid://bqpjjupyok60s"

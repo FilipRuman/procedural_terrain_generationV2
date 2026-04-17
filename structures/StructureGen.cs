@@ -14,13 +14,15 @@ public partial class StructureGen : Node
         public class StructureGrid
         {
                 const int grid_width = 3;
-                readonly StructureChunk[] grid;
+                // Public for tests
+                public readonly StructureChunk[] grid;
                 private Vector2I current_player_grid_pos;
 
                 private readonly int grid_cell_size;
                 private readonly StructureGen structure_gen;
                 private readonly GroundMeshGen mesh_gen;
                 private readonly int mesh_chunk_size;
+
                 public bool IsObjectValid(Vector2 world_pos_f)
                 {
                         Vector2I world_pos = (Vector2I)world_pos_f;
@@ -34,12 +36,21 @@ public partial class StructureGen : Node
 
                         return !structure.IsObjectColliding(world_pos);
                 }
+                public int TESTINDEX(Vector2I world_pos)
+                {
+
+                        var global_grid_pos = world_pos / grid_cell_size;
+                        var relative_grid_pos = global_grid_pos - current_player_grid_pos;
+                        // +1 because the grid array is offset by one in the positive direction
+                        return relative_grid_pos.X + 1 + (relative_grid_pos.Y + 1) * grid_width;
+                }
                 public StructureChunk this[Vector2I world_pos]
                 {
                         get
                         {
                                 var global_grid_pos = world_pos / grid_cell_size;
                                 var relative_grid_pos = global_grid_pos - current_player_grid_pos;
+                                // +1 because the grid array is offset by one in the positive direction
                                 return grid[relative_grid_pos.X + 1 + (relative_grid_pos.Y + 1) * grid_width];
                         }
 
@@ -70,8 +81,8 @@ public partial class StructureGen : Node
                                         if (new_x == 1 || new_y == 1)
                                         {
                                                 //Generate new cell data
-                                                var world_x = (x - 1 + new_player_grid_pos.X) * grid_cell_size;
-                                                var world_y = (y - 1 + new_player_grid_pos.Y) * grid_cell_size;
+                                                var world_x = (x - 2 + new_player_grid_pos.X) * grid_cell_size;
+                                                var world_y = (y - 2 + new_player_grid_pos.Y) * grid_cell_size;
                                                 grid[x + y * grid_width] = GenerateChunk(new(world_x, world_y));
                                         }
 
@@ -95,8 +106,8 @@ public partial class StructureGen : Node
                                 for (int y = 0; y < grid_width; y++)
                                 {
                                         //Generate new cell data
-                                        var world_x = (x - 1 + current_player_grid_pos.X) * grid_cell_size;
-                                        var world_y = (y - 1 + current_player_grid_pos.Y) * grid_cell_size;
+                                        var world_x = (x - 2 + current_player_grid_pos.X) * grid_cell_size;
+                                        var world_y = (y - 2 + current_player_grid_pos.Y) * grid_cell_size;
                                         grid[x + y * grid_width] = GenerateChunk(new(world_x, world_y));
                                 }
                         }
@@ -112,6 +123,7 @@ public partial class StructureGen : Node
 
                                 for (int i = 0; i < structure_type.generation_attempts_per_structure_chunk; i++)
                                 {
+
 
                                         if (structure_type.spawn_chance < GD.Randf())
                                                 continue;
@@ -130,6 +142,7 @@ public partial class StructureGen : Node
                                         var structure_rotation = GD.Randf() * 360f;
                                         var structure_scale = structure_type.base_sale + (GD.Randf() * 2 - 1) * structure_type.scale_change_amplitude;
                                         var structure_instance = new StructureInstanceData(structure_world_pos, structure_scale, structure_rotation, structure_type);
+
                                         if (!structure_instance.IsValid(mesh_gen))
                                                 continue;
                                         structure_instance.base_height = mesh_gen.CalculateHeight(structure_world_pos, out _);
@@ -155,8 +168,10 @@ public partial class StructureGen : Node
                                                 structures_for_mesh_chunk_world_pos.Add(chunk_world_pos, structure_instance);
                                         }
 
-                                        structure_gen_for_mesh_chunk_world_pos.Add(base_chunk_world_pos, structure_instance);
 
+                                        structure_gen_for_mesh_chunk_world_pos.TryAdd(base_chunk_world_pos, structure_instance);
+
+                                        GD.Print("Added a valid structure to inst que!");
                                 }
                         }
                         return new(structures_for_mesh_chunk_world_pos, structure_gen_for_mesh_chunk_world_pos);

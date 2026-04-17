@@ -31,7 +31,7 @@
 [sub_resource type="Resource" id="Resource_o4fqm"]
 script = ExtResource("12_5smuj")
 base_size = Vector2(100, 100)
-sample_points_spacing = 20.0
+sample_points_spacing = 100000.0
 metadata/_custom_type_script = "uid://dfcupjxxdf7pq"
 
 [sub_resource type="Resource" id="Resource_meb7l"]
@@ -247,7 +247,7 @@ auto_exposure_scale = 0.55
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
 
 [node name="Player" type="Node3D" parent="." unique_id=1787461385]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7785, 0, -6562)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85, 0, -7162)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Player" unique_id=919924789]
 transform = Transform3D(5.81162, 0, 0, 0, 9.797011, 0, 0, 0, 7.817965, 0, 0, 0)

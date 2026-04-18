@@ -10,10 +10,17 @@ config_version=5
 
 [application]
 
-config/name="New Game Project"
-run/main_scene="uid://mgp02mkor0at"
-config/features=PackedStringArray("4.5", "C#", "Forward Plus")
+config/name="procedural terrain generation"
+config/features=PackedStringArray("4.6", "C#", "Forward Plus")
 
 [dotnet]
 
-project/assembly_name="New Game Project"
+project/assembly_name="procedural terrain generation"
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
+
+[rendering]
+
+rendering_device/driver.windows="d3d12"

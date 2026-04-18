@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://bfnbfas8kxfqh"]
+
+[ext_resource type="Texture2D" path="res://structures/modles/low_poly_city/Separate_assets_obj/Textures1.png" id="1_4fir0"]
+[ext_resource type="ArrayMesh" path="res://structures/modles/low_poly_city/Separate_assets_obj/Eco_Building_Terrace.obj" id="2_84cp5"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7umts"]
+albedo_texture = ExtResource("1_4fir0")
+
+[node name="EcoBuildingTerrace" type="MeshInstance3D" unique_id=477847020]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_7umts")
+mesh = ExtResource("2_84cp5")

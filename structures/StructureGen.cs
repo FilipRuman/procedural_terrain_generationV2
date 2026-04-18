@@ -37,16 +37,6 @@ public partial class StructureGen : Node
                         return !structure.IsObjectColliding(new Vector2I((int)world_pos.X, (int)world_pos.Y));
 
                 }
-                public int TESTINDEX(Vector2 world_pos)
-                {
-
-                        var global_grid_pos = new Vector2I((int)world_pos.X / grid_cell_size, (int)world_pos.Y / grid_cell_size);
-                        var relative_grid_pos = global_grid_pos - current_player_grid_pos;
-
-                        GD.Print($"relative_grid_pos {relative_grid_pos}");
-                        // +1 because the grid array is offset by one in the positive direction
-                        return relative_grid_pos.X + 1 + (relative_grid_pos.Y + 1) * grid_width;
-                }
                 public StructureChunk this[Vector2I world_pos]
                 {
                         get

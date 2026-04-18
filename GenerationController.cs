@@ -25,9 +25,11 @@ public partial class GenerationController : Node
         [Export] ObjectsGenerator objects_generator;
         [Export] StructureGen structure_gen;
         StructureGen.StructureGrid structure_grid;
+        [Export] Node3D TestPoint;
 
         public override void _Ready()
         {
+
                 if (!Engine.IsEditorHint())
                         RunClean();
         }
@@ -36,8 +38,11 @@ public partial class GenerationController : Node
         const int max_chunk_data_textures_count = 517;
         public override void _Process(double delta)
         {
+
+
                 ChunkDataGeneration();
                 InstantiateChunksFromQue();
+
         }
         private void DestroyChunks(Vector2I[] chunks_to_destroy)
         {
@@ -159,7 +164,7 @@ public partial class GenerationController : Node
                                      Vector2I chunk_world_position = chunk + player_pos_snapped_to_chunk;
 
                                      var biome_data = biome_generator.GenerateTextureData(chunk_world_position, terrain_chunk_size + 1, biomes);
-                                     var objects_data = objects_generator.GenerateObjectsData(terrain_chunk_size, biome_data, chunk_world_position);
+                                     var objects_data = objects_generator.GenerateObjectsData(terrain_chunk_size, biome_data, structure_grid, chunk_world_position);
                                      var mesh_data = ground_mesh_gen.GenerateChunkData(chunk_world_position);
                                      structure_grid[chunk_world_position].structure_gen_for_mesh_chunk_world_pos.TryGetValue(chunk_world_position, out var chunk_structure_data);
                                      chunk_instantiation_que.Enqueue(new(mesh_data, biome_data, chunk_world_position, objects_data, chunk_structure_data));

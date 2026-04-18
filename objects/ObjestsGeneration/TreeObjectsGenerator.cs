@@ -42,7 +42,7 @@ public static class TreeObjectsGenerator
                 return dist_max / Mathf.Sqrt2;
         }
         public static void GenerateObjectsForMeshChunk(float base_object_spawn_chance, float minimal_object_spacing_sqrt, int mesh_chunk_size, GroundMeshGen ground_mesh_gen,
-                BiomeGenerator.TextureData biome_data, Vector2 base_world_position,
+                BiomeGenerator.TextureData biome_data, Vector2 base_world_position, StructureGen.StructureGrid structure_grid,
                 ref Dictionary<TerrainObject, List<ObjectInstantiationData>> object_instances_dictionary)
         {
 
@@ -59,19 +59,19 @@ public static class TreeObjectsGenerator
                                 bool is_margin = x == -1 || y == -1 || x == grid_cells_count_per_dimension - 2 || y == grid_cells_count_per_dimension - 2;
 
                                 GenerateObjectForGridCell(minimal_object_spacing_sqrt, base_cell_world_pos, new(x, y), grid_cell_width, is_margin,
-                                        ground_mesh_gen, biome_data, ref grid, ref object_instances_dictionary);
+                                        ground_mesh_gen, biome_data, structure_grid, ref grid, ref object_instances_dictionary);
                         }
                 }
         }
 
         private static void GenerateObjectForGridCell(float minimal_object_spacing_sqrt, Vector2 base_cell_world_pos, Vector2I grid_pos, float grid_cell_width, bool is_margin,
-             GroundMeshGen ground_mesh_gen, BiomeGenerator.TextureData biome_data,
+             GroundMeshGen ground_mesh_gen, BiomeGenerator.TextureData biome_data, StructureGen.StructureGrid structure_grid,
              ref ObjectsSpacingGrid grid, ref Dictionary<TerrainObject, List<ObjectInstantiationData>> instances_data_for_object_type)
         {
 
                 Vector2 uv = new(GD.Randf(), GD.Randf());
                 var world_pos_2d = uv * grid_cell_width + base_cell_world_pos;
-                if (!IsPosValid(world_pos_2d, minimal_object_spacing_sqrt, grid_pos, grid))
+                if (!IsPosValid(world_pos_2d, minimal_object_spacing_sqrt, grid_pos, grid) || !structure_grid.IsObjectValid(world_pos_2d))
                 {
                         return;
                 }

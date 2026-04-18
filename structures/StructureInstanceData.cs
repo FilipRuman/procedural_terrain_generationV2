@@ -25,7 +25,7 @@ public class StructureInstanceData(Vector2 base_world_pos, float scale, float ro
                         foreach (var point in ((IStructureShape)shape).GetSampleWorldPosPointsInsideTheShape(this))
                         {
 
-                                Vector2I chunk = new(Mathf.FloorToInt(point.X / mesh_chunk_size), Mathf.FloorToInt(point.Y / mesh_chunk_size));
+                                Vector2I chunk = new(Mathf.RoundToInt(point.X / mesh_chunk_size) + 1, Mathf.FloorToInt(point.Y / mesh_chunk_size) + 1);
                                 Vector2I chunk_world_pos = chunk * mesh_chunk_size;
                                 chunks.Add(chunk_world_pos);
                         }

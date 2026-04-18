@@ -23,24 +23,27 @@ public partial class StructureGen : Node
                 private readonly GroundMeshGen mesh_gen;
                 private readonly int mesh_chunk_size;
 
-                public bool IsObjectValid(Vector2 world_pos_f)
+                public bool IsObjectValid(Vector2 world_pos)
                 {
-                        Vector2I world_pos = (Vector2I)world_pos_f;
-                        var chunk_pos = world_pos / mesh_chunk_size;
-                        var chunk_world_pos = chunk_pos * mesh_chunk_size;
+
+                        var terrain_chunk_pos = new Vector2I((int)world_pos.X / mesh_chunk_size, (int)world_pos.Y / mesh_chunk_size);
+                        var chunk_world_pos = terrain_chunk_pos * mesh_chunk_size;
 
 
 
-                        if (!this[world_pos].structures_for_mesh_chunk_world_pos.TryGetValue(chunk_world_pos, out var structure))
+                        if (!this[chunk_world_pos].structures_for_mesh_chunk_world_pos.TryGetValue(chunk_world_pos, out var structure))
                                 return true;
 
-                        return !structure.IsObjectColliding(world_pos);
+                        return !structure.IsObjectColliding(new Vector2I((int)world_pos.X, (int)world_pos.Y));
+
                 }
-                public int TESTINDEX(Vector2I world_pos)
+                public int TESTINDEX(Vector2 world_pos)
                 {
 
-                        var global_grid_pos = world_pos / grid_cell_size;
+                        var global_grid_pos = new Vector2I((int)world_pos.X / grid_cell_size, (int)world_pos.Y / grid_cell_size);
                         var relative_grid_pos = global_grid_pos - current_player_grid_pos;
+
+                        GD.Print($"relative_grid_pos {relative_grid_pos}");
                         // +1 because the grid array is offset by one in the positive direction
                         return relative_grid_pos.X + 1 + (relative_grid_pos.Y + 1) * grid_width;
                 }
@@ -168,10 +171,7 @@ public partial class StructureGen : Node
                                                 structures_for_mesh_chunk_world_pos.Add(chunk_world_pos, structure_instance);
                                         }
 
-
                                         structure_gen_for_mesh_chunk_world_pos.TryAdd(base_chunk_world_pos, structure_instance);
-
-                                        GD.Print("Added a valid structure to inst que!");
                                 }
                         }
                         return new(structures_for_mesh_chunk_world_pos, structure_gen_for_mesh_chunk_world_pos);

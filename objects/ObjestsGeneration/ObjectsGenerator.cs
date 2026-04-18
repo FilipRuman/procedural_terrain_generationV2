@@ -54,21 +54,22 @@ public partial class ObjectsGenerator : Node
         }
 
         public ObjectTypeSpawnData[] GenerateObjectsData(int chunk_size,
-                BiomeGenerator.TextureData biome_data, Vector2 base_world_position)
+                BiomeGenerator.TextureData biome_data, StructureGen.StructureGrid structure_grid, Vector2 base_world_position)
         {
                 chunk_size -= 2;
 
                 RNG.SetGDRandomSeed(base_world_position);
                 Dictionary<TerrainObject, List<ObjectInstantiationData>> object_instances_dictionary = [];
 
+
                 TreeObjectsGenerator.GenerateObjectsForMeshChunk(base_tree_spawn_chance, minimal_tree_spacing, chunk_size,
-                                  ground_mesh_gen, biome_data, base_world_position, ref object_instances_dictionary);
+                                  ground_mesh_gen, biome_data, base_world_position, structure_grid, ref object_instances_dictionary);
 
                 GenerateObjectsWithoutSpacing(BiomeObjectsGenData.GetterType.grass, grass_spawn_attempts_per_mesh_chunk, chunk_size,
-                                        biome_data, base_world_position, ref object_instances_dictionary);
+                                        biome_data, base_world_position, structure_grid, ref object_instances_dictionary);
 
                 GenerateObjectsWithoutSpacing(BiomeObjectsGenData.GetterType.rock, rock_spawn_attempts_per_mesh_chunk, chunk_size,
-                                        biome_data, base_world_position, ref object_instances_dictionary);
+                                        biome_data, base_world_position, structure_grid, ref object_instances_dictionary);
 
 
                 var output = new ObjectTypeSpawnData[object_instances_dictionary.Count];
@@ -82,13 +83,16 @@ public partial class ObjectsGenerator : Node
                 return output;
         }
         public void GenerateObjectsWithoutSpacing(BiomeObjectsGenData.GetterType object_type, int spawn_attempts, int chunk_size,
-                BiomeGenerator.TextureData biome_data, Vector2 base_world_position,
+                BiomeGenerator.TextureData biome_data, Vector2 base_world_position, StructureGen.StructureGrid structure_grid,
                 ref Dictionary<TerrainObject, List<ObjectInstantiationData>> object_instances_dictionary)
         {
                 for (int i = 0; i < spawn_attempts; i++)
                 {
                         Vector2 uv = new(GD.Randf(), GD.Randf());
                         var world_pos_2d = uv * chunk_size + base_world_position;
+                        if (!structure_grid.IsObjectValid(world_pos_2d))
+                                continue;
+
                         var height = ground_mesh_gen.CalculateHeight(world_pos_2d, out var terrain_aspects);
                         var biomes_influence = biome_data.GetBiomeInfluenceForUV(uv);
                         Vector3 world_pos_3d = new(world_pos_2d.X, height, world_pos_2d.Y);

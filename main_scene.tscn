@@ -21,29 +21,66 @@
 [ext_resource type="Script" uid="uid://w1egd0ivsh5v" path="res://structures/StructureType.cs" id="11_fv2he"]
 [ext_resource type="Script" uid="uid://dfcupjxxdf7pq" path="res://structures/structure_shapes/RectangleStructureShape.cs" id="12_5smuj"]
 [ext_resource type="Script" uid="uid://cyylqtwxb5xm2" path="res://util/NoisePart.cs" id="13_5smuj"]
+[ext_resource type="PackedScene" uid="uid://d2dt7xhfktq13" path="res://structures/modles/eco_building_grid.tscn" id="14_kv3aw"]
 [ext_resource type="Script" uid="uid://cyc8wghcqqnc5" path="res://util/NoiseComponent.cs" id="14_y5ved"]
 [ext_resource type="Script" uid="uid://duat4j40jft0v" path="res://ground/TerrainAspectEffectOnMesh.cs" id="20_84odl"]
 [ext_resource type="Script" uid="uid://bmni8uj46ikxf" path="res://objects/ObjestsGeneration/ObjectsGenerator.cs" id="21_ak604"]
 [ext_resource type="Script" uid="uid://b7vnabd1g6tr8" path="res://structures/StructureGen.cs" id="22_vimvf"]
+[ext_resource type="PackedScene" uid="uid://bfnbfas8kxfqh" path="res://structures/eco_building_terrace.tscn" id="27_o7u2a"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_7th4q"]
 
 [sub_resource type="Resource" id="Resource_o4fqm"]
 script = ExtResource("12_5smuj")
-base_size = Vector2(100, 100)
-sample_points_spacing = 100000.0
+base_size = Vector2(58.266, 35.55)
+sample_points_spacing = 1.0
 metadata/_custom_type_script = "uid://dfcupjxxdf7pq"
 
 [sub_resource type="Resource" id="Resource_meb7l"]
 script = ExtResource("11_fv2he")
 shapes = [SubResource("Resource_o4fqm")]
-maximal_height_delta_inside_the_shapes = 50.0
+maximal_height_delta_inside_the_shapes = 20.0
 spawn_chance = 1.0
 model = ExtResource("11_5smuj")
-base_sale = 1.0
-scale_change_amplitude = 0.1
+base_sale = 1.5
+scale_change_amplitude = 0.3
 min_distance_from_grid_border_in_mesh_chunks = 1
-generation_attempts_per_structure_chunk = 50
+metadata/_custom_type_script = "uid://w1egd0ivsh5v"
+
+[sub_resource type="Resource" id="Resource_w30ff"]
+script = ExtResource("12_5smuj")
+base_size = Vector2(87.399, 53.325)
+sample_points_spacing = 1.0
+metadata/_custom_type_script = "uid://dfcupjxxdf7pq"
+
+[sub_resource type="Resource" id="Resource_xy6fp"]
+script = ExtResource("11_fv2he")
+shapes = [SubResource("Resource_w30ff")]
+maximal_height_delta_inside_the_shapes = 10.0
+spawn_chance = 1.0
+model = ExtResource("14_kv3aw")
+base_sale = 1.5
+scale_change_amplitude = 0.3
+min_distance_from_grid_border_in_mesh_chunks = 1
+generation_attempts_per_structure_chunk = 15
+metadata/_custom_type_script = "uid://w1egd0ivsh5v"
+
+[sub_resource type="Resource" id="Resource_uws2o"]
+script = ExtResource("12_5smuj")
+base_size = Vector2(61.179, 105.584)
+sample_points_spacing = 1.0
+metadata/_custom_type_script = "uid://dfcupjxxdf7pq"
+
+[sub_resource type="Resource" id="Resource_yj5sn"]
+script = ExtResource("11_fv2he")
+shapes = [SubResource("Resource_uws2o")]
+maximal_height_delta_inside_the_shapes = 10.0
+spawn_chance = 1.0
+model = ExtResource("27_o7u2a")
+base_sale = 1.5
+scale_change_amplitude = 0.3
+min_distance_from_grid_border_in_mesh_chunks = 1
+generation_attempts_per_structure_chunk = 15
 metadata/_custom_type_script = "uid://w1egd0ivsh5v"
 
 [sub_resource type="Gradient" id="Gradient_84odl"]
@@ -223,7 +260,22 @@ medium_freq_noise_amplitude = SubResource("Curve_jip8q")
 high_freq_noise_amplitude = SubResource("Curve_jtbqm")
 metadata/_custom_type_script = "uid://duat4j40jft0v"
 
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_o7u2a"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ijoax"]
+noise = SubResource("FastNoiseLite_o7u2a")
+seamless = true
+
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_vimvf"]
+sky_top_color = Color(0.20824888, 0.577609, 0.9999942, 1)
+sky_horizon_color = Color(0.6203545, 0.7790852, 0.965982, 1)
+sky_curve = 0.39585498
+sky_cover = SubResource("NoiseTexture2D_ijoax")
+sky_cover_modulate = Color(0.3994281, 0.39942774, 0.39942777, 1)
+ground_bottom_color = Color(0.6203545, 0.7790852, 0.965982, 1)
+ground_horizon_color = Color(0.6203545, 0.7790852, 0.965982, 1)
+ground_curve = 1.1812913
+sun_angle_max = 15.85
 
 [sub_resource type="Sky" id="Sky_ghshe"]
 sky_material = SubResource("ProceduralSkyMaterial_vimvf")
@@ -231,13 +283,26 @@ sky_material = SubResource("ProceduralSkyMaterial_vimvf")
 [sub_resource type="Environment" id="Environment_fv2he"]
 background_mode = 2
 sky = SubResource("Sky_ghshe")
+ambient_light_source = 2
+ambient_light_color = Color(0.61474454, 0.6147446, 0.6147445, 1)
+reflected_light_source = 1
 tonemap_mode = 2
 tonemap_exposure = 0.65
 ssr_enabled = true
 ssao_enabled = true
 ssil_enabled = true
 sdfgi_enabled = true
+sdfgi_read_sky_light = false
 glow_enabled = true
+fog_density = 0.054
+fog_aerial_perspective = 0.145
+fog_sky_affect = 0.326
+volumetric_fog_density = 0.4938
+volumetric_fog_emission_energy = 0.0
+volumetric_fog_anisotropy = 0.29
+volumetric_fog_length = 727.97
+volumetric_fog_detail_spread = 6.0
+volumetric_fog_sky_affect = 0.222
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_ak604"]
 auto_exposure_enabled = true
@@ -246,14 +311,21 @@ auto_exposure_scale = 0.55
 [node name="Main scene" type="Node3D" unique_id=325302715]
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
 
+[node name="test point" type="Node3D" parent="." unique_id=1867855183]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60, 130, -160)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="test point" unique_id=1834186763]
+transform = Transform3D(5.81162, 0, 0, 0, 9.797011, 0, 0, 0, 7.817965, 0, 0, 0)
+mesh = SubResource("CapsuleMesh_7th4q")
+
 [node name="Player" type="Node3D" parent="." unique_id=1787461385]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85, 0, -7162)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2540, 0, -1660)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Player" unique_id=919924789]
 transform = Transform3D(5.81162, 0, 0, 0, 9.797011, 0, 0, 0, 7.817965, 0, 0, 0)
 mesh = SubResource("CapsuleMesh_7th4q")
 
-[node name="Generation controller" type="Node3D" parent="." unique_id=1772107324 node_paths=PackedStringArray("player", "ground_mesh_gen", "biome_generator", "ground_shader_controller", "objects_generator", "structure_gen")]
+[node name="Generation controller" type="Node3D" parent="." unique_id=1772107324 node_paths=PackedStringArray("player", "ground_mesh_gen", "biome_generator", "ground_shader_controller", "objects_generator", "structure_gen", "TestPoint")]
 script = ExtResource("2_2c62f")
 terrain_chunk_size = 100
 biomes = [ExtResource("4_7th4q"), ExtResource("5_6jybn"), ExtResource("6_84odl"), ExtResource("7_ak604"), ExtResource("8_vimvf"), ExtResource("9_ghshe"), ExtResource("10_fv2he")]
@@ -266,17 +338,18 @@ biome_generator = NodePath("../biome generator")
 ground_shader_controller = NodePath("../ground shader controller")
 objects_generator = NodePath("../objects generator")
 structure_gen = NodePath("../structure gen")
+TestPoint = NodePath("../test point")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1002644790]
 transform = Transform3D(0.5036318, 4.471945, 8.930178, 0.3185028, -8.944169, 4.4609895, 9.982231, 0.059759136, -0.5928894, 0, 0, 0)
-light_energy = 0.296
-light_indirect_energy = 0.894
-light_volumetric_fog_energy = 2.06
+light_energy = 1.574
+light_indirect_energy = 0.0
+light_volumetric_fog_energy = 2.236
 shadow_enabled = true
 
 [node name="structure gen" type="Node" parent="." unique_id=976059663]
 script = ExtResource("22_vimvf")
-structure_pool = [SubResource("Resource_meb7l")]
+structure_pool = [SubResource("Resource_meb7l"), SubResource("Resource_xy6fp"), SubResource("Resource_yj5sn")]
 mesh_chunks_per_structure_grid_cell = 20
 
 [node name="biome generator" type="Node" parent="." unique_id=1876212071 node_paths=PackedStringArray("terrain_aspects_solver")]
@@ -334,3 +407,4 @@ environment = SubResource("Environment_fv2he")
 camera_attributes = SubResource("CameraAttributesPractical_ak604")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=218534836]
+near = 0.03
